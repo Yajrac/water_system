@@ -870,66 +870,24 @@ html:where(.theme-teal) {
   :where(html.theme-teal) .chart-card {
     padding: 18px 16px 20px;
   }
-  :where(html.theme-teal) .table-scroll {
-    overflow: visible;
-  }
-  :where(html.theme-teal) table,
-  :where(html.theme-teal) thead,
-  :where(html.theme-teal) tbody,
-  :where(html.theme-teal) th,
-  :where(html.theme-teal) td,
-  :where(html.theme-teal) tr {
-    display: block;
+  :where(html.theme-teal) .table-scroll,
+  :where(html.theme-teal) .table-wrap {
+    max-width: 100%;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
   }
   :where(html.theme-teal) table {
-    min-width: 0;
+    min-width: 640px;
+    font-size: 0.8rem;
   }
-  :where(html.theme-teal) thead {
-    display: none;
-  }
-  :where(html.theme-teal) tbody tr {
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    margin: 0 16px 12px;
-    padding: 14px 4px;
-    box-shadow: var(--shadow-sm);
-  }
-  :where(html.theme-teal) tbody tr:hover {
-    background: var(--color-surface);
-  }
+  :where(html.theme-teal) thead th,
   :where(html.theme-teal) tbody td {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    padding: 8px 14px;
-    border-bottom: none;
-    text-align: right;
-  }
-  :where(html.theme-teal) tbody td::before {
-    content: attr(data-label);
-    font-size: 0.72rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.03em;
-    color: var(--color-ink-muted);
+    padding: 12px 14px;
     text-align: left;
   }
-  :where(html.theme-teal) .cust-name {
-    text-align: right;
-  }
-  :where(html.theme-teal) .cust-name .barangay-mobile {
-    display: block;
-    font-weight: 500;
-    color: var(--color-ink-muted);
-    font-size: 0.78rem;
-    margin-top: 2px;
-  }
-  :where(html.theme-teal) td[data-label='Barangay'] {
-    display: none;
-  }
   :where(html.theme-teal) .action-btns {
-    justify-content: flex-end;
+    flex-wrap: nowrap;
   }
   :where(html.theme-teal) .panel-footer {
     flex-direction: column;

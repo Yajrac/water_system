@@ -339,19 +339,15 @@
   }
 }
 @media (max-width: 860px) {
-  .customers-table tbody tr {
-    margin-top: 12px;
-    background: var(--color-surface);
-  }
   .customer-identity {
-    justify-content: flex-end;
-    text-align: right;
+    justify-content: flex-start;
+    text-align: left;
   }
   .customer-row-actions {
-    justify-content: flex-end;
+    justify-content: flex-start;
   }
   .customers-table td[colspan] {
-    display: block;
+    display: table-cell;
     text-align: center;
     color: var(--color-ink-muted);
     padding: 28px 16px;
