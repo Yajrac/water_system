@@ -213,7 +213,7 @@
               <form id="customerForm">
                 <p class="form-help">
                   Record the applicant and service-connection details from the PWSS paper forms.
-                  Fields marked * are required. Save incomplete applications as Pending.
+                  <strong class="required-fields-notice">Fields marked * are required.</strong>
                 </p>
                 <fieldset class="customer-section">
                   <legend>1. Applicant and address</legend>
@@ -226,20 +226,37 @@
                         maxlength="120"
                         autocomplete="name" /></label
                     ><label
-                      >Philippine mobile number *<input
-                        name="contact"
-                        type="tel"
-                        required
-                        maxlength="13"
-                        pattern="(09[0-9]{9}|\+639[0-9]{9})"
-                        autocomplete="tel"
-                        placeholder="09123456789 or +639123456789"
-                      /><small>Use 09 + 9 digits or +639 + 9 digits, without spaces.</small></label
+                      >Philippine mobile number *<span class="phone-input-group"
+                        ><span class="phone-country-code" aria-hidden="true">+63</span
+                        ><input
+                          name="contact"
+                          type="tel"
+                          required
+                          maxlength="10"
+                          inputmode="numeric"
+                          pattern="9[0-9]{9}"
+                          autocomplete="tel-national"
+                          aria-label="Philippine mobile number after +63"
+                          placeholder="9123456789" /></span
+                      ><small
+                        >Enter 10 digits starting with 9. Country code +63 is already
+                        included.</small
+                      ></label
                     ><label
-                      >Purok / street *<input
-                        name="address"
+                      >Purok *<select name="address" required>
+                        <option value="">Select purok</option>
+                        <option value="Purok 1">Purok 1</option>
+                        <option value="Purok 2">Purok 2</option>
+                        <option value="Purok 3">Purok 3</option>
+                        <option value="Purok 4">Purok 4</option>
+                        <option value="Purok 5">Purok 5</option>
+                        <option value="Purok 6">Purok 6</option>
+                        <option value="Purok 7">Purok 7</option>
+                      </select></label
+                    ><label
+                      >Street / landmark<input
+                        name="street"
                         type="text"
-                        required
                         maxlength="200"
                         autocomplete="street-address" /></label
                     ><label
@@ -267,19 +284,6 @@
                   <legend>2. Application and installation</legend>
                   <div class="admin-form">
                     <label
-                      >Account number<input
-                        name="account"
-                        type="text"
-                        readonly
-                        placeholder="Generated on successful save"
-                      /><small>Assigned by the system; cannot be edited.</small></label
-                    ><label
-                      >Application number<input
-                        name="applicationNumber"
-                        type="text"
-                        readonly
-                        placeholder="Generated on successful save" /></label
-                    ><label
                       >Installation reference<input
                         name="installationReference"
                         type="text"
@@ -294,7 +298,7 @@
                     ><label
                       >Service status *<select name="serviceStatus" required>
                         <option value="Pending">Pending</option>
-                        <option value="Approved">Approved</option>
+                        <option value="Approved" selected>Approved</option>
                         <option value="Installed">Installed</option>
                       </select></label
                     ><label
@@ -432,55 +436,10 @@
                     </label>
                   </div>
                 </fieldset>
-                <fieldset class="customer-section">
-                  <legend>5. Accessories acknowledgement / removed meter</legend>
-                  <div class="admin-form">
-                    <label class="wide"
-                      >Meter and accessories received<textarea
-                        name="accessories"
-                        rows="3"
-                        maxlength="1000"
-                        placeholder="List the items recorded on the acknowledgement receipt"
-                      ></textarea></label
-                    ><label
-                      >Removed meter number (if applicable)<input
-                        name="removedMeter"
-                        type="text"
-                        maxlength="120" /></label
-                    ><label
-                      >Removed meter reading (m³)<input
-                        name="removedReading"
-                        type="number"
-                        min="0"
-                        step="0.001"
-                        value="0" /></label
-                    ><label
-                      >Removed meter kind<input
-                        name="removedKind"
-                        type="text"
-                        maxlength="120" /></label
-                    ><label
-                      >Removed meter size<input
-                        name="removedSize"
-                        type="text"
-                        maxlength="120" /></label
-                    ><label
-                      >Estimated water consumed (liters)<input
-                        name="estimatedLiters"
-                        type="number"
-                        min="0"
-                        step="0.001"
-                        value="0"
-                    /></label>
-                  </div>
-                </fieldset>
-                <p id="registrationHelp" class="form-help" aria-live="polite"></p>
                 <div class="customer-form-actions admin-actions">
-                  <button class="btn" type="submit" id="saveApplication">Save application</button
-                  ><button class="btn btn-primary" type="submit" id="registerCustomer" disabled>
+                  <button class="btn btn-primary" type="submit" id="registerCustomer" disabled>
                     Register customer</button
-                  ><button class="btn" type="button" id="printApplication" disabled>
-                    Print saved application</button
+                  ><button class="btn" type="button" id="printApplication">Print application</button
                   ><button class="btn" type="button" id="cancelCustomer">Cancel</button>
                 </div>
               </form>
@@ -494,6 +453,8 @@
     <script src="../js/shared/validation.js"></script>
     <script src="../js/shared/shared.js"></script>
     <script src="../js/shared/calendar.js"></script>
+    <script src="../js/customers/customer-validation.js"></script>
+    <script src="../js/shared/confirmation.js"></script>
     <script src="../js/customers/customer-form.js"></script>
   </body>
 </html>

@@ -1,8 +1,23 @@
 const applicationRecords = WaterStore.load();
 const applicationId = new URLSearchParams(location.search).get('id');
-const applicationCustomer = applicationRecords.customers.find(
+let applicationCustomer = applicationRecords.customers.find(
   (customer) => customer.id === applicationId,
 );
+const isPreview = new URLSearchParams(location.search).get('preview') === '1';
+if (isPreview) {
+  try {
+    applicationCustomer = JSON.parse(sessionStorage.getItem('pwss-application-print-preview'));
+  } catch {
+    applicationCustomer = null;
+  }
+  document.getElementById('printMessage').textContent =
+    'Form preview. Unsaved changes are not registered by printing.';
+  const back = document.querySelector('.print-tools a');
+  back.href = applicationCustomer?.id
+    ? 'customer-form.html?id=' + encodeURIComponent(applicationCustomer.id)
+    : 'customer-form.html';
+  back.textContent = 'Back to customer form';
+}
 const printButton = document.getElementById('printForm');
 if (!applicationCustomer) {
   document.getElementById('printMessage').textContent =
@@ -10,10 +25,11 @@ if (!applicationCustomer) {
   printButton.disabled = true;
 } else {
   const firstBill = applicationRecords.bills
-    .filter((bill) => bill.customerId === applicationId)
+    .filter((bill) => bill.customerId === applicationCustomer.id)
     .sort((a, b) => a.cycle.localeCompare(b.cycle))[0];
   const printable = {
     ...applicationCustomer,
+    address: [applicationCustomer.address, applicationCustomer.street].filter(Boolean).join(', '),
     initialReading: firstBill ? firstBill.previous : applicationCustomer.reading,
   };
   document.querySelectorAll('[data-field]').forEach((element) => {
@@ -61,4 +77,14 @@ if (!applicationCustomer) {
   document.getElementById('applicationPaper').hidden = false;
   document.getElementById('applicationAppendix').hidden = false;
 }
-printButton.addEventListener('click', () => window.print());
+printButton.addEventListener('click', async () => {
+  if (!applicationCustomer) return;
+  printButton.disabled = true;
+  try {
+    if (document.fonts?.ready) await document.fonts.ready;
+    await Promise.allSettled(Array.from(document.images, (image) => image.decode()));
+    window.print();
+  } finally {
+    printButton.disabled = false;
+  }
+});

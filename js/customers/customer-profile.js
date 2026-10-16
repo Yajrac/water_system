@@ -108,7 +108,7 @@ if (!profileCustomer) {
   profileDetails('personalDetails', [
     ['Full name', customer.name],
     ['Contact number', customer.contact],
-    ['Purok / street', customer.address],
+    ['Purok / street', [customer.address, customer.street].filter(Boolean).join(', ')],
     ['Barangay', customer.barangay],
     ['Customer type', customer.customerType],
     ['Application number', customer.applicationNumber],
