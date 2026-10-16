@@ -1,0 +1,95 @@
+.water-rates-wrap {
+  margin: 20px 0;
+  border: 1px solid var(--color-border-strong);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.main-content .water-rates-table {
+  table-layout: fixed;
+  margin: 0;
+}
+.main-content .water-rates-table tr > * {
+  border-bottom: 1px solid var(--color-border);
+  border-right: 1px solid var(--color-border-strong);
+  padding: 16px 20px;
+  vertical-align: middle;
+}
+.main-content .water-rates-table tr > :last-child {
+  border-right: 0;
+}
+.main-content .water-rates-table tbody tr:last-child > * {
+  border-bottom: 0;
+}
+.water-rates-table thead th:first-child {
+  width: 44%;
+}
+.main-content .water-rates-table thead th {
+  background: var(--table-heading);
+  color: var(--color-primary-deep);
+  font-size: 0.73rem;
+  font-weight: 800;
+  letter-spacing: 0.035em;
+}
+.water-rates-table thead th:not(:first-child) {
+  text-align: right;
+}
+.water-rates-table tbody th {
+  text-align: left;
+  font-size: 0.82rem;
+  line-height: 1.6;
+  font-weight: 600;
+  color: var(--color-ink);
+}
+.water-rates-table tbody tr:nth-child(even) {
+  background: var(--table-heading);
+}
+.water-rates-table tbody tr:hover {
+  background: var(--card-tint);
+}
+.water-rates-table .admin-filter {
+  width: 100%;
+  max-width: none;
+  min-width: 0;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 10px 12px;
+  text-align: right;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  border-radius: 5px;
+  background: var(--color-surface);
+}
+.water-rates-table .admin-filter:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+.rate-pending {
+  display: block;
+  text-align: right;
+  font-size: 0.75rem;
+  line-height: 1.6;
+  color: var(--color-ink-muted);
+}
+@media (max-width: 600px) {
+  .main-content .water-rates-table tr > * {
+    padding: 12px 8px;
+  }
+  .water-rates-table thead th:first-child {
+    width: 38%;
+  }
+  .main-content .water-rates-table thead th {
+    font-size: 0.63rem;
+    letter-spacing: 0;
+  }
+  .water-rates-table tbody th {
+    font-size: 0.7rem;
+  }
+  .water-rates-table .admin-filter {
+    padding: 10px 5px;
+    min-height: 44px;
+    font-size: 16px;
+  }
+  .rate-pending {
+    font-size: 0.65rem;
+  }
+}

@@ -26,6 +26,16 @@ function confirmAction(title, message, confirmLabel, preview = null) {
     confirm.value = 'confirm';
     confirm.textContent = confirmLabel;
     form.append(cancel, confirm);
+    form.addEventListener('submit', (event) => {
+      if (event.submitter !== confirm || !preview) return;
+      const invalid = Array.from(preview.querySelectorAll('input, select, textarea')).find(
+        (field) => !field.checkValidity(),
+      );
+      if (invalid) {
+        event.preventDefault();
+        invalid.reportValidity();
+      }
+    });
     dialog.append(heading, description, form);
     if (preview) {
       dialog.classList.add('has-preview');

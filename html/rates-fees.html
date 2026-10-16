@@ -15,6 +15,7 @@
     <script src="../js/shared/theme.js"></script>
     <link rel="stylesheet" href="../css/shared/shared.css" />
     <link rel="stylesheet" href="../css/shared/admin.css" />
+    <link rel="stylesheet" href="../css/billing/rates-fees.css" />
   </head>
   <body>
     <div class="sidebar-overlay" id="overlay"></div>
@@ -226,64 +227,174 @@
           <section class="panel">
             <div class="panel-header"><h2>Rates and fees</h2></div>
             <div class="admin-body">
-              <p>
-                These are provisional sample rates, not confirmed LGU rates. Confirm the approved
-                amounts before actual use. New settings apply to future bills; saved bills retain
-                their original amounts. Late fees are entered as approved amounts; no automatic
-                penalty policy is assumed.
+              <p class="form-help">
+                Manage residential and commercial water rates and connection fees.
               </p>
-              <form id="ratesForm" class="admin-form">
-                <label
-                  >First 10 m³: rate per m³<input
-                    name="tier0"
-                    type="number"
-                    required
-                    min="0"
-                    step="0.01" /></label
-                ><label
-                  >Next 10 m³: rate per m³<input
-                    name="tier1"
-                    type="number"
-                    required
-                    min="0"
-                    step="0.01" /></label
-                ><label
-                  >Next 10 m³: rate per m³<input
-                    name="tier2"
-                    type="number"
-                    required
-                    min="0"
-                    step="0.01" /></label
-                ><label
-                  >Above 30 m³: rate per m³<input
-                    name="tier3"
-                    type="number"
-                    required
-                    min="0"
-                    step="0.01" /></label
-                ><label
-                  >Monthly service charge<input
-                    name="monthly"
-                    type="number"
-                    required
-                    min="0"
-                    step="0.01" /></label
-                ><label
-                  >New connection fee<input
-                    name="connection"
-                    type="number"
-                    required
-                    min="0"
-                    step="0.01" /></label
-                ><label
-                  >Reconnection fee<input
-                    name="reconnection"
-                    type="number"
-                    required
-                    min="0"
-                    step="0.01"
-                /></label>
-                <div class="wide"><button class="btn btn-primary">Save rates</button></div>
+              <form id="ratesForm">
+                <div class="table-scroll water-rates-wrap">
+                  <table class="water-rates-table">
+                    <thead>
+                      <tr>
+                        <th>Consumption bracket</th>
+                        <th>Residential (&#8369;)</th>
+                        <th>Commercial (&#8369;)</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <th scope="row">0&ndash;10 m&sup3; &middot; minimum charge</th>
+                        <td>
+                          <input
+                            class="admin-filter"
+                            name="residential_minimum"
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            required
+                            aria-label="residential 0&ndash;10 m&sup3; &middot; minimum charge"
+                          />
+                        </td>
+                        <td>
+                          <input
+                            class="admin-filter"
+                            name="commercial_minimum"
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            required
+                            aria-label="commercial 0&ndash;10 m&sup3; &middot; minimum charge"
+                          />
+                        </td>
+                      </tr>
+                      <tr>
+                        <th scope="row">11&ndash;20 m&sup3; &middot; per m&sup3; above 10</th>
+                        <td>
+                          <input
+                            class="admin-filter"
+                            name="residential_tier0"
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            required
+                            aria-label="residential 11&ndash;20 m&sup3; &middot; per m&sup3; above 10"
+                          />
+                        </td>
+                        <td>
+                          <input
+                            class="admin-filter"
+                            name="commercial_tier0"
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            required
+                            aria-label="commercial 11&ndash;20 m&sup3; &middot; per m&sup3; above 10"
+                          />
+                        </td>
+                      </tr>
+                      <tr>
+                        <th scope="row">21&ndash;30 m&sup3; &middot; per m&sup3; above 20</th>
+                        <td>
+                          <input
+                            class="admin-filter"
+                            name="residential_tier1"
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            required
+                            aria-label="residential 21&ndash;30 m&sup3; &middot; per m&sup3; above 20"
+                          />
+                        </td>
+                        <td>
+                          <input
+                            class="admin-filter"
+                            name="commercial_tier1"
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            required
+                            aria-label="commercial 21&ndash;30 m&sup3; &middot; per m&sup3; above 20"
+                          />
+                        </td>
+                      </tr>
+                      <tr>
+                        <th scope="row">31&ndash;40 m&sup3; &middot; per m&sup3; above 30</th>
+                        <td>
+                          <input
+                            class="admin-filter"
+                            name="residential_tier2"
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            required
+                            aria-label="residential 31&ndash;40 m&sup3; &middot; per m&sup3; above 30"
+                          />
+                        </td>
+                        <td>
+                          <input
+                            class="admin-filter"
+                            name="commercial_tier2"
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            required
+                            aria-label="commercial 31&ndash;40 m&sup3; &middot; per m&sup3; above 30"
+                          />
+                        </td>
+                      </tr>
+                      <tr>
+                        <th scope="row">41&ndash;50 m&sup3; &middot; per m&sup3; above 40</th>
+                        <td>
+                          <input
+                            class="admin-filter"
+                            name="residential_tier3"
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            required
+                            aria-label="residential 41&ndash;50 m&sup3; &middot; per m&sup3; above 40"
+                          />
+                        </td>
+                        <td>
+                          <input
+                            class="admin-filter"
+                            name="commercial_tier3"
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            required
+                            aria-label="commercial 41&ndash;50 m&sup3; &middot; per m&sup3; above 40"
+                          />
+                        </td>
+                      </tr>
+                      <tr>
+                        <th scope="row">51+ m&sup3; &middot; per m&sup3; above 50</th>
+                        <td><input class="admin-filter" name="residential_above50" type="number" min="0" step="0.01" aria-label="Residential rate per cubic meter above 50" /></td>
+                        <td><input class="admin-filter" name="commercial_above50" type="number" min="0" step="0.01" aria-label="Commercial rate per cubic meter above 50" /></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <p class="form-help">Set the fees for new connections and reconnections below.</p>
+                <div class="admin-form">
+                  <label
+                    >New connection fee<input
+                      name="connection"
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      required /></label
+                  ><label
+                    >Reconnection fee<input
+                      name="reconnection"
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      required
+                  /></label>
+                  <div class="wide">
+                    <button type="submit" class="btn btn-primary">Save rates</button>
+                  </div>
+                </div>
               </form>
             </div>
           </section>

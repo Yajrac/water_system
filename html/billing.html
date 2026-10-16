@@ -223,32 +223,36 @@
             >
           </nav>
           <p id="pageMessage" role="status" tabindex="-1"></p>
-          <section class="panel" id="cycleManagement">
-            <div class="panel-header"><h2>Billing cycle management</h2></div>
-            <div class="admin-body">
-              <p id="periodSummary" role="status"></p>
-              <form id="cycleForm" class="admin-form">
-                <label>Month<select name="month" required></select></label
-                ><label>Year<select name="year" required></select></label>
-                <div class="admin-actions">
-                  <button class="btn btn-primary">Open selected cycle</button
-                  ><button class="btn" id="backToCurrentMonth" type="button">
-                    Back to current month
+          <section class="panel monthly-billing-panel">
+            <div class="panel-header monthly-billing-header">
+              <h2>Monthly Billing</h2>
+              <details class="period-menu">
+                <summary>
+                  Manage period
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 10 5 5 5-5" /></svg>
+                </summary>
+                <div class="period-menu-panel">
+                  <button type="button" class="btn" id="nextBillingMonth">Move to next month</button
+                  ><button type="button" class="btn" id="reopenBillingMonth">
+                    Reopen previous cycle
                   </button>
+                  <p id="periodAvailability"></p>
                 </div>
-              </form>
-              <p id="closedCycles"></p>
+              </details>
             </div>
-          </section>
-          <section class="panel">
-            <div class="panel-header"><h2>Billing cycle</h2></div>
             <div class="admin-body">
               <p id="activeCycleStatus" role="status"></p>
               <form id="billingForm" novalidate>
                 <div class="admin-form">
                   <div class="active-cycle-display">
-                    <span>Active billing cycle</span><strong id="activeCycleLabel"></strong
-                    ><small>Managed in Billing cycle management above</small>
+                    <span>Billing month</span><strong id="activeCycleLabel"></strong
+                    ><small id="billingProgress" role="status"></small
+                    ><progress
+                      id="billingProgressBar"
+                      value="0"
+                      max="1"
+                      aria-label="Customers billed this month"
+                    ></progress>
                   </div>
                   <label>Due date<input name="due" type="date" required /></label>
                 </div>

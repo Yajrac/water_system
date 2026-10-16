@@ -1949,3 +1949,104 @@ textarea:focus-visible,
     max-width: 100%;
   }
 }
+
+.monthly-billing-panel {
+  overflow: visible;
+}
+.monthly-billing-header {
+  border-radius: 10px 10px 0 0;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.period-menu {
+  position: relative;
+  margin-left: auto;
+}
+.period-menu > summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 12px;
+  border: 1px solid var(--color-border-strong);
+  border-radius: 7px;
+  background: var(--color-surface);
+  color: var(--color-primary-deep);
+  font-size: 0.8rem;
+  cursor: pointer;
+  list-style: none;
+}
+.period-menu > summary::-webkit-details-marker {
+  display: none;
+}
+.period-menu summary svg {
+  width: 17px;
+  height: 17px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+}
+.period-menu[open] summary {
+  background: var(--card-tint);
+}
+.period-menu-panel {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 8px);
+  z-index: 10;
+  width: 250px;
+  max-width: 75vw;
+  padding: 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-surface);
+  box-shadow: var(--shadow-md);
+}
+.period-menu-panel .btn {
+  display: flex;
+  width: 100%;
+  justify-content: flex-start;
+  margin-bottom: 8px;
+  font-size: 0.8rem;
+}
+.period-menu-panel .btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.period-menu-panel p {
+  color: var(--color-ink-muted);
+  font-size: 0.72rem;
+  line-height: 1.5;
+}
+#billingProgressBar {
+  width: min(240px, 100%);
+  height: 7px;
+  margin-top: 9px;
+  accent-color: var(--color-primary);
+}
+.period-reason {
+  display: grid;
+  gap: 8px;
+  font-size: 0.85rem;
+  margin: 18px 0;
+}
+.period-reason textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px;
+  border: 1px solid var(--color-border-strong);
+  border-radius: 7px;
+  background: var(--color-surface);
+  color: var(--color-ink);
+  font: inherit;
+  resize: vertical;
+}
+@media (max-width: 600px) {
+  .period-menu > summary {
+    min-height: 44px;
+  }
+  .period-reason textarea {
+    font-size: 16px;
+  }
+}
+
+.water-rates-table tr > :nth-child(3) { border-left: 1px solid var(--color-border-strong); }

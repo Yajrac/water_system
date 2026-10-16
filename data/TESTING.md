@@ -32,7 +32,7 @@ The first six customers already have October sample bills; use another customer 
 ## How to generate a test bill
 
 1. Open **Billing & Meter Reading → Meter Entry**.
-2. Verify that the active cycle is open. Use Billing cycle management on the same Meter Entry page if necessary.
+2. Verify that the active cycle is open. Use Manage period in the Monthly Billing card if necessary.
 3. Select a due date on or after today.
 4. Find Ana Reyes (`TEST-PWSS-00001`). Her previous reading is **100**.
 5. Enter **115** as the current reading. Consumption is **15 m³**.
@@ -85,3 +85,15 @@ guide; it does not change the billing formula or automatically generate bills.
 ## Paying several bills
 
 Record Payment defaults to All outstanding bills and fills Amount Paid with the account total. Lower the amount for a partial payment, or select one billing month. Payments are allocated oldest month first using integer centavos. One receipt records the full amount and lists each bill allocation, meter readings and remaining bill balance. Existing single-bill payment records remain supported.
+
+## Monthly Billing period controls
+
+The active month, progress, due date and readings share one Monthly Billing card. Manage period advances one month at a time, with confirmation and a warning for unbilled customers. Future months stay unavailable. Reopen previous cycle requires a reason and retains existing bills and payments. Current-year billing and per-customer duplicate/later-bill checks still apply. Draft readings stay attached to their original month.
+
+## Updated PWSS water rates
+
+New bills use the supplied PWSS rate sheet and the customer type. Residential minimum is PHP70 for 0?10 m?, followed by PHP8, PHP8.50, PHP9 and PHP9.50 for the next four 10 m? brackets. Commercial minimum is PHP100, followed by PHP12, PHP13, PHP14 and PHP15. There is no separate monthly fee on new bills.
+
+Examples: Residential 0 or 10 m? = PHP70; 15 m? = PHP110; 25 m? = PHP192.50; 50 m? = PHP420. Commercial 25 m? = PHP285 and 50 m? = PHP640. Consumption above 50 m? is blocked for both types pending confirmation. Fractional readings are charged progressively and rounded to centavos.
+
+Existing bills and JSON sample bills retain their original amounts, including any old provisional monthly fees. They are historical test fixtures, not examples of the new tariff. Connection and reconnection fees remain separately configured; the rate-sheet image does not confirm those fees. Changing tariffs never recalculates old bills or payments.

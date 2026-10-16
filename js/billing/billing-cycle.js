@@ -1,106 +1,143 @@
-// Select a working billing cycle, or return to the current month.
-const cycleForm = document.getElementById('cycleForm');
-const cycleMonth = cycleForm.elements.month;
-const cycleYear = cycleForm.elements.year;
-const currentYear = WaterStore.today().slice(0, 4);
-const availableYears = new Set([
-  currentYear,
-  ...WaterStore.load().bills.map((bill) => bill.cycle.slice(0, 4)),
-]);
-[...availableYears]
-  .sort()
-  .reverse()
-  .forEach((year) => {
-    const option = new Option(year === currentYear ? year : year + ' (historical)', year);
-    option.disabled = year !== currentYear;
-    cycleYear.add(option);
-  });
-[
-  'January',
-  'February',
-  'March',
-  'April',
-  'May',
-  'June',
-  'July',
-  'August',
-  'September',
-  'October',
-  'November',
-  'December',
-].forEach((month, index) => {
-  cycleMonth.add(new Option(month, String(index + 1).padStart(2, '0')));
-});
-function updateCycleMonths() {
-  Array.from(cycleMonth.options).forEach((option) => {
-    const cycle = cycleYear.value + '-' + option.value;
-    option.disabled = cycle > WaterStore.today().slice(0, 7);
-  });
+// Period controls share the Monthly Billing card. No unrestricted month picker.
+function adjacentBillingMonth(cycle, offset) {
+  const date = new Date(cycle + '-01T00:00:00Z');
+  date.setUTCMonth(date.getUTCMonth() + offset);
+  return date.toISOString().slice(0, 7);
 }
-cycleYear.addEventListener('change', updateCycleMonths);
-
-function showBillingPeriod() {
-  const records = WaterStore.load();
-  const period = WaterStore.billingPeriod(records);
-  WaterStore.save(records);
-  const selected = period.active || WaterStore.today().slice(0, 7);
-  cycleYear.value = currentYear;
-  cycleMonth.value = selected.slice(5, 7);
-  updateCycleMonths();
-  document.getElementById('periodSummary').textContent = period.active
-    ? 'Active cycle: ' + period.active
-    : 'No active billing cycle. Open the next cycle before generating bills.';
-  document.getElementById('closedCycles').textContent = period.closed.length
-    ? 'Previously closed: ' +
-      period.closed.slice().sort().join(', ') +
-      '. Select a month and choose Open to reopen it.'
-    : '';
-  document.getElementById('backToCurrentMonth').disabled =
-    period.active === WaterStore.today().slice(0, 7);
-}
-cycleForm.addEventListener('submit', async (event) => {
-  event.preventDefault();
-  const records = WaterStore.load();
-  const period = WaterStore.billingPeriod(records);
-  const cycle = cycleYear.value + '-' + cycleMonth.value;
-  const today = WaterStore.today();
-  if (
-    !/^\d{4}-(0[1-9]|1[0-2])$/.test(cycle) ||
-    cycle.slice(0, 4) !== today.slice(0, 4) ||
-    cycle > today.slice(0, 7)
-  )
-    return AdminUI.message(
-      'Choose a billing month within the current year, up to the current month.',
-    );
-  if (period.active === cycle && !period.closed.includes(cycle))
-    return AdminUI.message('This billing cycle is already open.');
-  const reopening = period.closed.includes(cycle);
-  const accepted = await confirmAction(
-    reopening ? 'Reopen billing cycle?' : 'Open billing cycle?',
-    'Selected cycle: ' +
-      cycle +
-      '\n\nThis becomes the working cycle. Existing bills, payments and meter readings remain unchanged. Duplicate bills are still blocked.',
-    reopening ? 'Reopen cycle' : 'Open cycle',
+function billingProgress(records, cycle) {
+  const customers = records.customers.filter(
+    (customer) => WaterStore.isRegistered(customer) && WaterStore.isActive(customer),
   );
-  if (!accepted) return;
-  if (JSON.stringify(WaterStore.load()) !== JSON.stringify(records) || WaterStore.today() !== today)
-    return AdminUI.message('Records or dates changed. Review the selected cycle and try again.');
-  period.active = cycle;
-  period.closed = period.closed.filter((closed) => closed !== cycle);
-  WaterStore.save(records);
-  Object.assign(billingRecords, records);
-  showBillingPeriod();
-  location.reload();
-});
-document.getElementById('backToCurrentMonth').addEventListener('click', () => {
+  const billed = customers.filter((customer) =>
+    records.bills.some((bill) => bill.customerId === customer.id && bill.cycle === cycle),
+  ).length;
+  return { total: customers.length, billed, remaining: customers.length - billed };
+}
+function updateBillingProgress() {
   const records = WaterStore.load();
-  const period = WaterStore.billingPeriod(records);
+  const cycle = WaterStore.billingPeriod(records).active;
+  const progress = billingProgress(records, cycle);
+  document.getElementById('billingProgress').textContent =
+    progress.billed + ' of ' + progress.total + ' customers billed';
+  const bar = document.getElementById('billingProgressBar');
+  bar.max = progress.total || 1;
+  bar.value = progress.billed;
+  const next = adjacentBillingMonth(cycle, 1);
+  const previous = adjacentBillingMonth(cycle, -1);
   const current = WaterStore.today().slice(0, 7);
-  period.active = current;
-  period.closed = period.closed.filter((closed) => closed !== current);
-  WaterStore.save(records);
-  Object.assign(billingRecords, records);
-  showBillingPeriod();
-  location.reload();
+  document.getElementById('nextBillingMonth').disabled = next > current;
+  document.getElementById('reopenBillingMonth').disabled =
+    previous.slice(0, 4) !== current.slice(0, 4);
+  document.getElementById('periodAvailability').textContent =
+    next > current
+      ? 'Next month becomes available in ' + next + '.'
+      : 'Next available month: ' + next;
+}
+let changingBillingPeriod = false;
+async function changeBillingPeriod(reopen) {
+  if (changingBillingPeriod) return;
+  changingBillingPeriod = true;
+  try {
+    const records = WaterStore.load();
+    const period = WaterStore.billingPeriod(records);
+    const today = WaterStore.today();
+    const target = adjacentBillingMonth(period.active, reopen ? -1 : 1);
+    if (target > today.slice(0, 7) || target.slice(0, 4) !== today.slice(0, 4)) {
+      await showNotice(
+        'Month unavailable',
+        'Billing can only be opened within the current year, up to the current month.',
+      );
+      return;
+    }
+    const progress = billingProgress(records, period.active);
+    const draft = sessionStorage.getItem('pio-duran-meter-drafts-' + period.active);
+    let hasDraft = false;
+    try {
+      hasDraft = Object.values(JSON.parse(draft)?.readings || {}).some(
+        (item) => item.current !== '',
+      );
+    } catch {
+      /* Invalid drafts are handled on the meter page. */
+    }
+    let preview = null;
+    let reason;
+    if (reopen) {
+      preview = document.createElement('label');
+      preview.className = 'period-reason';
+      preview.textContent = 'Reason for reopening *';
+      reason = document.createElement('textarea');
+      reason.rows = 3;
+      reason.maxLength = 300;
+      reason.required = true;
+      reason.placeholder = 'Explain the correction or missing billing entry';
+      preview.appendChild(reason);
+    }
+    const accepted = await confirmAction(
+      reopen ? 'Reopen previous cycle?' : 'Move to next month?',
+      'Current month: ' +
+        period.active +
+        '\nSelected month: ' +
+        target +
+        (progress.remaining
+          ? '\n\n' + progress.remaining + ' customers still have no bill for the current period.'
+          : '') +
+        (hasDraft
+          ? '\nUnfinished readings will stay in this month and will not move to the other period.'
+          : '') +
+        '\n\nExisting bills and payments are kept. Duplicate bills remain blocked.',
+      reopen ? 'Reopen period' : 'Move to next month',
+      preview,
+    );
+    if (!accepted) return;
+    const explanation = reason ? reason.value.trim() : '';
+    if (reopen && (!explanation || explanation.length > 300 || /[<>]/.test(explanation))) {
+      await showNotice(
+        'Reason required',
+        'Enter a reason of 1?300 characters without HTML tags before reopening a period.',
+      );
+      return;
+    }
+    if (
+      WaterStore.today() !== today ||
+      JSON.stringify(WaterStore.load()) !== JSON.stringify(records)
+    ) {
+      AdminUI.message('Records or dates changed. Review the period and try again.');
+      return;
+    }
+    const previousActive = period.active;
+    if (!reopen && !period.closed.includes(previousActive)) period.closed.push(previousActive);
+    period.active = target;
+    period.closed = period.closed.filter((month) => month !== target);
+    period.history = period.history || [];
+    period.history.push({
+      date: today,
+      from: previousActive,
+      to: target,
+      action: reopen ? 'reopen' : 'advance',
+      reason: explanation,
+    });
+    WaterStore.save(records);
+    location.reload();
+  } catch {
+    AdminUI.message('The billing period could not be changed. Please try again.');
+  } finally {
+    changingBillingPeriod = false;
+  }
+}
+document
+  .getElementById('nextBillingMonth')
+  .addEventListener('click', () => changeBillingPeriod(false));
+document
+  .getElementById('reopenBillingMonth')
+  .addEventListener('click', () => changeBillingPeriod(true));
+const periodMenu = document.querySelector('.period-menu');
+document.addEventListener('click', (event) => {
+  if (!periodMenu.contains(event.target)) periodMenu.open = false;
 });
-showBillingPeriod();
+periodMenu.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape') {
+    periodMenu.open = false;
+    periodMenu.querySelector('summary').focus();
+  }
+});
+updateBillingProgress();

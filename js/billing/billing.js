@@ -227,8 +227,15 @@ billingForm.addEventListener('submit', async (event) => {
         : draft.connection === 'Reconnection'
           ? latest.rates.reconnection
           : 0;
-    const water = WaterStore.consumptionCharge(consumption, latest.rates.tiers);
-    const monthly = latest.rates.monthly;
+    let water;
+    try {
+      water = WaterStore.consumptionCharge(consumption, customer.customerType, latest.rates);
+    } catch (error) {
+      return showNotice('Check water rates', customer.account + ': ' + error.message);
+    }
+    const monthly = 0;
+    if (![water, connection, late, other].every((value) => Number.isFinite(value) && value >= 0))
+      return AdminUI.message('Charges must be valid non-negative amounts. Review Rates & Fees.');
     const total = Math.round((water + monthly + connection + late + other) * 100) / 100;
     if (!Number.isFinite(total))
       return AdminUI.message('The bill amount is too large. Review the rates and readings.');
@@ -241,6 +248,12 @@ billingForm.addEventListener('submit', async (event) => {
       previous: customer.reading,
       current,
       consumption,
+      customerType: customer.customerType,
+      rateVersion: latest.rates.version,
+      rateSnapshot: {
+        ...latest.rates[customer.customerType.toLowerCase()],
+        tiers: [...latest.rates[customer.customerType.toLowerCase()].tiers],
+      },
       water,
       monthly,
       connection,
@@ -287,6 +300,7 @@ billingForm.addEventListener('submit', async (event) => {
   document.getElementById('draftCount').textContent = '0 readings entered across all pages';
   showMeterRows();
   AdminUI.message(pending.length + ' bills generated. Open Generated Bills to review them.');
+  updateBillingProgress();
 });
 ['meterSearch', 'meterBarangay'].forEach((id) =>
   document.getElementById(id).addEventListener(id === 'meterSearch' ? 'input' : 'change', () => {
@@ -298,7 +312,5 @@ billingForm.elements.due.addEventListener('change', saveMeterDraft);
 showMeterRows();
 saveMeterDraft();
 const periodError = WaterStore.cycleError(billingRecords, activePeriod.active);
-document.getElementById('activeCycleStatus').textContent =
-  periodError ||
-  'Open cycle: ' + activePeriod.active + '. Generation date is recorded automatically.';
+document.getElementById('activeCycleStatus').textContent = periodError || '';
 document.querySelector('.billing-submit button').disabled = Boolean(periodError);

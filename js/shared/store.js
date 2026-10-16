@@ -12,14 +12,30 @@ const WaterStore = {
   },
   load() {
     const saved = localStorage.getItem(this.key);
-    if (saved) return JSON.parse(saved);
+    if (saved) {
+      const records = JSON.parse(saved);
+      records.rates = this.currentRates(records.rates);
+      return records;
+    }
     return {
       customers: [],
       bills: [],
       payments: [],
       notices: [],
-      rates: { tiers: [8.5, 11, 14.5, 18], monthly: 75, connection: 1500, reconnection: 250 },
+      rates: this.currentRates(),
       office: { name: 'Pio Duran Water Supply', address: '', contact: '' },
+    };
+  },
+  currentRates(existing = {}) {
+    if (existing.version === 2) return existing;
+    // Replace provisional tariffs for future billing only; retain historical records.
+    return {
+      version: 2,
+      residential: { minimum: 70, tiers: [8, 8.5, 9, 9.5], above50: null },
+      commercial: { minimum: 100, tiers: [12, 13, 14, 15], above50: null },
+      monthly: 0,
+      connection: existing.connection ?? 1500,
+      reconnection: existing.reconnection ?? 250,
     };
   },
   save(records) {
@@ -38,7 +54,7 @@ const WaterStore = {
       return 'New bills can only be generated for the current year.';
     if (cycle > today.slice(0, 7)) return 'Future billing cycles are not open yet.';
     if (period.closed.includes(cycle))
-      return 'This billing period was closed. Select it in Billing cycle management and choose Open to reopen it.';
+      return 'This billing month is closed. Use Manage period to reopen it.';
     if (period.active !== cycle)
       return 'Generate bills only for the active cycle. Manage it on the Meter Entry page.';
     return '';
@@ -121,14 +137,33 @@ const WaterStore = {
       day: '2-digit',
     }).format(new Date());
   },
-  consumptionCharge(consumption, tiers) {
-    let remaining = consumption;
-    let total = 0;
-    tiers.forEach((rate, index) => {
-      const amount = index === 3 ? remaining : Math.min(10, remaining);
+  consumptionCharge(consumption, customerType, rates) {
+    if (!Number.isFinite(consumption) || consumption < 0)
+      throw new Error('Enter a valid non-negative consumption.');
+    if (!['Residential', 'Commercial'].includes(customerType))
+      throw new Error('Select Residential or Commercial in the customer profile before billing.');
+    const schedule = rates[customerType.toLowerCase()];
+    if (
+      !schedule ||
+      !Number.isFinite(schedule.minimum) ||
+      schedule.minimum < 0 ||
+      !Array.isArray(schedule.tiers) ||
+      schedule.tiers.length !== 4 ||
+      schedule.tiers.some((rate) => !Number.isFinite(rate) || rate < 0)
+    )
+      throw new Error('The water rate configuration is invalid. Review Rates & Fees.');
+    if (consumption > 50 && (!Number.isFinite(schedule.above50) || schedule.above50 < 0))
+      throw new Error(
+        customerType + ' consumption above 50 m³ needs a confirmed rate. No bills were generated.',
+      );
+    let remaining = Math.max(0, consumption - 10);
+    let total = schedule.minimum;
+    schedule.tiers.forEach((rate) => {
+      const amount = Math.min(10, remaining);
       total += amount * rate;
       remaining -= amount;
     });
+    if (remaining > 0) total += remaining * schedule.above50;
     return Math.round(total * 100) / 100;
   },
 };
