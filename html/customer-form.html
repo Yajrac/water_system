@@ -1,112 +1,499 @@
 <!DOCTYPE html>
 <html lang="en" data-page="customers" class="theme-teal">
-<head>
-<script src="../js/auth.js"></script>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Customer application — Pio Duran Water Supply</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <head>
+    <script src="../js/auth/auth.js"></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Customer application — Pio Duran Water Supply</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Public+Sans:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
 
+    <script src="../js/shared/theme.js"></script>
+    <link rel="stylesheet" href="../css/shared/shared.css" />
+    <link rel="stylesheet" href="../css/shared/admin.css" />
+    <link rel="stylesheet" href="../css/customers/customer-ui.css" />
+  </head>
+  <body>
+    <div class="sidebar-overlay" id="overlay"></div>
 
-<script src="../js/theme.js"></script>
-<link rel="stylesheet" href="../css/shared.css">
-<link rel="stylesheet" href="../css/admin.css">
-<link rel="stylesheet" href="../css/customer-ui.css">
-</head>
-<body>
+    <div class="app-shell">
+      <!-- Sidebar -->
+      <aside class="sidebar" id="sidebar">
+        <div class="sidebar-brand">
+          <div class="brand-mark">
+            <img
+              src="../assets/images/water_system_logo.jpg"
+              alt="Pio Duran Water Supply System logo"
+              class="brand-logo"
+            />
+          </div>
+          <div class="brand-text">
+            <span class="brand-title">PIO DURAN WATER</span>
+            <span class="brand-sub">Supply System</span>
+          </div>
+        </div>
 
-<div class="sidebar-overlay" id="overlay"></div>
+        <ul class="sidebar-menu">
+          <li>
+            <a href="index.html" class="sidebar-menu-item">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <rect x="3" y="3" width="7" height="9" rx="1.5" />
+                <rect x="14" y="3" width="7" height="5" rx="1.5" />
+                <rect x="14" y="12" width="7" height="9" rx="1.5" />
+                <rect x="3" y="16" width="7" height="5" rx="1.5" />
+              </svg>
+              <span>Dashboard Overview</span>
+            </a>
+          </li>
+          <li>
+            <a href="customers.html" class="sidebar-menu-item active" aria-current="page">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                <circle cx="9" cy="7" r="4" />
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+              </svg>
+              <span>Customer Management</span>
+            </a>
+          </li>
+          <li>
+            <a href="billing.html" class="sidebar-menu-item">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                <path d="M14 2v6h6" />
+                <path d="M9 15h6M9 11h2" />
+              </svg>
+              <span>Billing &amp; Meter Reading</span>
+            </a>
+          </li>
+          <li>
+            <a href="payment-history.html" class="sidebar-menu-item">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <rect x="1" y="4" width="22" height="16" rx="2" />
+                <line x1="1" y1="10" x2="23" y2="10" />
+              </svg>
+              <span>Payment History</span>
+            </a>
+          </li>
+          <li>
+            <a href="broadcast.html" class="sidebar-menu-item">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+              </svg>
+              <span>Broadcast &amp; Notifications</span>
+            </a>
+          </li>
+          <li>
+            <a href="reports.html" class="sidebar-menu-item">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <line x1="18" y1="20" x2="18" y2="10" />
+                <line x1="12" y1="20" x2="12" y2="4" />
+                <line x1="6" y1="20" x2="6" y2="14" />
+              </svg>
+              <span>Reports &amp; Analytics</span>
+            </a>
+          </li>
+          <li>
+            <a href="settings.html" class="sidebar-menu-item">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <circle cx="12" cy="12" r="3" />
+                <path
+                  d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"
+                />
+              </svg>
+              <span>Settings</span>
+            </a>
+          </li>
+        </ul>
 
-<div class="app-shell">
+        <div class="sidebar-tools">
+          <button type="button" class="btn theme-toggle" id="themeToggle" aria-pressed="false">
+            Dark mode
+          </button>
+        </div>
+        <div class="sidebar-foot">Admin website &middot; Municipal Waterworks Office</div>
+      </aside>
 
-  <!-- Sidebar -->
-  <aside class="sidebar" id="sidebar">
-    <div class="sidebar-brand">
-      <div class="brand-mark">
-        <img src="../water_system_logo.jpg" alt="Pio Duran Water Supply System logo" class="brand-logo">
-      </div>
-      <div class="brand-text">
-        <span class="brand-title">PIO DURAN WATER</span>
-        <span class="brand-sub">Supply System</span>
+      <!-- Main -->
+      <div class="main-content-wrap style-1">
+        <!-- Mobile topbar -->
+        <div class="mobile-topbar">
+          <div class="style-2">
+            <div class="brand-mark">
+              <img
+                src="../assets/images/water_system_logo.jpg"
+                alt="Pio Duran Water Supply System logo"
+                class="brand-logo"
+              />
+            </div>
+            <div class="brand-text">
+              <span class="brand-title">PIO DURAN WATER</span>
+            </div>
+          </div>
+          <button class="menu-toggle" id="menuToggle" aria-label="Open menu" aria-expanded="false">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+            >
+              <line x1="3" y1="6" x2="21" y2="6" />
+              <line x1="3" y1="12" x2="21" y2="12" />
+              <line x1="3" y1="18" x2="21" y2="18" />
+            </svg>
+          </button>
+        </div>
+
+        <main class="main-content customer-editor-page">
+          <header class="page-header">
+            <div>
+              <h1 id="customerTitle">Add customer</h1>
+              <p>Water service connection application</p>
+            </div>
+            <a class="btn" href="customers.html">Back to customers</a>
+          </header>
+          <p id="pageMessage" role="status" tabindex="-1"></p>
+          <section class="panel customer-page-form">
+            <div class="admin-body">
+              <form id="customerForm">
+                <p class="form-help">
+                  Record the applicant and service-connection details from the PWSS paper forms.
+                  Fields marked * are required. Save incomplete applications as Pending.
+                </p>
+                <fieldset class="customer-section">
+                  <legend>1. Applicant and address</legend>
+                  <div class="admin-form">
+                    <label
+                      >Name of applicant *<input
+                        name="name"
+                        type="text"
+                        required
+                        maxlength="120"
+                        autocomplete="name" /></label
+                    ><label
+                      >Philippine mobile number *<input
+                        name="contact"
+                        type="tel"
+                        required
+                        maxlength="13"
+                        pattern="(09[0-9]{9}|\+639[0-9]{9})"
+                        autocomplete="tel"
+                        placeholder="09123456789 or +639123456789"
+                      /><small>Use 09 + 9 digits or +639 + 9 digits, without spaces.</small></label
+                    ><label
+                      >Purok / street *<input
+                        name="address"
+                        type="text"
+                        required
+                        maxlength="200"
+                        autocomplete="street-address" /></label
+                    ><label
+                      >Barangay *<select name="barangay" required>
+                        <option value="">Select an option</option>
+                        <option value="Brgy 1">Brgy 1</option>
+                        <option value="Brgy 2">Brgy 2</option>
+                        <option value="Brgy 3">Brgy 3</option>
+                        <option value="Brgy 4">Brgy 4</option>
+                        <option value="Brgy 5">Brgy 5</option>
+                        <option value="Caratagan">Caratagan</option>
+                        <option value="Banawan">Banawan</option>
+                      </select></label
+                    ><label
+                      >Municipality / province<input value="Pio Duran, Albay" readonly /></label
+                    ><label
+                      >Customer type *<select name="customerType" required>
+                        <option value="Residential">Residential</option>
+                        <option value="Commercial">Commercial</option>
+                      </select></label
+                    >
+                  </div>
+                </fieldset>
+                <fieldset class="customer-section">
+                  <legend>2. Application and installation</legend>
+                  <div class="admin-form">
+                    <label
+                      >Account number<input
+                        name="account"
+                        type="text"
+                        readonly
+                        placeholder="Generated on successful save"
+                      /><small>Assigned by the system; cannot be edited.</small></label
+                    ><label
+                      >Application number<input
+                        name="applicationNumber"
+                        type="text"
+                        readonly
+                        placeholder="Generated on successful save" /></label
+                    ><label
+                      >Installation reference<input
+                        name="installationReference"
+                        type="text"
+                        maxlength="120" /></label
+                    ><label
+                      >Cluster number<input
+                        name="clusterNumber"
+                        type="text"
+                        maxlength="120" /></label
+                    ><label>Date applied *<input name="dateApplied" type="date" required /></label
+                    ><label>Date approved<input name="dateApproved" type="date" /></label
+                    ><label
+                      >Service status *<select name="serviceStatus" required>
+                        <option value="Pending">Pending</option>
+                        <option value="Approved">Approved</option>
+                        <option value="Installed">Installed</option>
+                      </select></label
+                    ><label
+                      >Approved by<input name="approvedBy" type="text" maxlength="120" /></label
+                    ><label
+                      >Installed by / inspector-plumber<input
+                        name="installedBy"
+                        type="text"
+                        maxlength="120" /></label
+                    ><label>Date installed<input name="dateInstalled" type="date" /></label
+                    ><label
+                      >Meter number<input name="meterNumber" type="text" maxlength="120" /></label
+                    ><label
+                      >Initial / current meter reading (m³) *<input
+                        name="reading"
+                        type="number"
+                        required
+                        min="0"
+                        step="0.001"
+                        value="0" /></label
+                    ><label>Meter kind<input name="meterKind" type="text" maxlength="120" /></label
+                    ><label
+                      >Meter size<input
+                        name="meterSize"
+                        type="text"
+                        maxlength="40"
+                        placeholder="e.g. 1/2 inch" /></label
+                    ><label class="wide"
+                      >Nature of work<textarea
+                        name="natureOfWork"
+                        rows="2"
+                        maxlength="500"
+                      ></textarea>
+                    </label>
+                  </div>
+                </fieldset>
+                <fieldset class="customer-section">
+                  <legend>3. Installation estimate</legend>
+                  <div class="admin-form">
+                    <p class="wide form-help">
+                      Enter the amounts on the approved estimate. These charges are recorded here;
+                      they are not automatically added to a monthly bill.
+                    </p>
+                    <label
+                      >Basic installation fee (₱)<input
+                        name="installationFee"
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value="0" /></label
+                    ><label
+                      >Setback length / quantity<input
+                        name="setbackLength"
+                        type="number"
+                        min="0"
+                        step="0.001"
+                        value="0" /></label
+                    ><label
+                      >Setback rate (₱ per unit)<input
+                        name="setbackRate"
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value="0" /></label
+                    ><label
+                      >Reinstallation / reconnection cost (₱)<input
+                        name="reinstallationFee"
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value="0" /></label
+                    ><label
+                      >Violation charges (₱)<input
+                        name="violationFee"
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value="0"
+                    /></label>
+                    <div class="estimate-total">
+                      <span>Grand total</span><output id="installationTotal">₱0.00</output>
+                    </div>
+                  </div>
+                </fieldset>
+                <fieldset class="customer-section">
+                  <legend>4. Contract and document verification</legend>
+                  <div class="admin-form">
+                    <p class="wide form-help">
+                      Record the signed paper documents received by the office. These checks do not
+                      create an electronic signature.
+                    </p>
+                    <label class="checkbox-field wide"
+                      ><input type="checkbox" name="certificateReceived" />Barangay certification /
+                      property-right document verified</label
+                    ><label class="checkbox-field wide"
+                      ><input type="checkbox" name="contractReceived" />Signed water supply service
+                      contract received</label
+                    ><label class="checkbox-field wide"
+                      ><input type="checkbox" name="acknowledgementReceived" />Signed meter /
+                      accessories acknowledgement received</label
+                    ><label>Contract signed date<input name="contractDate" type="date" /></label
+                    ><label
+                      >Acknowledgement date<input name="acknowledgementDate" type="date" /></label
+                    ><label
+                      >Applicant CTC number<input
+                        name="ctcNumber"
+                        type="text"
+                        maxlength="120" /></label
+                    ><label>CTC date of issue<input name="ctcDate" type="date" /></label
+                    ><label
+                      >CTC place of issue<input
+                        name="ctcPlace"
+                        type="text"
+                        maxlength="120" /></label
+                    ><label
+                      >Office representative CTC number<input
+                        name="representativeCtc"
+                        type="text"
+                        maxlength="120" /></label
+                    ><label
+                      >Representative CTC date of issue<input
+                        name="representativeCtcDate"
+                        type="date" /></label
+                    ><label
+                      >Representative CTC place of issue<input
+                        name="representativeCtcPlace"
+                        type="text"
+                        maxlength="120" /></label
+                    ><label class="wide"
+                      >Document reference / remarks<textarea
+                        name="documentNotes"
+                        rows="2"
+                        maxlength="1000"
+                      ></textarea>
+                    </label>
+                  </div>
+                </fieldset>
+                <fieldset class="customer-section">
+                  <legend>5. Accessories acknowledgement / removed meter</legend>
+                  <div class="admin-form">
+                    <label class="wide"
+                      >Meter and accessories received<textarea
+                        name="accessories"
+                        rows="3"
+                        maxlength="1000"
+                        placeholder="List the items recorded on the acknowledgement receipt"
+                      ></textarea></label
+                    ><label
+                      >Removed meter number (if applicable)<input
+                        name="removedMeter"
+                        type="text"
+                        maxlength="120" /></label
+                    ><label
+                      >Removed meter reading (m³)<input
+                        name="removedReading"
+                        type="number"
+                        min="0"
+                        step="0.001"
+                        value="0" /></label
+                    ><label
+                      >Removed meter kind<input
+                        name="removedKind"
+                        type="text"
+                        maxlength="120" /></label
+                    ><label
+                      >Removed meter size<input
+                        name="removedSize"
+                        type="text"
+                        maxlength="120" /></label
+                    ><label
+                      >Estimated water consumed (liters)<input
+                        name="estimatedLiters"
+                        type="number"
+                        min="0"
+                        step="0.001"
+                        value="0"
+                    /></label>
+                  </div>
+                </fieldset>
+                <p id="registrationHelp" class="form-help" aria-live="polite"></p>
+                <div class="customer-form-actions admin-actions">
+                  <button class="btn" type="submit" id="saveApplication">Save application</button
+                  ><button class="btn btn-primary" type="submit" id="registerCustomer" disabled>
+                    Register customer</button
+                  ><button class="btn" type="button" id="printApplication" disabled>
+                    Print saved application</button
+                  ><button class="btn" type="button" id="cancelCustomer">Cancel</button>
+                </div>
+              </form>
+            </div>
+          </section>
+        </main>
       </div>
     </div>
 
-    <ul class="sidebar-menu">
-      <li><a href="index.html" class="sidebar-menu-item">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
-        <span>Dashboard Overview</span>
-      </a></li>
-      <li><a href="customers.html" class="sidebar-menu-item active" aria-current="page">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-        <span>Customer Management</span>
-      </a></li>
-      <li><a href="billing.html" class="sidebar-menu-item">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M9 15h6M9 11h2"/></svg>
-        <span>Billing &amp; Meter Reading</span>
-      </a></li>
-      <li><a href="payment-history.html" class="sidebar-menu-item">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-        <span>Payment History</span>
-      </a></li>
-      <li><a href="broadcast.html" class="sidebar-menu-item">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-        <span>Broadcast &amp; Notifications</span>
-      </a></li>
-      <li><a href="reports.html" class="sidebar-menu-item">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-        <span>Reports &amp; Analytics</span>
-      </a></li>
-      <li><a href="settings.html" class="sidebar-menu-item">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-        <span>Settings</span>
-      </a></li>
-    </ul>
-
-    <div class="sidebar-tools"><button type="button" class="btn theme-toggle" id="themeToggle" aria-pressed="false">Dark mode</button></div>
-<div class="sidebar-foot">Admin website &middot; Municipal Waterworks Office</div>
-  </aside>
-
-  <!-- Main -->
-  <div class="main-content-wrap style-1">
-
-    <!-- Mobile topbar -->
-    <div class="mobile-topbar">
-      <div class="style-2">
-        <div class="brand-mark">
-          <img src="../water_system_logo.jpg" alt="Pio Duran Water Supply System logo" class="brand-logo">
-        </div>
-        <div class="brand-text">
-          <span class="brand-title">PIO DURAN WATER</span>
-        </div>
-      </div>
-      <button class="menu-toggle" id="menuToggle" aria-label="Open menu" aria-expanded="false">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-      </button>
-    </div>
-
-    <main class="main-content customer-editor-page">
-  <header class="page-header"><div><h1 id="customerTitle">Add customer</h1><p>Water service connection application</p></div><a class="btn" href="customers.html">Back to customers</a></header>
-  <p id="pageMessage" role="status" tabindex="-1"></p>
-  <section class="panel customer-page-form"><div class="admin-body"><form id="customerForm">
-<p class="form-help">Record the applicant and service-connection details from the PWSS paper forms. Fields marked * are required. Save incomplete applications as Pending.</p>
-<fieldset class="customer-section"><legend>1. Applicant and address</legend><div class="admin-form"><label>Name of applicant *<input name="name" type="text" required maxlength="120" autocomplete="name"></label><label>Philippine mobile number *<input name="contact" type="tel" required maxlength="13" pattern="(09[0-9]{9}|\+639[0-9]{9})" autocomplete="tel" placeholder="09123456789 or +639123456789"><small>Use 09 + 9 digits or +639 + 9 digits, without spaces.</small></label><label>Purok / street *<input name="address" type="text" required maxlength="200" autocomplete="street-address"></label><label>Barangay *<select name="barangay" required><option value="">Select an option</option><option value="Brgy 1">Brgy 1</option><option value="Brgy 2">Brgy 2</option><option value="Brgy 3">Brgy 3</option><option value="Brgy 4">Brgy 4</option><option value="Brgy 5">Brgy 5</option><option value="Caratagan">Caratagan</option><option value="Banawan">Banawan</option></select></label><label>Municipality / province<input value="Pio Duran, Albay" readonly></label><label>Customer type *<select name="customerType" required><option value="Residential">Residential</option><option value="Commercial">Commercial</option></select></label></div></fieldset>
-<fieldset class="customer-section"><legend>2. Application and installation</legend><div class="admin-form"><label>Account number<input name="account" type="text" readonly placeholder="Generated on successful save"><small>Assigned by the system; cannot be edited.</small></label><label>Application number<input name="applicationNumber" type="text" readonly placeholder="Generated on successful save"></label><label>Installation reference<input name="installationReference" type="text" maxlength="120"></label><label>Cluster number<input name="clusterNumber" type="text" maxlength="120"></label><label>Date applied *<input name="dateApplied" type="date" required></label><label>Date approved<input name="dateApproved" type="date" ></label><label>Service status *<select name="serviceStatus" required><option value="Pending">Pending</option><option value="Approved">Approved</option><option value="Installed">Installed</option></select></label><label>Approved by<input name="approvedBy" type="text" maxlength="120"></label><label>Installed by / inspector-plumber<input name="installedBy" type="text" maxlength="120"></label><label>Date installed<input name="dateInstalled" type="date" ></label><label>Meter number<input name="meterNumber" type="text" maxlength="120"></label><label>Initial / current meter reading (m³) *<input name="reading" type="number" required min="0" step="0.001" value="0"></label><label>Meter kind<input name="meterKind" type="text" maxlength="120"></label><label>Meter size<input name="meterSize" type="text" maxlength="40" placeholder="e.g. 1/2 inch"></label><label class="wide">Nature of work<textarea name="natureOfWork" rows="2" maxlength="500"></textarea></label></div></fieldset>
-<fieldset class="customer-section"><legend>3. Installation estimate</legend><div class="admin-form"><p class="wide form-help">Enter the amounts on the approved estimate. These charges are recorded here; they are not automatically added to a monthly bill.</p><label>Basic installation fee (₱)<input name="installationFee" type="number" min="0" step="0.01" value="0"></label><label>Setback length / quantity<input name="setbackLength" type="number" min="0" step="0.001" value="0"></label><label>Setback rate (₱ per unit)<input name="setbackRate" type="number" min="0" step="0.01" value="0"></label><label>Reinstallation / reconnection cost (₱)<input name="reinstallationFee" type="number" min="0" step="0.01" value="0"></label><label>Violation charges (₱)<input name="violationFee" type="number" min="0" step="0.01" value="0"></label><div class="estimate-total"><span>Grand total</span><output id="installationTotal">₱0.00</output></div></div></fieldset>
-<fieldset class="customer-section"><legend>4. Contract and document verification</legend><div class="admin-form"><p class="wide form-help">Record the signed paper documents received by the office. These checks do not create an electronic signature.</p><label class="checkbox-field wide"><input type="checkbox" name="certificateReceived">Barangay certification / property-right document verified</label><label class="checkbox-field wide"><input type="checkbox" name="contractReceived">Signed water supply service contract received</label><label class="checkbox-field wide"><input type="checkbox" name="acknowledgementReceived">Signed meter / accessories acknowledgement received</label><label>Contract signed date<input name="contractDate" type="date" ></label><label>Acknowledgement date<input name="acknowledgementDate" type="date" ></label><label>Applicant CTC number<input name="ctcNumber" type="text" maxlength="120"></label><label>CTC date of issue<input name="ctcDate" type="date" ></label><label>CTC place of issue<input name="ctcPlace" type="text" maxlength="120"></label><label>Office representative CTC number<input name="representativeCtc" type="text" maxlength="120"></label><label>Representative CTC date of issue<input name="representativeCtcDate" type="date" ></label><label>Representative CTC place of issue<input name="representativeCtcPlace" type="text" maxlength="120"></label><label class="wide">Document reference / remarks<textarea name="documentNotes" rows="2" maxlength="1000"></textarea></label></div></fieldset>
-<fieldset class="customer-section"><legend>5. Accessories acknowledgement / removed meter</legend><div class="admin-form"><label class="wide">Meter and accessories received<textarea name="accessories" rows="3" maxlength="1000" placeholder="List the items recorded on the acknowledgement receipt"></textarea></label><label>Removed meter number (if applicable)<input name="removedMeter" type="text" maxlength="120"></label><label>Removed meter reading (m³)<input name="removedReading" type="number" min="0" step="0.001" value="0"></label><label>Removed meter kind<input name="removedKind" type="text" maxlength="120"></label><label>Removed meter size<input name="removedSize" type="text" maxlength="120"></label><label>Estimated water consumed (liters)<input name="estimatedLiters" type="number" min="0" step="0.001" value="0"></label></div></fieldset>
-<p id="registrationHelp" class="form-help" aria-live="polite"></p><div class="customer-form-actions admin-actions"><button class="btn" type="submit" id="saveApplication">Save application</button><button class="btn btn-primary" type="submit" id="registerCustomer" disabled>Register customer</button><button class="btn" type="button" id="printApplication" disabled>Print saved application</button><button class="btn" type="button" id="cancelCustomer">Cancel</button></div>
-</form></div></section>
-  </main>
-  </div>
-</div>
-
-
-<script src="../js/store.js"></script>
-<script src="../js/validation.js"></script>
-<script src="../js/shared.js"></script>
-<script src="../js/calendar.js"></script>
-<script src="../js/customer-form.js"></script>
-</body>
+    <script src="../js/shared/store.js"></script>
+    <script src="../js/shared/validation.js"></script>
+    <script src="../js/shared/shared.js"></script>
+    <script src="../js/shared/calendar.js"></script>
+    <script src="../js/customers/customer-form.js"></script>
+  </body>
 </html>

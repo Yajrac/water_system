@@ -1,0 +1,46 @@
+/* Page-specific overrides and components. Load shared.css first. */
+
+textarea.field-input {
+  resize: vertical;
+  min-height: 64px;
+}
+
+.method-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.83rem;
+  font-weight: 600;
+  color: var(--color-ink-muted);
+}
+
+.method-tag svg {
+  width: 14px;
+  height: 14px;
+  color: var(--color-ink-faint);
+}
+
+.receipt-no {
+  font-weight: 700;
+  color: var(--color-primary-deep);
+  font-variant-numeric: tabular-nums;
+}
+
+.receipt-none {
+  color: var(--color-ink-faint);
+}
+
+.btn-post {
+  background: var(--color-warning-bg);
+  color: var(--color-accent-deep);
+  border: none;
+  padding: 6px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 0.79rem;
+  font-weight: 700;
+  transition: background-color 0.15s ease;
+}
+
+.btn-post:hover {
+  background: #f6e2b8;
+}

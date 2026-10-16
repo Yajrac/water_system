@@ -1,99 +1,310 @@
 <!DOCTYPE html>
 <html lang="en" data-page="broadcast" class="theme-teal">
-<head>
-<script src="../js/auth.js"></script>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Broadcast & Notifications — Pio Duran Water Supply</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <head>
+    <script src="../js/auth/auth.js"></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Broadcast & Notifications — Pio Duran Water Supply</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Public+Sans:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
 
+    <script src="../js/shared/theme.js"></script>
+    <link rel="stylesheet" href="../css/shared/shared.css" />
+    <link rel="stylesheet" href="../css/shared/admin.css" />
+  </head>
+  <body>
+    <div class="sidebar-overlay" id="overlay"></div>
 
-<script src="../js/theme.js"></script>
-<link rel="stylesheet" href="../css/shared.css">
-<link rel="stylesheet" href="../css/admin.css">
-</head>
-<body>
+    <div class="app-shell">
+      <!-- Sidebar -->
+      <aside class="sidebar" id="sidebar">
+        <div class="sidebar-brand">
+          <div class="brand-mark">
+            <img
+              src="../assets/images/water_system_logo.jpg"
+              alt="Pio Duran Water Supply System logo"
+              class="brand-logo"
+            />
+          </div>
+          <div class="brand-text">
+            <span class="brand-title">PIO DURAN WATER</span>
+            <span class="brand-sub">Supply System</span>
+          </div>
+        </div>
 
-<div class="sidebar-overlay" id="overlay"></div>
+        <ul class="sidebar-menu">
+          <li>
+            <a href="index.html" class="sidebar-menu-item">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <rect x="3" y="3" width="7" height="9" rx="1.5" />
+                <rect x="14" y="3" width="7" height="5" rx="1.5" />
+                <rect x="14" y="12" width="7" height="9" rx="1.5" />
+                <rect x="3" y="16" width="7" height="5" rx="1.5" />
+              </svg>
+              <span>Dashboard Overview</span>
+            </a>
+          </li>
+          <li>
+            <a href="customers.html" class="sidebar-menu-item">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                <circle cx="9" cy="7" r="4" />
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+              </svg>
+              <span>Customer Management</span>
+            </a>
+          </li>
+          <li>
+            <a href="billing.html" class="sidebar-menu-item">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                <path d="M14 2v6h6" />
+                <path d="M9 15h6M9 11h2" />
+              </svg>
+              <span>Billing &amp; Meter Reading</span>
+            </a>
+          </li>
+          <li>
+            <a href="payment-history.html" class="sidebar-menu-item">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <rect x="1" y="4" width="22" height="16" rx="2" />
+                <line x1="1" y1="10" x2="23" y2="10" />
+              </svg>
+              <span>Payment History</span>
+            </a>
+          </li>
+          <li>
+            <a href="broadcast.html" class="sidebar-menu-item active" aria-current="page">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+              </svg>
+              <span>Broadcast &amp; Notifications</span>
+            </a>
+          </li>
+          <li>
+            <a href="reports.html" class="sidebar-menu-item">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <line x1="18" y1="20" x2="18" y2="10" />
+                <line x1="12" y1="20" x2="12" y2="4" />
+                <line x1="6" y1="20" x2="6" y2="14" />
+              </svg>
+              <span>Reports &amp; Analytics</span>
+            </a>
+          </li>
+          <li>
+            <a href="settings.html" class="sidebar-menu-item">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <circle cx="12" cy="12" r="3" />
+                <path
+                  d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"
+                />
+              </svg>
+              <span>Settings</span>
+            </a>
+          </li>
+        </ul>
 
-<div class="app-shell">
+        <div class="sidebar-tools">
+          <button type="button" class="btn theme-toggle" id="themeToggle" aria-pressed="false">
+            Dark mode
+          </button>
+        </div>
+        <div class="sidebar-foot">Admin website &middot; Municipal Waterworks Office</div>
+      </aside>
 
-  <!-- Sidebar -->
-  <aside class="sidebar" id="sidebar">
-    <div class="sidebar-brand">
-      <div class="brand-mark">
-        <img src="../water_system_logo.jpg" alt="Pio Duran Water Supply System logo" class="brand-logo">
-      </div>
-      <div class="brand-text">
-        <span class="brand-title">PIO DURAN WATER</span>
-        <span class="brand-sub">Supply System</span>
+      <!-- Main -->
+      <div class="main-content-wrap style-1">
+        <!-- Mobile topbar -->
+        <div class="mobile-topbar">
+          <div class="style-2">
+            <div class="brand-mark">
+              <img
+                src="../assets/images/water_system_logo.jpg"
+                alt="Pio Duran Water Supply System logo"
+                class="brand-logo"
+              />
+            </div>
+            <div class="brand-text">
+              <span class="brand-title">PIO DURAN WATER</span>
+            </div>
+          </div>
+          <button class="menu-toggle" id="menuToggle" aria-label="Open menu" aria-expanded="false">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+            >
+              <line x1="3" y1="6" x2="21" y2="6" />
+              <line x1="3" y1="12" x2="21" y2="12" />
+              <line x1="3" y1="18" x2="21" y2="18" />
+            </svg>
+          </button>
+        </div>
+
+        <main class="main-content">
+          <header class="page-header">
+            <div>
+              <h1>Broadcast & Notifications</h1>
+              <p>Municipal water supply administration</p>
+            </div>
+          </header>
+          <div class="profile-tabs section-tabs" role="tablist" aria-label="Page sections">
+            <button
+              type="button"
+              role="tab"
+              id="prepareNotificationTab"
+              aria-controls="prepareNotification"
+              aria-selected="true"
+              tabindex="0"
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M4 20l5-1L20 8l-4-4L5 15zM14 6l4 4" /></svg
+              ><span>Prepare notification</span></button
+            ><button
+              type="button"
+              role="tab"
+              id="notificationDraftsTab"
+              aria-controls="notificationDrafts"
+              aria-selected="false"
+              tabindex="-1"
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M5 3h14v18H5zM8 8h8M8 12h8M8 16h5" /></svg
+              ><span>Notification drafts</span>
+            </button>
+          </div>
+          <p id="pageMessage" role="status" tabindex="-1"></p>
+          <section
+            class="panel section-tab-panel"
+            id="prepareNotification"
+            role="tabpanel"
+            aria-labelledby="prepareNotificationTab"
+            tabindex="0"
+          >
+            <div class="panel-header"><h2>Prepare notification</h2></div>
+            <div class="admin-body">
+              <p>
+                Messages are saved as drafts only. Sending to an app or SMS requires a delivery
+                service and an approved channel.
+              </p>
+              <form id="noticeForm" class="admin-form">
+                <label
+                  >Notice type<select name="type">
+                    <option>Due date</option>
+                    <option>Unpaid bill</option>
+                    <option>Disconnection</option>
+                    <option>Reconnection</option>
+                    <option>Announcement</option>
+                  </select></label
+                ><label
+                  >Audience<select name="audience" id="noticeAudience">
+                    <option value="all">All customers</option>
+                    <option value="barangay">Barangay</option>
+                    <option value="customer">Specific customer</option>
+                  </select></label
+                ><label id="noticeTargetLabel" hidden
+                  >Target<select name="target" id="noticeTarget"></select></label
+                ><label class="wide"
+                  >Message<textarea name="message" rows="4" required maxlength="2000"></textarea>
+                </label>
+                <p id="recipientCount" class="wide"></p>
+                <div class="wide"><button class="btn btn-primary">Save draft</button></div>
+              </form>
+            </div>
+          </section>
+          <section
+            class="panel section-tab-panel"
+            id="notificationDrafts"
+            role="tabpanel"
+            aria-labelledby="notificationDraftsTab"
+            tabindex="0"
+            hidden
+          >
+            <div class="panel-header"><h2>Notification drafts</h2></div>
+            <div class="admin-body">
+              <div class="table-scroll">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Created</th>
+                      <th>Type</th>
+                      <th>Audience</th>
+                      <th>Recipients</th>
+                      <th>Message</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody id="noticeRows"></tbody>
+                </table>
+              </div>
+            </div>
+          </section>
+        </main>
       </div>
     </div>
 
-    <ul class="sidebar-menu">
-      <li><a href="index.html" class="sidebar-menu-item">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
-        <span>Dashboard Overview</span>
-      </a></li>
-      <li><a href="customers.html" class="sidebar-menu-item">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-        <span>Customer Management</span>
-      </a></li>
-      <li><a href="billing.html" class="sidebar-menu-item">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M9 15h6M9 11h2"/></svg>
-        <span>Billing &amp; Meter Reading</span>
-      </a></li>
-      <li><a href="payment-history.html" class="sidebar-menu-item">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-        <span>Payment History</span>
-      </a></li>
-      <li><a href="broadcast.html" class="sidebar-menu-item active" aria-current="page">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-        <span>Broadcast &amp; Notifications</span>
-      </a></li>
-      <li><a href="reports.html" class="sidebar-menu-item">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-        <span>Reports &amp; Analytics</span>
-      </a></li>
-      <li><a href="settings.html" class="sidebar-menu-item">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-        <span>Settings</span>
-      </a></li>
-    </ul>
-
-    <div class="sidebar-tools"><button type="button" class="btn theme-toggle" id="themeToggle" aria-pressed="false">Dark mode</button></div>
-<div class="sidebar-foot">Admin website &middot; Municipal Waterworks Office</div>
-  </aside>
-
-  <!-- Main -->
-  <div class="main-content-wrap style-1">
-
-    <!-- Mobile topbar -->
-    <div class="mobile-topbar">
-      <div class="style-2">
-        <div class="brand-mark">
-          <img src="../water_system_logo.jpg" alt="Pio Duran Water Supply System logo" class="brand-logo">
-        </div>
-        <div class="brand-text">
-          <span class="brand-title">PIO DURAN WATER</span>
-        </div>
-      </div>
-      <button class="menu-toggle" id="menuToggle" aria-label="Open menu" aria-expanded="false">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-      </button>
-    </div>
-
-    <main class="main-content"><header class="page-header"><div><h1>Broadcast & Notifications</h1><p>Municipal water supply administration</p></div></header><p id="pageMessage" role="status" tabindex="-1"></p><section class="panel"><div class="panel-header"><h2>Prepare notification</h2></div><div class="admin-body"><p>Messages are saved as drafts only. Sending to an app or SMS requires a delivery service and an approved channel.</p><form id="noticeForm" class="admin-form"><label>Notice type<select name="type"><option>Due date</option><option>Unpaid bill</option><option>Disconnection</option><option>Reconnection</option><option>Announcement</option></select></label><label>Audience<select name="audience" id="noticeAudience"><option value="all">All customers</option><option value="barangay">Barangay</option><option value="customer">Specific customer</option></select></label><label id="noticeTargetLabel" hidden>Target<select name="target" id="noticeTarget"></select></label><label class="wide">Message<textarea name="message" rows="4" required maxlength="2000"></textarea></label><p id="recipientCount" class="wide"></p><div class="wide"><button class="btn btn-primary">Save draft</button></div></form></div></section><section class="panel"><div class="panel-header"><h2>Notification drafts</h2></div><div class="admin-body"><div class="table-scroll"><table><thead><tr><th>Created</th><th>Type</th><th>Audience</th><th>Recipients</th><th>Message</th><th>Status</th></tr></thead><tbody id="noticeRows"></tbody></table></div></div></section></main>
-  </div>
-</div>
-
-
-<script src="../js/store.js"></script>
-<script src="../js/validation.js"></script>
-<script src="../js/shared.js"></script>
-<script src="../js/calendar.js"></script>
-<script src="../js/broadcast.js"></script>
-</body>
+    <script src="../js/shared/store.js"></script>
+    <script src="../js/shared/validation.js"></script>
+    <script src="../js/shared/shared.js"></script>
+    <script src="../js/shared/calendar.js"></script>
+    <script src="../js/shared/section-tabs.js"></script>
+    <script src="../js/broadcast/broadcast.js"></script>
+  </body>
 </html>

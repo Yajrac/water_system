@@ -1,11 +1,23 @@
 ﻿# Pio Duran admin website
 
+## Folder guide
+
+- `html/`: HTML pages; existing page URLs stay the same.
+- `assets/images/`: logo and image assets.
+- `data/`: sample JSON and testing notes.
+- `css/shared/` and `js/shared/`: shared styles, storage, validation, theme and UI helpers.
+- Feature folders inside both `css/` and `js/`: `auth/`, `customers/`, `billing/`, `payments/`, `dashboard/`, `reports/`, `settings/` and `broadcast/`.
+
+Edit the HTML in `html/` and its matching feature folder under `css/` or `js/`.
+The project still uses plain browser scripts, with no build tools or package setup.
+
+
 Plain HTML, CSS and JavaScript. No Python, framework, package installation or build step.
 Open `index.html` to enter the admin login. Serve the folder with your editor's local
 web preview for shared saved records: storage on direct file:// pages varies by browser.
 
-html/ contains the admin pages. css/shared.css holds shared theme rules;
-css/admin.css holds forms, dialogs and print layout. Each page has its own readable
+html/ contains the admin pages. css/shared/shared.css holds shared theme rules;
+css/shared/admin.css holds forms, dialogs and print layout. Each page has its own readable
 script in js/. store.js handles browser records and bill calculation; shared.js
 contains small UI helpers and the mobile menu. No build scripts are needed.
 
@@ -75,7 +87,7 @@ details. Signature lines stay blank; signed originals remain separate. The print
 page uses application.css and customer-application.js and has no build dependency.
 
 Add Customer and Edit now use the full-page form at html/customer-form.html.
-js/customer-form.js handles validation and saving; js/customers.js handles the
+js/customers/customer-form.js handles validation and saving; js/customers/customers.js handles the
 list, filters and CSV import. Saving returns to the customer list with a confirmation.
 
 Billing is split into three linked pages: billing.html (Meter Entry),
@@ -88,7 +100,7 @@ readings, including filtered or off-page records, and rechecks the saved meter
 readings before committing the batch. The draft clears after a successful save.
 
 Billing cycle management on the Meter Entry page manages the active cycle.
-Its controls are in js/billing-cycle.js. Rates & Fees only manages charges.
+Its controls are in js/billing/billing-cycle.js. Rates & Fees only manages charges.
 The initial cycle is the
 current month. Open selected cycle changes the working month after confirmation.
 Previously closed months can be reopened. Back to current month immediately
@@ -115,7 +127,7 @@ For local testing, data/sample-customers.json contains 20 fictional, ready-to-bi
 customer records across all seven barangays. data/TESTING.md explains how to
 load them without replacing existing records and walks through bill generation
 using suggested meter readings. Visiting Customers fetches the JSON through
-js/sample-customers.js and adds missing samples to browser storage. Existing
+js/customers/sample-customers.js and adds missing samples to browser storage. Existing
 records and edits are preserved. Use a local web preview URL for fetch to work.
 
 ## Local login preview

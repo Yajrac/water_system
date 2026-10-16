@@ -1,0 +1,176 @@
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  color: #152b3a;
+  background: #eaf2f7;
+  font-family: Georgia, 'Times New Roman', serif;
+  line-height: 1.5;
+}
+.print-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: center;
+  padding: 16px;
+  font-family: Arial, sans-serif;
+}
+.print-tools a,
+.print-tools button {
+  border: 1px solid #087bb5;
+  border-radius: 8px;
+  padding: 10px 16px;
+  background: white;
+  color: #075985;
+  font: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
+.print-tools span {
+  font-size: 0.85rem;
+}
+#printMessage {
+  margin: 16px;
+}
+.paper {
+  width: min(210mm, 100%);
+  margin: 20px auto;
+  padding: 16mm;
+  background: white;
+  box-shadow: 0 5px 24px #1233;
+  font-size: 12px;
+}
+.paper-header {
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  text-align: center;
+}
+.paper-header div {
+  flex: 1;
+}
+.paper-header img {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+}
+h1,
+h2 {
+  font-size: 14px;
+  margin: 3px 0;
+}
+h3 {
+  font-size: 13px;
+  margin: 12px 0 8px;
+}
+.reference {
+  font-size: 11px;
+  text-align: right;
+}
+.paper-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin: 12px 0;
+}
+.paper-row label {
+  flex: 1;
+  min-width: 130px;
+}
+.paper-row span[data-field] {
+  display: inline-block;
+  min-width: 70px;
+  border-bottom: 1px solid #888;
+}
+.paper-note {
+  margin: 24px 0;
+}
+.signature-row {
+  display: flex;
+  gap: 40px;
+  margin: 28px 0;
+}
+.signature-row > div {
+  flex: 1;
+  text-align: center;
+}
+.signature-line {
+  border-bottom: 1px solid #666;
+  height: 36px;
+  margin: 6px 0;
+}
+.signature-row strong {
+  display: block;
+  margin-top: 4px;
+}
+section {
+  border-top: 1px solid #777;
+  padding-top: 8px;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+td,
+th {
+  padding: 5px 0;
+  text-align: left;
+}
+td:last-child,
+th:last-child {
+  text-align: right;
+}
+dl {
+  display: grid;
+  grid-template-columns: 1fr 1.5fr;
+  gap: 8px 18px;
+}
+dt {
+  font-weight: bold;
+}
+dd {
+  margin: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.appendix [data-field='accessories'] {
+  white-space: pre-wrap;
+}
+@media (max-width: 600px) {
+  .paper {
+    padding: 20px;
+  }
+  .paper-header img {
+    width: 50px;
+    height: 50px;
+  }
+  .signature-row {
+    gap: 16px;
+  }
+}
+@media print {
+  @page {
+    size: A4;
+    margin: 12mm;
+  }
+  body {
+    background: white;
+    color: black;
+  }
+  .print-tools,
+  #printMessage {
+    display: none;
+  }
+  .paper {
+    width: auto;
+    padding: 0;
+    margin: 0;
+    box-shadow: none;
+  }
+  .appendix {
+    break-before: page;
+  }
+}

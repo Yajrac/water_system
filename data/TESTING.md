@@ -13,7 +13,7 @@ Each record includes:
 - `expectedTestConsumption`: the difference between those two values.
 
 Open the website with your editor's local web preview and visit Dashboard or Customers.
-`js/sample-customers.js` uses `fetch('../data/sample-customers.json')` like an
+`js/customers/sample-customers.js` uses `fetch('../data/sample-customers.json')` like an
 API call. The list refreshes when loading finishes. The samples are appended to
 browser storage so they are also available in Meter Entry, payments and reports.
 Opening the site directly with file:// may block fetch; use the local preview URL.

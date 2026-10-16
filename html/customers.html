@@ -1,124 +1,352 @@
 <!DOCTYPE html>
 <html lang="en" data-page="customers" class="theme-teal">
-<head>
-<script src="../js/auth.js"></script>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Customer Management — Pio Duran Water Supply</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <head>
+    <script src="../js/auth/auth.js"></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Customer Management — Pio Duran Water Supply</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Public+Sans:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
 
+    <script src="../js/shared/theme.js"></script>
+    <link rel="stylesheet" href="../css/shared/shared.css" />
+    <link rel="stylesheet" href="../css/shared/admin.css" />
+    <link rel="stylesheet" href="../css/customers/customer-ui.css" />
+  </head>
+  <body>
+    <div class="sidebar-overlay" id="overlay"></div>
 
-<script src="../js/theme.js"></script>
-<link rel="stylesheet" href="../css/shared.css">
-<link rel="stylesheet" href="../css/admin.css">
-<link rel="stylesheet" href="../css/customer-ui.css">
-</head>
-<body>
-
-<div class="sidebar-overlay" id="overlay"></div>
-
-<div class="app-shell">
-
-  <!-- Sidebar -->
-  <aside class="sidebar" id="sidebar">
-    <div class="sidebar-brand">
-      <div class="brand-mark">
-        <img src="../water_system_logo.jpg" alt="Pio Duran Water Supply System logo" class="brand-logo">
-      </div>
-      <div class="brand-text">
-        <span class="brand-title">PIO DURAN WATER</span>
-        <span class="brand-sub">Supply System</span>
-      </div>
-    </div>
-
-    <ul class="sidebar-menu">
-      <li><a href="index.html" class="sidebar-menu-item">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
-        <span>Dashboard Overview</span>
-      </a></li>
-      <li><a href="customers.html" class="sidebar-menu-item active" aria-current="page">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-        <span>Customer Management</span>
-      </a></li>
-      <li><a href="billing.html" class="sidebar-menu-item">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M9 15h6M9 11h2"/></svg>
-        <span>Billing &amp; Meter Reading</span>
-      </a></li>
-      <li><a href="payment-history.html" class="sidebar-menu-item">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-        <span>Payment History</span>
-      </a></li>
-      <li><a href="broadcast.html" class="sidebar-menu-item">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-        <span>Broadcast &amp; Notifications</span>
-      </a></li>
-      <li><a href="reports.html" class="sidebar-menu-item">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-        <span>Reports &amp; Analytics</span>
-      </a></li>
-      <li><a href="settings.html" class="sidebar-menu-item">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-        <span>Settings</span>
-      </a></li>
-    </ul>
-
-    <div class="sidebar-tools"><button type="button" class="btn theme-toggle" id="themeToggle" aria-pressed="false">Dark mode</button></div>
-<div class="sidebar-foot">Admin website &middot; Municipal Waterworks Office</div>
-  </aside>
-
-  <!-- Main -->
-  <div class="main-content-wrap style-1">
-
-    <!-- Mobile topbar -->
-    <div class="mobile-topbar">
-      <div class="style-2">
-        <div class="brand-mark">
-          <img src="../water_system_logo.jpg" alt="Pio Duran Water Supply System logo" class="brand-logo">
+    <div class="app-shell">
+      <!-- Sidebar -->
+      <aside class="sidebar" id="sidebar">
+        <div class="sidebar-brand">
+          <div class="brand-mark">
+            <img
+              src="../assets/images/water_system_logo.jpg"
+              alt="Pio Duran Water Supply System logo"
+              class="brand-logo"
+            />
+          </div>
+          <div class="brand-text">
+            <span class="brand-title">PIO DURAN WATER</span>
+            <span class="brand-sub">Supply System</span>
+          </div>
         </div>
-        <div class="brand-text">
-          <span class="brand-title">PIO DURAN WATER</span>
+
+        <ul class="sidebar-menu">
+          <li>
+            <a href="index.html" class="sidebar-menu-item">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <rect x="3" y="3" width="7" height="9" rx="1.5" />
+                <rect x="14" y="3" width="7" height="5" rx="1.5" />
+                <rect x="14" y="12" width="7" height="9" rx="1.5" />
+                <rect x="3" y="16" width="7" height="5" rx="1.5" />
+              </svg>
+              <span>Dashboard Overview</span>
+            </a>
+          </li>
+          <li>
+            <a href="customers.html" class="sidebar-menu-item active" aria-current="page">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                <circle cx="9" cy="7" r="4" />
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+              </svg>
+              <span>Customer Management</span>
+            </a>
+          </li>
+          <li>
+            <a href="billing.html" class="sidebar-menu-item">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                <path d="M14 2v6h6" />
+                <path d="M9 15h6M9 11h2" />
+              </svg>
+              <span>Billing &amp; Meter Reading</span>
+            </a>
+          </li>
+          <li>
+            <a href="payment-history.html" class="sidebar-menu-item">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <rect x="1" y="4" width="22" height="16" rx="2" />
+                <line x1="1" y1="10" x2="23" y2="10" />
+              </svg>
+              <span>Payment History</span>
+            </a>
+          </li>
+          <li>
+            <a href="broadcast.html" class="sidebar-menu-item">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+              </svg>
+              <span>Broadcast &amp; Notifications</span>
+            </a>
+          </li>
+          <li>
+            <a href="reports.html" class="sidebar-menu-item">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <line x1="18" y1="20" x2="18" y2="10" />
+                <line x1="12" y1="20" x2="12" y2="4" />
+                <line x1="6" y1="20" x2="6" y2="14" />
+              </svg>
+              <span>Reports &amp; Analytics</span>
+            </a>
+          </li>
+          <li>
+            <a href="settings.html" class="sidebar-menu-item">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <circle cx="12" cy="12" r="3" />
+                <path
+                  d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"
+                />
+              </svg>
+              <span>Settings</span>
+            </a>
+          </li>
+        </ul>
+
+        <div class="sidebar-tools">
+          <button type="button" class="btn theme-toggle" id="themeToggle" aria-pressed="false">
+            Dark mode
+          </button>
         </div>
+        <div class="sidebar-foot">Admin website &middot; Municipal Waterworks Office</div>
+      </aside>
+
+      <!-- Main -->
+      <div class="main-content-wrap style-1">
+        <!-- Mobile topbar -->
+        <div class="mobile-topbar">
+          <div class="style-2">
+            <div class="brand-mark">
+              <img
+                src="../assets/images/water_system_logo.jpg"
+                alt="Pio Duran Water Supply System logo"
+                class="brand-logo"
+              />
+            </div>
+            <div class="brand-text">
+              <span class="brand-title">PIO DURAN WATER</span>
+            </div>
+          </div>
+          <button class="menu-toggle" id="menuToggle" aria-label="Open menu" aria-expanded="false">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+            >
+              <line x1="3" y1="6" x2="21" y2="6" />
+              <line x1="3" y1="12" x2="21" y2="12" />
+              <line x1="3" y1="18" x2="21" y2="18" />
+            </svg>
+          </button>
+        </div>
+
+        <main class="main-content customer-list-page">
+          <header class="page-header customer-page-header">
+            <div>
+              <span class="section-eyebrow">SERVICE ACCOUNTS</span>
+              <h1>Customer Management</h1>
+              <p>
+                Manage your customers, review applications, and keep account details up to date.
+              </p>
+            </div>
+            <a
+              class="btn btn-primary customer-add-button"
+              id="addCustomer"
+              href="customer-form.html"
+              ><span aria-hidden="true">+</span> Add customer</a
+            >
+          </header>
+          <p id="pageMessage" role="status" tabindex="-1"></p>
+          <section class="customer-overview" aria-label="Customer summary">
+            <div class="customer-metric">
+              <span class="metric-symbol" aria-hidden="true"
+                ><svg viewBox="0 0 24 24">
+                  <path
+                    d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2 M13 7a4 4 0 1 1-8 0a4 4 0 0 1 8 0 M17 4a4 4 0 0 1 0 8 M22 21v-2a4 4 0 0 0-3-4"
+                  /></svg
+              ></span>
+              <div>
+                <p>Total records</p>
+                <strong id="totalCustomers">0</strong><span>Customers and applications</span>
+              </div>
+            </div>
+            <div class="customer-metric">
+              <span class="metric-symbol verified" aria-hidden="true"
+                ><svg viewBox="0 0 24 24">
+                  <path d="M12 3l8 3v6c0 5-8 9-8 9s-8-4-8-9V6z M8 12l3 3 5-6" /></svg
+              ></span>
+              <div>
+                <p>Registered customers</p>
+                <strong id="registeredCustomers">0</strong><span>Verified service accounts</span>
+              </div>
+            </div>
+            <div class="customer-metric">
+              <span class="metric-symbol pending" aria-hidden="true"
+                ><svg viewBox="0 0 24 24">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16h16V8z M14 2v6h6 M8 12h8 M8 16h5" /></svg
+              ></span>
+              <div>
+                <p>Pending applications</p>
+                <strong id="pendingCustomers">0</strong><span>Awaiting registration</span>
+              </div>
+            </div>
+          </section>
+          <section class="panel customer-directory">
+            <div class="panel-header">
+              <div>
+                <h2>Customer directory</h2>
+                <p>All your service records in one place.</p>
+              </div>
+              <span id="customerCount" class="directory-count" aria-live="polite"></span>
+            </div>
+            <div class="payment-history-toolbar common-filter-toolbar">
+              <label class="payment-history-search"
+                >Search customers<span class="search-control"
+                  ><svg viewBox="0 0 24 24" aria-hidden="true">
+                    <circle cx="10.5" cy="10.5" r="6.5" />
+                    <path d="M16 16l5 5" /></svg
+                  ><input
+                    id="customerSearch"
+                    class="admin-filter"
+                    placeholder="Search by name or account number"
+                    type="search" /></span
+              ></label>
+              <details class="payment-filter-dropdown">
+                <summary>
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M4 7h16M7 12h10M10 17h4" /></svg
+                  >Filter<svg class="filter-chevron" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="m7 10 5 5 5-5" />
+                  </svg>
+                </summary>
+                <div class="payment-history-filters">
+                  <label
+                    >Barangay<select id="barangayFilter" class="admin-filter">
+                      <option value="">All barangays</option>
+                    </select></label
+                  >
+                </div>
+              </details>
+            </div>
+            <div class="table-scroll customers-table">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Account</th>
+                    <th>Customer</th>
+                    <th>Barangay</th>
+                    <th>Contact</th>
+                    <th>Meter reading</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="customerRows"></tbody>
+              </table>
+            </div>
+            <div class="directory-footer">
+              <span>Need to register a new service connection?</span
+              ><a href="customer-form.html"
+                >Create an application <span aria-hidden="true">→</span></a
+              >
+            </div>
+          </section>
+          <details class="panel customer-import">
+            <summary>
+              <span class="import-symbol" aria-hidden="true">↑</span
+              ><span
+                ><strong>Import existing customers</strong
+                ><small>Bring your existing records into the customer directory.</small></span
+              ><span class="import-chevron" aria-hidden="true">⌄</span>
+            </summary>
+            <div class="admin-body">
+              <p class="form-help">
+                Upload a CSV file up to 5 MB. Start with the template to use the correct columns.
+                Export Excel records as CSV first; duplicate accounts will be rejected.
+              </p>
+              <div class="admin-actions">
+                <button class="btn" id="downloadTemplate" type="button">
+                  Download CSV template
+                </button>
+              </div>
+              <form id="importForm" class="admin-form">
+                <label
+                  >Choose your CSV file<input type="file" id="customerFile" accept=".csv" required
+                /></label>
+                <div class="import-submit">
+                  <button class="btn btn-primary">Import customers</button>
+                </div>
+              </form>
+            </div>
+          </details>
+        </main>
       </div>
-      <button class="menu-toggle" id="menuToggle" aria-label="Open menu" aria-expanded="false">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-      </button>
     </div>
 
-    <main class="main-content customer-list-page">
-  <header class="page-header customer-page-header">
-    <div><span class="section-eyebrow">SERVICE ACCOUNTS</span><h1>Customer Management</h1><p>Manage your customers, review applications, and keep account details up to date.</p></div>
-    <a class="btn btn-primary customer-add-button" id="addCustomer" href="customer-form.html"><span aria-hidden="true">+</span> Add customer</a>
-  </header>
-  <p id="pageMessage" role="status" tabindex="-1"></p>
-  <section class="customer-overview" aria-label="Customer summary">
-    <div class="customer-metric"><span class="metric-symbol" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2 M13 7a4 4 0 1 1-8 0a4 4 0 0 1 8 0 M17 4a4 4 0 0 1 0 8 M22 21v-2a4 4 0 0 0-3-4"/></svg></span><div><p>Total records</p><strong id="totalCustomers">0</strong><span>Customers and applications</span></div></div>
-    <div class="customer-metric"><span class="metric-symbol verified" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 5-8 9-8 9s-8-4-8-9V6z M8 12l3 3 5-6"/></svg></span><div><p>Registered customers</p><strong id="registeredCustomers">0</strong><span>Verified service accounts</span></div></div>
-    <div class="customer-metric"><span class="metric-symbol pending" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16h16V8z M14 2v6h6 M8 12h8 M8 16h5"/></svg></span><div><p>Pending applications</p><strong id="pendingCustomers">0</strong><span>Awaiting registration</span></div></div>
-  </section>
-  <section class="panel customer-directory">
-    <div class="panel-header"><div><h2>Customer directory</h2><p>All your service records in one place.</p></div><span id="customerCount" class="directory-count" aria-live="polite"></span></div>
-    <div class="payment-history-toolbar common-filter-toolbar"><label class="payment-history-search">Search customers<span class="search-control"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M16 16l5 5"/></svg><input id="customerSearch" class="admin-filter" placeholder="Search by name or account number" type="search"></span></label><details class="payment-filter-dropdown"><summary><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M7 12h10M10 17h4"/></svg>Filter<svg class="filter-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m7 10 5 5 5-5"/></svg></summary><div class="payment-history-filters"><label>Barangay<select id="barangayFilter" class="admin-filter"><option value="">All barangays</option></select></label></div></details></div>
-    <div class="table-scroll customers-table"><table><thead><tr><th>Account</th><th>Customer</th><th>Barangay</th><th>Contact</th><th>Meter reading</th><th>Status</th><th>Actions</th></tr></thead><tbody id="customerRows"></tbody></table></div>
-    <div class="directory-footer"><span>Need to register a new service connection?</span><a href="customer-form.html">Create an application <span aria-hidden="true">→</span></a></div>
-  </section>
-  <details class="panel customer-import">
-    <summary><span class="import-symbol" aria-hidden="true">↑</span><span><strong>Import existing customers</strong><small>Bring your existing records into the customer directory.</small></span><span class="import-chevron" aria-hidden="true">⌄</span></summary>
-    <div class="admin-body"><p class="form-help">Upload a CSV file up to 5 MB. Start with the template to use the correct columns. Export Excel records as CSV first; duplicate accounts will be rejected.</p>
-      <div class="admin-actions"><button class="btn" id="downloadTemplate" type="button">Download CSV template</button></div>
-      <form id="importForm" class="admin-form"><label>Choose your CSV file<input type="file" id="customerFile" accept=".csv" required></label><div class="import-submit"><button class="btn btn-primary">Import customers</button></div></form>
-    </div>
-  </details>
-</main>
-  </div>
-</div>
-
-
-<script src="../js/store.js"></script>
-<script src="../js/validation.js"></script>
-<script src="../js/shared.js"></script>
-<script src="../js/sample-customers.js"></script>
-<script src="../js/customers.js"></script>
-</body>
+    <script src="../js/shared/store.js"></script>
+    <script src="../js/shared/validation.js"></script>
+    <script src="../js/shared/shared.js"></script>
+    <script src="../js/shared/skeleton.js"></script>
+    <script src="../js/customers/sample-customers.js"></script>
+    <script src="../js/customers/customers.js"></script>
+  </body>
 </html>
