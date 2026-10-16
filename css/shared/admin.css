@@ -9,45 +9,150 @@
   table.mobile-summary-table th,
   table.mobile-summary-table td {
     padding: 12px 8px;
-    font-size: .74rem;
+    font-size: 0.74rem;
     overflow-wrap: anywhere;
   }
-  table.mobile-summary-table th { white-space: normal; }
-  .mobile-summary-customers tr > :not(:nth-child(2)):not(:nth-child(6)):not(:nth-child(7)):not([colspan]),
-  .mobile-summary-balances tr > :not(:nth-child(2)):not(:nth-child(6)):not(:nth-child(7)):not([colspan]),
-  .mobile-summary-payments tr > :not(:nth-child(3)):not(:nth-child(5)):not(:nth-child(8)):not([colspan]),
-  .mobile-summary-bills tr > :not(:nth-child(2)):not(:nth-child(3)):not(:nth-child(11)):not(:nth-child(14)):not([colspan]),
-  .mobile-summary-accounts tr > :not(:nth-child(2)):not(:nth-child(5)):not(:nth-child(6)):not(:nth-child(7)):not([colspan]),
-  .mobile-summary-consumption tr > :not(:nth-child(1)):not(:nth-child(3)) :not([colspan]){
+  table.mobile-summary-table th {
+    white-space: normal;
+  }
+  .mobile-summary-customers
+    tr
+    > :not(:nth-child(2)):not(:nth-child(6)):not(:nth-child(7)):not([colspan]),
+  .mobile-summary-balances
+    tr
+    > :not(:nth-child(2)):not(:nth-child(6)):not(:nth-child(7)):not([colspan]),
+  .mobile-summary-payments
+    tr
+    > :not(:nth-child(3)):not(:nth-child(5)):not(:nth-child(8)):not([colspan]),
+  .mobile-summary-bills
+    tr
+    > :not(:nth-child(2)):not(:nth-child(3)):not(:nth-child(11)):not(:nth-child(14)):not([colspan]),
+  .mobile-summary-accounts
+    tr
+    > :not(:nth-child(2)):not(:nth-child(5)):not(:nth-child(6)):not(:nth-child(7)):not([colspan]),
+  .mobile-summary-consumption tr > :not(:nth-child(1)):not(:nth-child(3)):not([colspan]) {
     display: none;
   }
-  table.mobile-summary-table td[colspan] { display: table-cell; }
+  table.mobile-summary-table td[colspan] {
+    display: table-cell;
+  }
   .mobile-summary-customers .action-edit,
   .mobile-summary-customers .customer-avatar,
-  .mobile-summary-customers .customer-identity small { display: none; }
-  .mobile-summary-table .customer-row-actions { flex-wrap: nowrap; }
-  .mobile-summary-table .btn { padding: 8px; font-size: .7rem; white-space: nowrap; }
+  .mobile-summary-customers .customer-identity small {
+    display: none;
+  }
+  .mobile-summary-table .customer-row-actions {
+    flex-wrap: nowrap;
+  }
+  .mobile-summary-table .btn {
+    padding: 8px;
+    font-size: 0.7rem;
+    white-space: nowrap;
+  }
   .mobile-summary-table .payment-status,
-  .mobile-summary-table .customer-status { font-size: .64rem; padding: 4px 7px; }
+  .mobile-summary-table .customer-status {
+    font-size: 0.64rem;
+    padding: 4px 7px;
+  }
 }
-.skeleton-block { display: block; position: relative; overflow: hidden; border-radius: 5px; background: var(--color-border); }
-.skeleton-block::after { content: ''; position: absolute; inset: 0; transform: translateX(-100%); background: linear-gradient(90deg, transparent, #ffffff60, transparent); animation: skeleton-shimmer 1.5s ease-in-out infinite; }
-.skeleton-heading { height: 13px; width: 58%; margin-bottom: 22px; }
-.skeleton-number { height: 30px; width: 70%; margin-bottom: 14px; }
-.skeleton-caption { height: 10px; width: 80%; }
-.skeleton-row-text { height: 14px; width: 85%; min-width: 38px; margin: 8px 0; }
-.skeleton-plot { height: 230px; width: 100%; margin-bottom: 14px; }
-.skeleton-chart { padding: 5px 0; }
-.loading-announcement { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
-[data-theme="dark"] .skeleton-block::after { background: linear-gradient(90deg, transparent, #ffffff12, transparent); }
-@keyframes skeleton-shimmer { to { transform: translateX(100%); } }
-@media (prefers-reduced-motion: reduce) { .skeleton-block::after { animation: none; } }
-.btn.receipt-icon-button { display: inline-flex; align-items: center; justify-content: center; width: 38px; height: 38px; padding: 8px; }
-.receipt-icon-button svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.skeleton-block {
+  display: block;
+  position: relative;
+  overflow: hidden;
+  border-radius: 5px;
+  background: var(--color-border);
+}
+.skeleton-block::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, #ffffff60, transparent);
+  animation: skeleton-shimmer 1.5s ease-in-out infinite;
+}
+.skeleton-heading {
+  height: 13px;
+  width: 58%;
+  margin-bottom: 22px;
+}
+.skeleton-number {
+  height: 30px;
+  width: 70%;
+  margin-bottom: 14px;
+}
+.skeleton-caption {
+  height: 10px;
+  width: 80%;
+}
+.skeleton-row-text {
+  height: 14px;
+  width: 85%;
+  min-width: 38px;
+  margin: 8px 0;
+}
+.skeleton-plot {
+  height: 230px;
+  width: 100%;
+  margin-bottom: 14px;
+}
+.skeleton-chart {
+  padding: 5px 0;
+}
+.loading-announcement {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+[data-theme='dark'] .skeleton-block::after {
+  background: linear-gradient(90deg, transparent, #ffffff12, transparent);
+}
+@keyframes skeleton-shimmer {
+  to {
+    transform: translateX(100%);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-block::after {
+    animation: none;
+  }
+}
+.btn.receipt-icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  padding: 8px;
+}
+.receipt-icon-button svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
 @media (max-width: 600px) {
-  .mobile-summary-payments tr > :last-child { text-align: center; }
-  .mobile-summary-payments .btn.receipt-icon-button { width: 44px; height: 44px; min-width: 44px; padding: 10px; border-radius: 8px; }
-  .mobile-summary-payments .receipt-icon-button svg { width: 22px; height: 22px; flex-shrink: 0; }
+  .mobile-summary-payments tr > :last-child {
+    text-align: center;
+  }
+  .mobile-summary-payments .btn.receipt-icon-button {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    padding: 10px;
+    border-radius: 8px;
+  }
+  .mobile-summary-payments .receipt-icon-button svg {
+    width: 22px;
+    height: 22px;
+    flex-shrink: 0;
+  }
 }
 .section-tabs {
   flex-wrap: wrap;
@@ -1681,5 +1786,166 @@ textarea:focus-visible,
   }
   .customer-form-actions {
     bottom: -18px;
+  }
+}
+
+/* Keep wide tables inside their own container instead of widening the page. */
+@media screen {
+  html.theme-teal .main-content-wrap {
+    width: 100%;
+    min-width: 0;
+  }
+  html.theme-teal .main-content {
+    box-sizing: border-box;
+    width: calc(100% - var(--sidebar-w));
+    max-width: none;
+  }
+  .main-content .panel,
+  .main-content .admin-body {
+    min-width: 0;
+  }
+  .main-content .table-scroll,
+  .main-content .table-wrap,
+  .bill-preview-table {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+  }
+  .main-content table {
+    width: 100%;
+    min-width: 0;
+    border-collapse: collapse;
+  }
+  .main-content th,
+  .main-content td {
+    overflow-wrap: anywhere;
+  }
+  .main-content thead th {
+    white-space: normal;
+  }
+  #meterRows input {
+    width: 100%;
+    min-width: 90px;
+    max-width: 130px;
+    box-sizing: border-box;
+  }
+  .main-content table:has(#billRows) {
+    min-width: 1120px;
+  }
+  .main-content table:has(#meterRows) {
+    min-width: 920px;
+  }
+}
+@media screen and (max-width: 860px) {
+  html.theme-teal .main-content {
+    width: 100%;
+    margin-left: 0;
+  }
+  .main-content table {
+    font-size: 0.78rem;
+  }
+  .main-content thead th,
+  .main-content tbody td {
+    padding: 12px 10px;
+  }
+}
+@media screen and (max-width: 600px) {
+  .main-content table.mobile-summary-table {
+    min-width: 0;
+    table-layout: fixed;
+  }
+  .main-content table.mobile-summary-table th,
+  .main-content table.mobile-summary-table td {
+    padding: 11px 7px;
+    font-size: 0.72rem;
+  }
+  .main-content .mobile-summary-customers .customer-identity {
+    min-width: 0;
+  }
+  .main-content .mobile-summary-customers .customer-identity > div {
+    min-width: 0;
+  }
+  .main-content .mobile-summary-customers .customer-row-actions {
+    flex-wrap: wrap;
+  }
+  .main-content .mobile-summary-table .payment-status,
+  .main-content .mobile-summary-table .customer-status {
+    white-space: normal;
+  }
+  .main-content .mobile-summary-payments tr > :last-child {
+    width: 65px;
+  }
+  .main-content .mobile-summary-customers tr > :last-child {
+    width: 90px;
+  }
+}
+
+/* On phones, expand filters below the toolbar instead of over the table. */
+@media screen and (max-width: 600px) {
+  .payment-history-toolbar {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: end;
+    gap: 12px 8px;
+  }
+  .payment-history-toolbar .payment-history-search {
+    min-width: 0;
+    width: 100%;
+  }
+  .payment-history-toolbar .payment-history-search input {
+    min-width: 0;
+    width: 100%;
+    height: 46px;
+    font-size: 16px;
+    box-sizing: border-box;
+  }
+  .payment-history-toolbar .payment-filter-dropdown {
+    display: contents;
+  }
+  .payment-history-toolbar .payment-filter-dropdown > summary {
+    grid-column: 2;
+    grid-row: 1;
+    align-self: end;
+    height: 46px;
+    box-sizing: border-box;
+    padding: 10px;
+    gap: 6px;
+    white-space: nowrap;
+  }
+  .payment-history-toolbar .payment-filter-dropdown .payment-history-filters {
+    position: static;
+    grid-column: 1 / -1;
+    grid-template-columns: minmax(0, 1fr);
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 14px;
+    box-shadow: none;
+  }
+  .payment-filter-dropdown .payment-history-filters label {
+    min-width: 0;
+  }
+  .payment-filter-dropdown .payment-history-filters input,
+  .payment-filter-dropdown .payment-history-filters select {
+    min-width: 0;
+    width: 100%;
+    max-width: 100%;
+    min-height: 46px;
+    box-sizing: border-box;
+    font-size: 16px;
+  }
+  .payment-filter-dropdown .payment-history-filters .btn {
+    min-height: 44px;
+    width: 100%;
+  }
+  .payment-filter-dropdown .filter-panel-close {
+    min-width: 40px;
+    min-height: 40px;
+  }
+  .payment-filter-dropdown .calendar-field {
+    min-width: 0;
+    max-width: 100%;
   }
 }

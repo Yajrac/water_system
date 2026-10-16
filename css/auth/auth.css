@@ -222,6 +222,9 @@
 @media (max-width: 700px) {
   .auth-page {
     padding: 80px 16px 24px;
+    align-items: start;
+    overflow-y: auto;
+    padding-bottom: calc(24px + var(--auth-keyboard-space, 0px) + env(safe-area-inset-bottom, 0px));
   }
   .auth-layout {
     grid-template-columns: minmax(0, 1fr);
@@ -247,6 +250,7 @@
   .auth-card input {
     font-size: 16px;
     box-sizing: border-box;
+    scroll-margin-block: 24px;
   }
   .auth-theme {
     right: 16px;

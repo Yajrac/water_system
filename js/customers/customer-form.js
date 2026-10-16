@@ -5,6 +5,24 @@ const printApplicationButton = document.getElementById('printApplication');
 let editingCustomerId = null;
 let savingCustomer = false;
 const contactField = customerForm.elements.contact;
+const applicantNameField = customerForm.elements.name;
+let lastApplicantName = '';
+const applicantCharacters = /^[\p{L}\p{M} .,'-]*$/u;
+applicantNameField.addEventListener('beforeinput', (event) => {
+  if (!event.isComposing && event.data && !applicantCharacters.test(event.data)) event.preventDefault();
+});
+applicantNameField.addEventListener('paste', (event) => {
+  const value = event.clipboardData.getData('text');
+  if (!applicantCharacters.test(value)) {
+    event.preventDefault();
+    AdminUI.message('Applicant name accepts letters, spaces, periods, commas, apostrophes and hyphens only.');
+  }
+});
+applicantNameField.addEventListener('input', (event) => {
+  if (event.isComposing) return;
+  if (applicantCharacters.test(applicantNameField.value) && applicantNameField.value.length <= 120) lastApplicantName = applicantNameField.value;
+  else applicantNameField.value = lastApplicantName;
+});
 const registrationFields = [
   'certificateReceived',
   'contractReceived',
@@ -62,6 +80,7 @@ function openCustomer(customer) {
     customerForm.elements.contact.value = (customer.contact || '').replace(/^(\+63|0)/, '');
   }
   lastContactValue = contactField.value;
+  lastApplicantName = applicantNameField.value;
   const purok = customer?.address?.match(/^Purok\s*([1-7])(?:\b|,)/i);
   customerForm.elements.address.value = purok ? 'Purok ' + purok[1] : '';
   customerForm.elements.street.value =
