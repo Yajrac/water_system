@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+<script src="../js/auth.js"></script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PWSS customer application</title>
+  <link rel="stylesheet" href="../css/application.css">
+</head>
+<body>
+  <nav class="print-tools"><a href="customers.html">Back to customers</a><button id="printForm" type="button">Print application</button><span>Prints the saved record; signature lines remain blank.</span></nav>
+  <p id="printMessage" role="status"></p>
+  <article class="paper" id="applicationPaper" hidden>
+    <header class="paper-header"><div><h1>PIO DURAN WATER SUPPLY SYSTEM (PWSS)</h1><p>PIO DURAN, ALBAY</p><h2>WATER SERVICE CONNECTION APPLICATION FORM</h2></div><img src="../water_system_logo.jpg" alt="PWSS logo"></header>
+    <p class="reference">Application No. <span data-field="applicationNumber"></span> · Status: <span data-field="registrationStatus"></span></p>
+    <div class="paper-row"><label>Name of applicant: <span data-field="name"></span></label><label>Contact #: <span data-field="contact"></span></label></div>
+    <div class="paper-row"><label>Purok / street: <span data-field="address"></span></label><label>Barangay: <span data-field="barangay"></span></label><span>Pio Duran, Albay</span></div>
+    <div class="paper-row"><label>Account No.: <span data-field="account"></span></label><label>Installation: <span data-field="installationReference"></span></label><label>Cluster No.: <span data-field="clusterNumber"></span></label></div>
+    <div class="paper-row"><label>Type: <span data-field="customerType"></span></label><label>Date applied: <span data-field="dateApplied"></span></label><label>Date approved: <span data-field="dateApproved"></span></label></div>
+    <p class="paper-note">Application and supporting documents are subject to PWSS verification and approval. This printed record does not replace the signed water supply service contract.</p>
+    <div class="signature-row"><div>Signed by:<div class="signature-line"></div><strong>Applicant</strong></div><div>Approved by:<div class="signature-line"></div><span data-field="approvedBy"></span><strong>General Manager / authorized approver</strong></div></div>
+    <section><h3>Installation estimate</h3><p>Estimated items and installation costs recorded by the office:</p><table><tbody><tr><td>Basic installation fee</td><td data-money="installationFee"></td></tr><tr><td>Setback cost: <span data-field="setbackLength"></span> × <span data-money="setbackRate"></span></td><td id="setbackTotal"></td></tr><tr><td>Reinstallation / reconnection cost</td><td data-money="reinstallationFee"></td></tr><tr><td>Violation charges</td><td data-money="violationFee"></td></tr><tr><th>Grand total</th><th data-money="installationTotal"></th></tr></tbody></table></section>
+    <div class="signature-row"><div>Approved for installation:<div class="signature-line"></div><span data-field="approvedBy"></span></div><div>Installed by:<div class="signature-line"></div><span data-field="installedBy"></span><strong>Inspector / plumber</strong></div></div>
+    <section><h3>Service connection record</h3><div class="paper-row"><label>Account No.: <span data-field="account"></span></label><label>Meter No.: <span data-field="meterNumber"></span></label></div><div class="paper-row"><label>Initial reading (m³): <span data-field="initialReading"></span></label><label>Date installed: <span data-field="dateInstalled"></span></label></div><div class="paper-row"><label>Meter kind: <span data-field="meterKind"></span></label><label>Meter size: <span data-field="meterSize"></span></label></div><p>Date: <span data-field="dateInstalled"></span></p><p>Signature: __________________________________</p></section>
+    <p class="paper-note"><strong>NOTE:</strong> Attach the barangay certification confirming ownership or the right over the property applied for water connection.</p>
+  </article>
+  <article class="paper appendix" id="applicationAppendix" hidden><h2>Contract and accessories record</h2><p>Administrative record of the received paper documents. The signed originals remain separate.</p><dl id="documentDetails"></dl><h3>Accessories acknowledged</h3><p data-field="accessories"></p><div class="signature-row"><div>Signature of concessionaire:<div class="signature-line"></div></div><div>Date:<div class="signature-line"></div></div></div></article>
+  <script src="../js/store.js"></script>
+  <script src="../js/customer-application.js"></script>
+</body>
+</html>

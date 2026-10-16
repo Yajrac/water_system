@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en" data-page="settings" class="theme-teal">
+<head>
+<script src="../js/auth.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Settings — Pio Duran Water Supply</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+
+<script src="../js/theme.js"></script>
+<link rel="stylesheet" href="../css/shared.css">
+<link rel="stylesheet" href="../css/admin.css">
+</head>
+<body>
+
+<div class="sidebar-overlay" id="overlay"></div>
+
+<div class="app-shell">
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-mark">
+        <img src="../water_system_logo.jpg" alt="Pio Duran Water Supply System logo" class="brand-logo">
+      </div>
+      <div class="brand-text">
+        <span class="brand-title">PIO DURAN WATER</span>
+        <span class="brand-sub">Supply System</span>
+      </div>
+    </div>
+
+    <ul class="sidebar-menu">
+      <li><a href="index.html" class="sidebar-menu-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
+        <span>Dashboard Overview</span>
+      </a></li>
+      <li><a href="customers.html" class="sidebar-menu-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <span>Customer Management</span>
+      </a></li>
+      <li><a href="billing.html" class="sidebar-menu-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M9 15h6M9 11h2"/></svg>
+        <span>Billing &amp; Meter Reading</span>
+      </a></li>
+      <li><a href="payment-history.html" class="sidebar-menu-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+        <span>Payment History</span>
+      </a></li>
+      <li><a href="broadcast.html" class="sidebar-menu-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <span>Broadcast &amp; Notifications</span>
+      </a></li>
+      <li><a href="reports.html" class="sidebar-menu-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        <span>Reports &amp; Analytics</span>
+      </a></li>
+      <li><a href="settings.html" class="sidebar-menu-item active" aria-current="page">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        <span>Settings</span>
+      </a></li>
+    </ul>
+
+    <div class="sidebar-tools"><button type="button" class="btn theme-toggle" id="themeToggle" aria-pressed="false">Dark mode</button></div>
+<div class="sidebar-foot">Admin website &middot; Municipal Waterworks Office</div>
+  </aside>
+
+  <!-- Main -->
+  <div class="main-content-wrap style-1">
+
+    <!-- Mobile topbar -->
+    <div class="mobile-topbar">
+      <div class="style-2">
+        <div class="brand-mark">
+          <img src="../water_system_logo.jpg" alt="Pio Duran Water Supply System logo" class="brand-logo">
+        </div>
+        <div class="brand-text">
+          <span class="brand-title">PIO DURAN WATER</span>
+        </div>
+      </div>
+      <button class="menu-toggle" id="menuToggle" aria-label="Open menu" aria-expanded="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+    </div>
+
+    <main class="main-content"><header class="page-header"><div><h1>Settings</h1><p>Municipal water supply administration</p></div></header><p id="pageMessage" role="status" tabindex="-1"></p><section class="panel"><div class="panel-header"><h2>Office details</h2></div><div class="admin-body"><form id="officeForm" class="admin-form"><label>Utility name<input name="name" type="text" required maxlength="120"></label><label>Office address<input name="address" type="text" maxlength="200"></label><label>Contact number<input name="contact" type="tel" maxlength="30"></label><div class="wide"><button class="btn btn-primary">Save office details</button></div></form></div></section><section class="panel"><div class="panel-header"><h2>Billing settings</h2></div><div class="admin-body"><p>All rates and fees are managed in one place to avoid conflicting values.</p><a class="btn" href="rates-fees.html">Open rates and fees</a></div></section><section class="panel"><div class="panel-header"><h2>Local records</h2></div><div class="admin-body"><p>Download a JSON copy of the browser records for reference. This does not create a server backup.</p><button id="backupRecords" class="btn">Download records</button></div></section></main>
+  </div>
+</div>
+
+
+<script src="../js/store.js"></script>
+<script src="../js/validation.js"></script>
+<script src="../js/shared.js"></script>
+<script src="../js/calendar.js"></script>
+<script src="../js/settings.js"></script>
+</body>
+</html>
