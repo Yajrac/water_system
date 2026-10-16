@@ -1,4 +1,32 @@
 /* Plain form and table layout shared by the admin pages. */
+.billing-dates {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  min-width: 0;
+  align-items: start;
+}
+.generation-date-display {
+  display: grid;
+  gap: 10px;
+  padding-top: 2px;
+}
+.generation-date-display span {
+  font-weight: 600;
+}
+.generation-date-display strong {
+  padding-block: 9px;
+  color: var(--color-ink);
+  font-size: 0.9rem;
+}
+.billing-dates > label {
+  min-width: 0;
+}
+@media (max-width: 700px) {
+  .billing-dates {
+    grid-template-columns: 1fr;
+  }
+}
 /* Keep only the essential columns on phones. Printing retains the full table. */
 @media screen and (max-width: 600px) {
   table.mobile-summary-table {
@@ -17,19 +45,19 @@
   }
   .mobile-summary-customers
     tr
-    > :not(:nth-child(2)):not(:nth-child(6)):not(:nth-child(7)):not([colspan]),
+    > :not(:nth-child(1)):not(:nth-child(5)):not(:nth-child(6)):not([colspan]),
   .mobile-summary-balances
     tr
-    > :not(:nth-child(2)):not(:nth-child(6)):not(:nth-child(7)):not([colspan]),
+    > :not(:nth-child(1)):not(:nth-child(5)):not(:nth-child(6)):not([colspan]),
   .mobile-summary-payments
     tr
-    > :not(:nth-child(3)):not(:nth-child(5)):not(:nth-child(8)):not([colspan]),
+    > :not(:nth-child(2)):not(:nth-child(4)):not(:nth-child(7)):not([colspan]),
   .mobile-summary-bills
     tr
     > :not(:nth-child(2)):not(:nth-child(3)):not(:nth-child(11)):not(:nth-child(14)):not([colspan]),
   .mobile-summary-accounts
     tr
-    > :not(:nth-child(2)):not(:nth-child(5)):not(:nth-child(6)):not(:nth-child(7)):not([colspan]),
+    > :not(:nth-child(1)):not(:nth-child(4)):not(:nth-child(5)):not(:nth-child(6)):not([colspan]),
   .mobile-summary-consumption tr > :not(:nth-child(1)):not(:nth-child(3)):not([colspan]) {
     display: none;
   }
@@ -37,8 +65,7 @@
     display: table-cell;
   }
   .mobile-summary-customers .action-edit,
-  .mobile-summary-customers .customer-avatar,
-  .mobile-summary-customers .customer-identity small {
+  .mobile-summary-customers .customer-avatar {
     display: none;
   }
   .mobile-summary-table .customer-row-actions {
@@ -2049,4 +2076,17 @@ textarea:focus-visible,
   }
 }
 
-.water-rates-table tr > :nth-child(3) { border-left: 1px solid var(--color-border-strong); }
+.water-rates-table tr > :nth-child(3) {
+  border-left: 1px solid var(--color-border-strong);
+}
+
+.table-customer strong {
+  display: block;
+  font-size: 0.83rem;
+}
+.table-customer small {
+  display: block;
+  margin-top: 5px;
+  font-size: 0.7rem;
+  color: var(--color-ink-muted);
+}

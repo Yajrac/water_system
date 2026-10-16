@@ -1,6 +1,21 @@
 const billingRecords = WaterStore.load();
+// Monthly Billing always works on the current Philippine calendar month.
+const currentBillingMonth = WaterStore.today().slice(0, 7);
+const currentPeriod = WaterStore.billingPeriod(billingRecords);
+currentPeriod.active = currentBillingMonth;
+currentPeriod.closed = currentPeriod.closed.filter((month) => month !== currentBillingMonth);
 const billingForm = document.getElementById('billingForm');
 const meterBody = document.getElementById('meterRows');
+function updateGenerationDate() {
+  const today = WaterStore.today();
+  document.getElementById('generationDateLabel').textContent = new Intl.DateTimeFormat('en-PH', {
+    dateStyle: 'long',
+    timeZone: 'Asia/Manila',
+  }).format(new Date(today + 'T12:00:00+08:00'));
+  billingForm.elements.due.min = today;
+}
+updateGenerationDate();
+window.addEventListener('focus', updateGenerationDate);
 let generatingBills = false;
 const draftKey = 'pio-duran-meter-drafts-' + WaterStore.billingPeriod(billingRecords).active;
 let meterDrafts = {};
@@ -99,8 +114,7 @@ function showMeterRows() {
     };
     const row = meterBody.insertRow();
     row.dataset.customerId = customer.id;
-    AdminUI.cell(row, customer.account, 'Account');
-    AdminUI.cell(row, customer.name, 'Customer');
+    AdminUI.customer(row, customer);
     AdminUI.cell(row, customer.reading, 'Previous reading');
     const current = document.createElement('input');
     current.type = 'number';
@@ -146,7 +160,7 @@ function showMeterRows() {
   });
   AdminUI.empty(
     meterBody,
-    8,
+    7,
     'No customers awaiting a bill for this cycle match your search. Generated bills are in Generated Bills.',
   );
 }
@@ -180,6 +194,7 @@ billingForm.addEventListener('submit', async (event) => {
   const cycle = activePeriod.active;
   const due = billingForm.elements.due.value;
   const generatedOn = WaterStore.today();
+  updateGenerationDate();
   billingForm.elements.due.min = generatedOn;
   if (!Validation.date(due) || due < generatedOn)
     return AdminUI.message(

@@ -33,13 +33,16 @@ function showReport() {
     ];
     reportRows.push(values);
     const row = body.insertRow();
-    values.forEach((value, index) =>
-      AdminUI.cell(
-        row,
-        index === 4 || index === 5 ? WaterStore.money(Number(value)) : value,
-        reportHeadings[index],
-      ),
-    );
+    AdminUI.customer(row, customer);
+    values
+      .slice(2)
+      .forEach((value, index) =>
+        AdminUI.cell(
+          row,
+          index === 2 || index === 3 ? WaterStore.money(Number(value)) : value,
+          reportHeadings[index + 2],
+        ),
+      );
     if (!groups[customer.barangay])
       groups[customer.barangay] = { customers: new Set(), consumption: 0 };
     groups[customer.barangay].customers.add(customer.id);
@@ -62,7 +65,7 @@ function showReport() {
         ),
       );
     });
-  AdminUI.empty(body, 7, 'No bills match the selected filters.');
+  AdminUI.empty(body, 6, 'No bills match the selected filters.');
   AdminUI.empty(consumptionBody, 4, 'No consumption records match the selected filters.');
 }
 WaterStore.barangays.forEach((barangay) => reportBarangay.add(new Option(barangay, barangay)));

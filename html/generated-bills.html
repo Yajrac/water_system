@@ -15,6 +15,7 @@
     <script src="../js/shared/theme.js"></script>
     <link rel="stylesheet" href="../css/shared/shared.css" />
     <link rel="stylesheet" href="../css/shared/admin.css" />
+    <link rel="stylesheet" href="../css/billing/generated-bills.css" />
   </head>
   <body>
     <div class="sidebar-overlay" id="overlay"></div>
@@ -268,23 +269,16 @@
               </div>
               <p id="billDueSummary" role="status"></p>
               <div class="table-scroll">
-                <table class="mobile-summary-table mobile-summary-bills">
+                <table class="mobile-summary-table generated-bills-table">
                   <thead>
                     <tr>
-                      <th>Account</th>
                       <th>Customer</th>
-                      <th>Cycle</th>
-                      <th>Consumption</th>
-                      <th>Water charge</th>
-                      <th>Monthly charge</th>
-                      <th>Connection</th>
-                      <th>Late fee</th>
-                      <th>Other charge</th>
-                      <th>Total</th>
+                      <th>Billing month</th>
+                      <th>Bill total</th>
                       <th>Balance</th>
-                      <th>Generated on</th>
                       <th>Due date</th>
                       <th>Status</th>
+                      <th>View</th>
                     </tr>
                   </thead>
                   <tbody id="billRows"></tbody>

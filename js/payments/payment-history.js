@@ -36,20 +36,15 @@ function showPayments() {
       ? payment.allocations.map((item) => item.cycle).join(', ')
       : bill?.cycle;
     const row = body.insertRow();
+    AdminUI.cell(row, payment.receipt, 'Receipt');
+    AdminUI.customer(row, customer);
     [
-      payment.receipt,
-      customer?.account || '—',
-      customer?.name || 'Unknown customer',
-      cycle || '—',
+      cycle || 'Not recorded',
       WaterStore.money(payment.amount),
       payment.method,
       payment.date,
     ].forEach((value, index) =>
-      AdminUI.cell(
-        row,
-        value,
-        ['Receipt', 'Account', 'Customer', 'Cycle', 'Amount', 'Method', 'Date'][index],
-      ),
+      AdminUI.cell(row, value, ['Cycle', 'Amount', 'Method', 'Date'][index]),
     );
     const actions = AdminUI.cell(row, '', 'View report');
     AdminUI.button(actions, 'View receipt', () => showReceipt(payment));
@@ -62,7 +57,7 @@ function showPayments() {
   });
   AdminUI.empty(
     body,
-    8,
+    7,
     invalidDates
       ? 'Correct the date range to view payments.'
       : 'No payments match your search or filters.',

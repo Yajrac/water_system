@@ -186,7 +186,6 @@ function showCustomers() {
   );
   customers.forEach((customer) => {
     const row = body.insertRow();
-    AdminUI.cell(row, customer.account, 'Account').className = 'customer-account';
     const nameCell = AdminUI.cell(row, '', 'Customer');
     const identity = document.createElement('div');
     identity.className = 'customer-identity';
@@ -204,7 +203,7 @@ function showCustomers() {
     const name = document.createElement('strong');
     name.textContent = customer.name;
     const type = document.createElement('small');
-    type.textContent = customer.customerType || 'Service account';
+    type.textContent = customer.account;
     details.append(name, type);
     identity.append(avatar, details);
     nameCell.appendChild(identity);
@@ -237,7 +236,7 @@ function showCustomers() {
     history.textContent = 'View profile';
     actions.appendChild(history);
   });
-  AdminUI.empty(body, 7, 'No customers found. Add a customer or import a CSV file.');
+  AdminUI.empty(body, 6, 'No customers found. Add a customer or import a CSV file.');
   document.getElementById('customerCount').textContent =
     customers.length + ' of ' + customerRecords.customers.length + ' customers';
   const registered = customerRecords.customers.filter((customer) =>
@@ -445,7 +444,7 @@ if (savedCustomer) {
 
 async function loadSampleCustomerList() {
   const table = document.getElementById('customerRows');
-  const finish = customerRecords.customers.length ? null : Skeleton.start(table, 'table', 6, 7);
+  const finish = customerRecords.customers.length ? null : Skeleton.start(table, 'table', 6, 6);
   table.setAttribute('aria-busy', 'true');
   try {
     const records = await fetchSampleCustomers();

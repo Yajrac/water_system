@@ -49,6 +49,16 @@ function updatePaymentLinks(customerId) {
 }
 updatePaymentLinks(new URLSearchParams(location.search).get('customer'));
 const AdminUI = {
+  customer(row, customer) {
+    const cell = this.cell(row, '', 'Customer');
+    cell.className = 'table-customer';
+    const name = document.createElement('strong');
+    name.textContent = customer?.name || 'Unknown customer';
+    const account = document.createElement('small');
+    account.textContent = customer?.account || 'Not recorded';
+    cell.append(name, account);
+    return cell;
+  },
   cell(row, value, label) {
     const cell = document.createElement('td');
     cell.textContent = value;

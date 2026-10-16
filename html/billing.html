@@ -226,19 +226,6 @@
           <section class="panel monthly-billing-panel">
             <div class="panel-header monthly-billing-header">
               <h2>Monthly Billing</h2>
-              <details class="period-menu">
-                <summary>
-                  Manage period
-                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 10 5 5 5-5" /></svg>
-                </summary>
-                <div class="period-menu-panel">
-                  <button type="button" class="btn" id="nextBillingMonth">Move to next month</button
-                  ><button type="button" class="btn" id="reopenBillingMonth">
-                    Reopen previous cycle
-                  </button>
-                  <p id="periodAvailability"></p>
-                </div>
-              </details>
             </div>
             <div class="admin-body">
               <p id="activeCycleStatus" role="status"></p>
@@ -254,7 +241,12 @@
                       aria-label="Customers billed this month"
                     ></progress>
                   </div>
-                  <label>Due date<input name="due" type="date" required /></label>
+                  <div class="billing-dates">
+                    <div class="generation-date-display">
+                      <span>Generation date</span><strong id="generationDateLabel"></strong>
+                    </div>
+                    <label>Payment due date<input name="due" type="date" required /></label>
+                  </div>
                 </div>
                 <p>
                   Enter current meter readings for customers without a bill for the selected month.
@@ -288,7 +280,6 @@
                   <table>
                     <thead>
                       <tr>
-                        <th>Account</th>
                         <th>Customer</th>
                         <th>Previous reading</th>
                         <th>Current reading</th>

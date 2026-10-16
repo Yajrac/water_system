@@ -17,23 +17,18 @@ function showBalances() {
     )
       return;
     const row = body.insertRow();
+    AdminUI.customer(row, customer);
     [
-      customer.account,
-      customer.name,
       bill.cycle,
       WaterStore.money(bill.total),
       WaterStore.money(bill.total - balance),
       WaterStore.money(balance),
       WaterStore.status(bill, paymentRecords),
     ].forEach((value, index) =>
-      AdminUI.cell(
-        row,
-        value,
-        ['Account', 'Customer', 'Cycle', 'Bill total', 'Paid', 'Balance', 'Status'][index],
-      ),
+      AdminUI.cell(row, value, ['Cycle', 'Bill total', 'Paid', 'Balance', 'Status'][index]),
     );
   });
-  AdminUI.empty(body, 7, 'No bills match your search and filters.');
+  AdminUI.empty(body, 6, 'No bills match your search and filters.');
 }
 const requestedCustomer = new URLSearchParams(location.search).get('customer');
 const matchedCustomer = paymentRecords.customers.find(
