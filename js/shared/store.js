@@ -1,20 +1,44 @@
 // One local record shared by the admin pages. No server or login is connected yet.
 const WaterStore = {
   key: 'pio-duran-admin-v1',
-  barangays: ['Brgy 1', 'Brgy 2', 'Brgy 3', 'Brgy 4', 'Brgy 5', 'Caratagan', 'Banawan'],
+  get barangays() {
+    return this.barangayRegistry(this.load()).map((barangay) => barangay.name);
+  },
+  barangayRegistry(records) {
+    if (!Array.isArray(records.barangays)) {
+      records.barangays = [
+        ['Brgy 1', '0500513023'],
+        ['Brgy 2', '0500513024'],
+        ['Brgy 3', '0500513025'],
+        ['Brgy 4', '0500513026'],
+        ['Brgy 5', '0500513027'],
+        ['Caratagan', '0500513009'],
+        ['Banawan', '0500513005'],
+      ].map(([name, code]) => ({ name, code, municipality: 'Pio Duran', province: 'Albay' }));
+    }
+    records.barangays.forEach((entry) => {
+      entry.name = this.normalizeBarangay(entry.name);
+    });
+    return records.barangays;
+  },
   normalizeBarangay(value) {
-    const cleaned = value
-      .trim()
-      .toLowerCase()
-      .replace(/^barangay\s*/, 'brgy ')
-      .replace(/^brgy\.?\s*/, 'brgy ');
-    return this.barangays.find((barangay) => barangay.toLowerCase() === cleaned) || value.trim();
+    const raw = String(value || '').trim();
+    if (!raw) return '';
+    let name = raw.replace(/^(?:barangay|brgy\.?)\s+/i, '').trim();
+    const roman = { i: 1, ii: 2, iii: 3, iv: 4, v: 5 };
+    name = roman[name.toLowerCase()] || name;
+    name = String(name).replace(/\b[a-z]/g, (letter) => letter.toUpperCase());
+    return 'Barangay ' + name;
   },
   load() {
     const saved = localStorage.getItem(this.key);
     if (saved) {
       const records = JSON.parse(saved);
       records.rates = this.currentRates(records.rates);
+      if (Array.isArray(records.barangays)) this.barangayRegistry(records);
+      records.customers.forEach((customer) => {
+        customer.barangay = this.normalizeBarangay(customer.barangay);
+      });
       return records;
     }
     return {
@@ -40,6 +64,17 @@ const WaterStore = {
   },
   save(records) {
     localStorage.setItem(this.key, JSON.stringify(records));
+  },
+  flatBillingSetup(records, cycle, barangay) {
+    return records.billingSetups?.[cycle]?.[this.normalizeBarangay(barangay)] || null;
+  },
+  flatWaterCharge(consumption, rate) {
+    if (!Number.isFinite(consumption) || consumption < 0 || !Number.isFinite(rate) || rate <= 0)
+      throw new Error('Enter valid consumption and a positive rate per cubic meter.');
+    const total = Math.round(consumption * rate * 100) / 100;
+    if (!Number.isSafeInteger(Math.round(total * 100)))
+      throw new Error('The water charge is too large.');
+    return total;
   },
   billingPeriod(records) {
     if (!records.billingPeriod)
@@ -80,7 +115,7 @@ const WaterStore = {
     return ['Approved', 'Installed'].includes(customer.serviceStatus);
   },
   isActive(customer) {
-    return customer.active !== false;
+    return customer.active !== false && customer.connectionStatus !== 'Disconnected';
   },
   money(value) {
     return new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(value);
@@ -119,6 +154,7 @@ const WaterStore = {
           previous: bill.previous,
           current: bill.current,
           consumption: bill.consumption,
+          ratePerCubic: bill.ratePerCubic,
         });
         remaining -= applied;
       });

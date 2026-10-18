@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en" data-page="customers" class="theme-teal">
   <head>
+    <link rel="icon" type="image/jpeg" href="../assets/images/water_system_logo.jpg" />
     <script src="../js/auth/auth.js"></script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -16,6 +17,9 @@
     <link rel="stylesheet" href="../css/shared/shared.css" />
     <link rel="stylesheet" href="../css/shared/admin.css" />
     <link rel="stylesheet" href="../css/customers/customer-ui.css" />
+    <link rel="stylesheet" href="../css/shared/back-button.css" />
+    <link rel="stylesheet" href="../css/shared/modals.css" />
+    <link rel="stylesheet" href="../css/shared/responsive-cards.css" />
   </head>
   <body>
     <div class="sidebar-overlay" id="overlay"></div>
@@ -75,6 +79,20 @@
             </a>
           </li>
           <li>
+            <a href="barangays.html" class="sidebar-menu-item"
+              ><svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="m3 6 6-3 6 3 6-3v15l-6 3-6-3-6 3zM9 3v15M15 6v15" /></svg
+              ><span>Barangay Registry</span></a
+            >
+          </li>
+          <li>
             <a href="billing.html" class="sidebar-menu-item">
               <svg
                 viewBox="0 0 24 24"
@@ -122,6 +140,36 @@
               </svg>
               <span>Broadcast &amp; Notifications</span>
             </a>
+          </li>
+          <li>
+            <a href="disconnected.html" class="sidebar-menu-item"
+              ><svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M8 3v5M16 3v5M5 8h14v3a7 7 0 0 1-7 7v3M3 3l18 18" /></svg
+              ><span>Disconnected Accounts</span></a
+            >
+          </li>
+          <li>
+            <a href="feedback.html" class="sidebar-menu-item"
+              ><svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path
+                  d="M21 11a8 8 0 0 1-8 8H6l-4 3V5a3 3 0 0 1 3-3h8a8 8 0 0 1 8 9zM7 8h8M7 12h5"
+                /></svg
+              ><span>Customer Feedback</span></a
+            >
           </li>
           <li>
             <a href="reports.html" class="sidebar-menu-item">
@@ -205,28 +253,56 @@
               <h1 id="customerTitle">Add customer</h1>
               <p>Water service connection application</p>
             </div>
-            <a class="btn" href="customers.html">Back to customers</a>
+            <a
+              class="btn back-icon-button"
+              href="customers.html"
+              aria-label="Back to customers"
+              data-tooltip="Back"
+              ><svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                aria-hidden="true"
+              >
+                <path d="m12 5-7 7 7 7M5 12h14" /></svg
+            ></a>
           </header>
           <p id="pageMessage" role="status" tabindex="-1"></p>
           <section class="panel customer-page-form">
             <div class="admin-body">
               <form id="customerForm">
+                <div class="customer-step-header">
+                  <ol
+                    class="customer-step-track"
+                    id="customerStepTrack"
+                    aria-label="Application steps"
+                  ></ol>
+                  <strong id="customerStepTitle"></strong>
+                </div>
                 <p class="form-help">
                   Record the applicant and service-connection details from the PWSS paper forms.
-                  <strong class="required-fields-notice">Fields marked * are required.</strong>
+                  <strong class="required-fields-notice"
+                    >Fields marked <span class="required-marker">*</span> are required.</strong
+                  >
                 </p>
                 <fieldset class="customer-section">
-                  <legend>1. Applicant and address</legend>
+                  <legend>1. Applicant basic information</legend>
                   <div class="admin-form">
                     <label
-                      >Name of applicant *<input
-                        name="name"
-                        type="text"
-                        required
-                        maxlength="120"
-                        autocomplete="name" /></label
+                      >Name of applicant <span class="required-marker">*</span
+                      ><input name="name" type="text" required maxlength="120" autocomplete="name"
+                    /></label>
+
+                    <label
+                      >Gender<select name="gender">
+                        <option value="">Select gender</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                      </select></label
                     ><label
-                      >Philippine mobile number *<span class="phone-input-group"
+                      >Philippine mobile number <span class="required-marker">*</span
+                      ><span class="phone-input-group"
                         ><span class="phone-country-code" aria-hidden="true">+63</span
                         ><input
                           name="contact"
@@ -243,7 +319,8 @@
                         included.</small
                       ></label
                     ><label
-                      >Purok *<select name="address" required>
+                      >Purok <span class="required-marker">*</span
+                      ><select name="address" required>
                         <option value="">Select purok</option>
                         <option value="Purok 1">Purok 1</option>
                         <option value="Purok 2">Purok 2</option>
@@ -260,20 +337,15 @@
                         maxlength="200"
                         autocomplete="street-address" /></label
                     ><label
-                      >Barangay *<select name="barangay" required>
-                        <option value="">Select an option</option>
-                        <option value="Brgy 1">Brgy 1</option>
-                        <option value="Brgy 2">Brgy 2</option>
-                        <option value="Brgy 3">Brgy 3</option>
-                        <option value="Brgy 4">Brgy 4</option>
-                        <option value="Brgy 5">Brgy 5</option>
-                        <option value="Caratagan">Caratagan</option>
-                        <option value="Banawan">Banawan</option>
+                      >Barangay <span class="required-marker">*</span
+                      ><select name="barangay" required>
+                        <option value="">Select barangay</option>
                       </select></label
                     ><label
                       >Municipality / province<input value="Pio Duran, Albay" readonly /></label
                     ><label
-                      >Customer type *<select name="customerType" required>
+                      >Customer type <span class="required-marker">*</span
+                      ><select name="customerType" required>
                         <option value="Residential">Residential</option>
                         <option value="Commercial">Commercial</option>
                       </select></label
@@ -284,35 +356,24 @@
                   <legend>2. Application and installation</legend>
                   <div class="admin-form">
                     <label
-                      >Installation reference<input
-                        name="installationReference"
-                        type="text"
-                        maxlength="120" /></label
-                    ><label
-                      >Cluster number<input
-                        name="clusterNumber"
-                        type="text"
-                        maxlength="120" /></label
-                    ><label>Date applied *<input name="dateApplied" type="date" required /></label
+                      >Date applied <span class="required-marker">*</span
+                      ><input name="dateApplied" type="date" required /></label
                     ><label>Date approved<input name="dateApproved" type="date" /></label
                     ><label
-                      >Service status *<select name="serviceStatus" required>
+                      >Service status <span class="required-marker">*</span
+                      ><select name="serviceStatus" required>
                         <option value="Pending">Pending</option>
                         <option value="Approved" selected>Approved</option>
                         <option value="Installed">Installed</option>
                       </select></label
                     ><label
                       >Approved by<input name="approvedBy" type="text" maxlength="120" /></label
-                    ><label
-                      >Installed by / inspector-plumber<input
-                        name="installedBy"
-                        type="text"
-                        maxlength="120" /></label
                     ><label>Date installed<input name="dateInstalled" type="date" /></label
                     ><label
                       >Meter number<input name="meterNumber" type="text" maxlength="120" /></label
                     ><label
-                      >Initial / current meter reading (m³) *<input
+                      >Initial / current meter reading (m³) <span class="required-marker">*</span
+                      ><input
                         name="reading"
                         type="number"
                         required
@@ -327,11 +388,13 @@
                         maxlength="40"
                         placeholder="e.g. 1/2 inch" /></label
                     ><label class="wide"
-                      >Nature of work<textarea
-                        name="natureOfWork"
-                        rows="2"
-                        maxlength="500"
-                      ></textarea>
+                      >Nature of work<select name="natureOfWork">
+                        <option value="">Select nature of work (optional)</option>
+                        <option>New connection</option>
+                        <option>Reconnection</option>
+                        <option>Meter replacement</option>
+                        <option>Service repair</option>
+                      </select>
                     </label>
                   </div>
                 </fieldset>
@@ -399,7 +462,12 @@
                     ><label class="checkbox-field wide"
                       ><input type="checkbox" name="acknowledgementReceived" />Signed meter /
                       accessories acknowledgement received</label
-                    ><label>Contract signed date<input name="contractDate" type="date" /></label
+                    ><label
+                      >Contract signed date<input
+                        name="contractDate"
+                        type="text"
+                        readonly
+                        placeholder="Automatically recorded when contract is checked" /></label
                     ><label
                       >Acknowledgement date<input name="acknowledgementDate" type="date" /></label
                     ><label
@@ -436,6 +504,84 @@
                     </label>
                   </div>
                 </fieldset>
+                <fieldset class="customer-section">
+                  <legend>Customer app account</legend>
+                  <div class="admin-form">
+                    <label class="wide"
+                      >Submitter No. (Auto-generated)
+                      <output id="submitterNumber" class="customer-reference"></output>
+                    </label>
+                    <label
+                      >Username
+                      <input
+                        name="username"
+                        type="text"
+                        minlength="3"
+                        maxlength="40"
+                        pattern="[A-Za-z0-9._-]{3,40}"
+                        autocomplete="off"
+                        spellcheck="false"
+                      />
+                      <small>Suggested from the applicant name. You can change it.</small>
+                    </label>
+                    <div class="customer-password-field">
+                      <label for="customerPassword">Password preview</label>
+                      <div class="customer-password-control">
+                        <input
+                          id="customerPassword"
+                          type="password"
+                          autocomplete="new-password"
+                          minlength="8"
+                          maxlength="128"
+                          aria-describedby="customerPasswordHelp"
+                        />
+                        <button
+                          id="toggleCustomerPassword"
+                          type="button"
+                          aria-label="Show password"
+                          aria-pressed="false"
+                        >
+                          <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="1.8"
+                            aria-hidden="true"
+                          >
+                            <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z" />
+                            <circle cx="12" cy="12" r="3" />
+                            <path id="customerPasswordSlash" d="m3 3 18 18" hidden />
+                          </svg>
+                        </button>
+                      </div>
+                      <small id="customerPasswordHelp"
+                        >Customer app login is not connected. This password is preview only and will
+                        not be saved.</small
+                      >
+                    </div>
+                  </div>
+                </fieldset>
+                <div class="customer-step-navigation">
+                  <button
+                    type="button"
+                    class="btn btn-primary customer-step-back"
+                    id="previousCustomerStep"
+                  >
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      aria-hidden="true"
+                    >
+                      <path d="m12 5-7 7 7 7M5 12h14" /></svg
+                    >Back</button
+                  ><button type="button" class="btn btn-primary" id="nextCustomerStep">
+                    Next <span aria-hidden="true">&rarr;</span>
+                  </button>
+                </div>
                 <div class="customer-form-actions admin-actions">
                   <button class="btn btn-primary" type="submit" id="registerCustomer" disabled>
                     Register customer</button
@@ -456,5 +602,6 @@
     <script src="../js/customers/customer-validation.js"></script>
     <script src="../js/shared/confirmation.js"></script>
     <script src="../js/customers/customer-form.js"></script>
+    <script src="../js/customers/customer-steps.js"></script>
   </body>
 </html>

@@ -47,6 +47,7 @@ function renderDashboard() {
     top.append(heading, icon);
     const number = document.createElement('strong');
     number.textContent = value;
+  if (typeof value === 'string' && value.includes('\u20b1')) number.classList.add('money-value');
     const caption = document.createElement('p');
     caption.textContent = description;
     item.append(top, number, caption);

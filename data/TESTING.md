@@ -97,3 +97,19 @@ New bills use the supplied PWSS rate sheet and the customer type. Residential mi
 Examples: Residential 0 or 10 m? = PHP70; 15 m? = PHP110; 25 m? = PHP192.50; 50 m? = PHP420. Commercial 25 m? = PHP285 and 50 m? = PHP640. Consumption above 50 m? is blocked for both types pending confirmation. Fractional readings are charged progressively and rounded to centavos.
 
 Existing bills and JSON sample bills retain their original amounts, including any old provisional monthly fees. They are historical test fixtures, not examples of the new tariff. Connection and reconnection fees remain separately configured; the rate-sheet image does not confirm those fees. Changing tariffs never recalculates old bills or payments.
+
+## Barangay registry
+
+Open Barangay Registry from the sidebar. The original seven service areas remain the defaults. Add Barangay loads choices from `data/pio-duran-barangays.json`; municipality and province are fixed to Pio Duran, Albay. Registered areas are shared by customer registration, billing/report filters and notification targeting. Existing customer records prevent deletion or replacement of their barangay. Duplicate selections are rejected. Registry entries use the same browser storage as other project records.
+
+Directory source: [PSA PSGC - Pio Duran](https://psa.gov.ph/classification/psgc/barangays/0500513000), 33 barangays listed as of 31 July 2025, checked 18 October 2026. Official Barangay I-V map to the existing Brgy 1-5 labels for compatibility. The local directory works without a third-party API once the project is served locally.
+
+## Current billing mode: flat rate
+
+Billing Setup on Rates & Fees now saves a positive price per cubic meter and due date for a registered barangay in the current month. Continue requires confirmation, then opens Meter Entry for that barangay. New water charges use consumption multiplied by the saved price, rounded to centavos; there is no minimum water charge in flat mode. Examples: 25 m? at PHP8 = PHP200; 55 m? at PHP9 = PHP495; zero consumption = PHP0 water charge. Any manually selected connection, late or other charges are added separately. The setup is required for each barangay/month; historical progressive bills and sample fixtures are not recalculated. Each generated bill stores its rate snapshot. Generation date always uses today in Philippine time. This section supersedes the earlier progressive tariff instructions for new billing.
+
+## Disconnections and feedback
+
+Disconnected Accounts records an active registered customer, reason and current date after confirmation. Disconnected accounts are excluded from new bills; existing bills and payment history remain available. Reconnect updates the service status and records the date without settling balances or charging a fee automatically. Administrative deactivation alone is not recorded as a physical disconnection.
+
+Customer Feedback is entered manually by the admin. Choose a saved customer and category, then save the concern after confirmation. View a record to update its status (New, In progress, Resolved) and notes. Search and status filters apply to both pages. Records use browser storage; no customer app submission or message delivery is connected.

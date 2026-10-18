@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en" data-page="service" class="theme-teal">
+  <head>
+    <link rel="icon" type="image/jpeg" href="../assets/images/water_system_logo.jpg" />
+    <script src="../js/auth/auth.js"></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Disconnected Accounts - Pio Duran Water Supply</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Public+Sans:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <script src="../js/shared/theme.js"></script>
+    <link rel="stylesheet" href="../css/shared/shared.css" />
+    <link rel="stylesheet" href="../css/shared/admin.css" />
+    <link rel="stylesheet" href="../css/service/service.css" />
+    <link rel="stylesheet" href="../css/shared/back-button.css" />
+    <link rel="stylesheet" href="../css/shared/modals.css" />
+    <link rel="stylesheet" href="../css/shared/responsive-cards.css" />
+  </head>
+  <body>
+    <div class="sidebar-overlay" id="overlay"></div>
+
+    <div class="app-shell">
+      <!-- Sidebar -->
+      <aside class="sidebar" id="sidebar">
+        <div class="sidebar-brand">
+          <div class="brand-mark">
+            <img
+              src="../assets/images/water_system_logo.jpg"
+              alt="Pio Duran Water Supply System logo"
+              class="brand-logo"
+            />
+          </div>
+          <div class="brand-text">
+            <span class="brand-title">PIO DURAN WATER</span>
+            <span class="brand-sub">Supply System</span>
+          </div>
+        </div>
+
+        <ul class="sidebar-menu">
+          <li>
+            <a href="index.html" class="sidebar-menu-item">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <rect x="3" y="3" width="7" height="9" rx="1.5" />
+                <rect x="14" y="3" width="7" height="5" rx="1.5" />
+                <rect x="14" y="12" width="7" height="9" rx="1.5" />
+                <rect x="3" y="16" width="7" height="5" rx="1.5" />
+              </svg>
+              <span>Dashboard Overview</span>
+            </a>
+          </li>
+          <li>
+            <a href="customers.html" class="sidebar-menu-item">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                <circle cx="9" cy="7" r="4" />
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+              </svg>
+              <span>Customer Management</span>
+            </a>
+          </li>
+          <li>
+            <a href="barangays.html" class="sidebar-menu-item"
+              ><svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="m3 6 6-3 6 3 6-3v15l-6 3-6-3-6 3zM9 3v15M15 6v15" /></svg
+              ><span>Barangay Registry</span></a
+            >
+          </li>
+          <li>
+            <a href="billing.html" class="sidebar-menu-item">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                <path d="M14 2v6h6" />
+                <path d="M9 15h6M9 11h2" />
+              </svg>
+              <span>Billing &amp; Meter Reading</span>
+            </a>
+          </li>
+          <li>
+            <a href="payment-history.html" class="sidebar-menu-item">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <rect x="1" y="4" width="22" height="16" rx="2" />
+                <line x1="1" y1="10" x2="23" y2="10" />
+              </svg>
+              <span>Payment History</span>
+            </a>
+          </li>
+          <li>
+            <a href="broadcast.html" class="sidebar-menu-item">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+              </svg>
+              <span>Broadcast &amp; Notifications</span>
+            </a>
+          </li>
+          <li>
+            <a href="disconnected.html" class="sidebar-menu-item active" aria-current="page"
+              ><svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M8 3v5M16 3v5M5 8h14v3a7 7 0 0 1-7 7v3M3 3l18 18" /></svg
+              ><span>Disconnected Accounts</span></a
+            >
+          </li>
+          <li>
+            <a href="feedback.html" class="sidebar-menu-item"
+              ><svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path
+                  d="M21 11a8 8 0 0 1-8 8H6l-4 3V5a3 3 0 0 1 3-3h8a8 8 0 0 1 8 9zM7 8h8M7 12h5"
+                /></svg
+              ><span>Customer Feedback</span></a
+            >
+          </li>
+          <li>
+            <a href="reports.html" class="sidebar-menu-item">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <line x1="18" y1="20" x2="18" y2="10" />
+                <line x1="12" y1="20" x2="12" y2="4" />
+                <line x1="6" y1="20" x2="6" y2="14" />
+              </svg>
+              <span>Reports &amp; Analytics</span>
+            </a>
+          </li>
+          <li>
+            <a href="settings.html" class="sidebar-menu-item">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <circle cx="12" cy="12" r="3" />
+                <path
+                  d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"
+                />
+              </svg>
+              <span>Settings</span>
+            </a>
+          </li>
+        </ul>
+
+        <div class="sidebar-tools">
+          <button type="button" class="btn theme-toggle" id="themeToggle" aria-pressed="false">
+            Dark mode
+          </button>
+        </div>
+        <div class="sidebar-foot">Admin website &middot; Municipal Waterworks Office</div>
+      </aside>
+
+      <!-- Main -->
+      <div class="main-content-wrap style-1">
+        <!-- Mobile topbar -->
+        <div class="mobile-topbar">
+          <div class="style-2">
+            <div class="brand-mark">
+              <img
+                src="../assets/images/water_system_logo.jpg"
+                alt="Pio Duran Water Supply System logo"
+                class="brand-logo"
+              />
+            </div>
+            <div class="brand-text">
+              <span class="brand-title">PIO DURAN WATER</span>
+            </div>
+          </div>
+          <button class="menu-toggle" id="menuToggle" aria-label="Open menu" aria-expanded="false">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+            >
+              <line x1="3" y1="6" x2="21" y2="6" />
+              <line x1="3" y1="12" x2="21" y2="12" />
+              <line x1="3" y1="18" x2="21" y2="18" />
+            </svg>
+          </button>
+        </div>
+
+        <main class="main-content service-page">
+          <header class="page-header">
+            <div>
+              <h1>Disconnected Accounts</h1>
+              <p>Service disconnections and reconnection records</p>
+            </div>
+          </header>
+          <p id="pageMessage" role="status" tabindex="-1"></p>
+          <section class="panel">
+            <div class="panel-header"><h2>Service records</h2></div>
+            <div class="admin-body">
+              <div class="service-toolbar">
+                <label class="service-search"
+                  >Search customers<span class="payment-search-control"
+                    ><svg viewBox="0 0 24 24" aria-hidden="true">
+                      <circle cx="10.5" cy="10.5" r="6.5" />
+                      <path d="m16 16 5 5" /></svg
+                    ><input
+                      class="admin-filter"
+                      id="disconnectSearch"
+                      type="search"
+                      placeholder="Search customer or account"
+                      aria-label="Search customer or account" /></span></label
+                ><label
+                  >Status<select id="disconnectStatus" class="admin-filter">
+                    <option value="open">Inactive / disconnected</option>
+                    <option value="all">All records</option>
+                    <option value="reconnected">Active</option>
+                  </select></label
+                >
+              </div>
+              <div class="table-scroll">
+                <table class="service-table">
+                  <thead>
+                    <tr>
+                      <th>Customer</th>
+                      <th>Disconnected on</th>
+                      <th>Reason</th>
+                      <th>Outstanding balance</th>
+                      <th>Status</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="disconnectRows"></tbody>
+                </table>
+              </div>
+              <nav
+                id="disconnectPagination"
+                class="record-pagination"
+                aria-label="Disconnection pages"
+              ></nav>
+            </div>
+          </section>
+        </main>
+      </div>
+    </div>
+
+    <script src="../js/shared/store.js"></script>
+    <script src="../js/shared/validation.js"></script>
+    <script src="../js/shared/shared.js"></script>
+    <script src="../js/shared/confirmation.js"></script>
+    <script src="../js/shared/pagination.js"></script>
+    <script src="../js/shared/account-records.js"></script>
+    <script src="../js/customers/sample-customers.js"></script>
+    <script src="../js/shared/sample-service-records.js"></script>
+    <script src="../js/disconnected/disconnected.js"></script>
+  </body>
+</html>

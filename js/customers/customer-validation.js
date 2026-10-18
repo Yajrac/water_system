@@ -1,12 +1,11 @@
 // Explicit rules are checked again on save, independent of HTML input attributes.
 const CustomerValidation = {
+  workTypes: ['New connection', 'Reconnection', 'Meter replacement', 'Service repair'],
   textLimits: {
+    username: 40,
     name: 120,
     street: 200,
-    installationReference: 120,
-    clusterNumber: 120,
     approvedBy: 120,
-    installedBy: 120,
     meterNumber: 120,
     meterKind: 120,
     meterSize: 40,
@@ -37,6 +36,7 @@ const CustomerValidation = {
       'address',
       'barangay',
       'customerType',
+      'gender',
       'serviceStatus',
       'contact',
     ];
@@ -48,7 +48,10 @@ const CustomerValidation = {
     });
     return customer;
   },
-  error(customer, form) {
+  error(customer, form, existingNatureOfWork = '') {
+    if (!['', 'Male', 'Female'].includes(customer.gender)) return 'Select a valid gender option.';
+    if (customer.username && !/^[A-Za-z0-9._-]{3,40}$/.test(customer.username))
+      return 'Username must contain 3–40 letters, numbers, periods, underscores or hyphens.';
     if (
       !customer.name ||
       !customer.address ||
@@ -62,8 +65,14 @@ const CustomerValidation = {
     if (!/^9\d{9}$/.test(customer.contact))
       return 'Mobile number must contain exactly 10 digits starting with 9. The +63 prefix is already included.';
     if (!/^Purok [1-7]$/.test(customer.address)) return 'Select Purok 1 to Purok 7.';
+    if (
+      customer.natureOfWork &&
+      !this.workTypes.includes(customer.natureOfWork) &&
+      customer.natureOfWork !== existingNatureOfWork
+    )
+      return 'Select a valid nature of work from the dropdown.';
     if (!WaterStore.barangays.includes(customer.barangay))
-      return 'Choose one of the seven project barangays.';
+      return 'Choose a barangay from the registered service areas.';
     if (
       !['Residential', 'Commercial'].includes(customer.customerType) ||
       !['Pending', 'Approved', 'Installed'].includes(customer.serviceStatus)
@@ -80,7 +89,7 @@ const CustomerValidation = {
           ' characters; HTML tags and control characters are not accepted.'
         );
     }
-    for (const name of ['approvedBy', 'installedBy']) {
+    for (const name of ['approvedBy']) {
       if (customer[name] && !/^[\p{L}\p{M} .,'-]+$/u.test(customer[name]))
         return 'Approver and installer names must contain letters, spaces or name punctuation.';
     }

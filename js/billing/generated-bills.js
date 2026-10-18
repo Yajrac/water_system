@@ -35,6 +35,9 @@ function showGeneratedBills() {
     identity.append(name, account);
     [
       bill.cycle,
+      Number.isFinite(bill.previous) ? bill.previous + ' m\u00b3' : 'Not recorded',
+      Number.isFinite(bill.current) ? bill.current + ' m\u00b3' : 'Not recorded',
+      Number.isFinite(bill.consumption) ? bill.consumption + ' m\u00b3' : 'Not recorded',
       WaterStore.money(bill.total),
       WaterStore.money(WaterStore.balance(bill, billRecords)),
       bill.due,
@@ -43,7 +46,16 @@ function showGeneratedBills() {
       AdminUI.cell(
         row,
         value,
-        ['Billing month', 'Bill total', 'Balance', 'Due date', 'Status'][index],
+        [
+          'Billing month',
+          'Previous reading',
+          'Current reading',
+          'Consumption',
+          'Bill total',
+          'Balance',
+          'Due date',
+          'Status',
+        ][index],
       ),
     );
     const actions = AdminUI.cell(row, '', 'View');
@@ -60,7 +72,7 @@ function showGeneratedBills() {
   });
   AdminUI.empty(
     body,
-    7,
+    10,
     due
       ? 'No outstanding bills are due on this date with the selected filters.'
       : 'No generated bills match these filters.',
@@ -110,6 +122,9 @@ function showBillDetails(bill) {
     ['Previous reading', volume(bill.previous)],
     ['Current reading', volume(bill.current)],
     ['Water consumed', volume(bill.consumption)],
+    ...(bill.billingMode === 'flat'
+      ? [['Rate per cubic meter', WaterStore.money(bill.ratePerCubic)]]
+      : []),
     ['Water charge', WaterStore.money(bill.water)],
     ['Monthly charge', WaterStore.money(bill.monthly || 0)],
     ['Connection / reconnection', WaterStore.money(bill.connection || 0)],

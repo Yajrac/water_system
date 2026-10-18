@@ -74,82 +74,16 @@ function showPayments() {
 
 function showReceipt(payment) {
   const customer = paymentRecords.customers.find((item) => item.id === payment.customerId);
-  const bill = paymentRecords.bills.find((item) => item.id === payment.billId);
-  if (payment.allocations) {
-    const details = document.getElementById('receiptDetails');
-    details.replaceChildren();
-    document.getElementById('receiptOffice').textContent = paymentRecords.office.name;
-    const currentBalance = paymentRecords.bills
-      .filter((item) => item.customerId === payment.customerId)
-      .reduce((sum, item) => sum + WaterStore.balance(item, paymentRecords), 0);
-    [
-      ['Receipt number', payment.receipt],
-      ['Customer', customer?.name || 'Unknown customer'],
-      ['Account', customer?.account || '—'],
-      ['Date paid', payment.date],
-      ['Payment method', payment.method],
-      [
-        'Payment covers',
-        payment.scope === 'account'
-          ? 'Outstanding account balance · oldest bills first'
-          : 'Selected billing month',
-      ],
-      ['Selected balance before payment', WaterStore.money(payment.balanceBefore)],
-      ['This payment', WaterStore.money(payment.amount)],
-      ['Selected balance after payment', WaterStore.money(payment.balanceAfter)],
-      ['Current account balance', WaterStore.money(currentBalance)],
-    ].forEach(([label, value]) => {
-      const term = document.createElement('dt');
-      term.textContent = label;
-      const description = document.createElement('dd');
-      description.textContent = value;
-      details.append(term, description);
-    });
-    appendReceiptAllocations(details, payment);
-    receiptDialog.showModal();
-    return;
-  }
-  if (!bill) return AdminUI.message('The bill for this receipt could not be found.');
-  // Older receipts have no balance snapshot. Reconstruct it in recording order.
-  const position = paymentRecords.payments.indexOf(payment);
-  const paidThroughReceipt = paymentRecords.payments
-    .slice(0, position + 1)
-    .reduce((sum, item) => sum + WaterStore.paymentForBill(item, bill.id), 0);
-  const after = Number.isFinite(payment.balanceAfter)
-    ? payment.balanceAfter
-    : Math.max(0, Math.round((bill.total - paidThroughReceipt) * 100) / 100);
-  const details = document.getElementById('receiptDetails');
-  details.replaceChildren();
-  document.getElementById('receiptOffice').textContent = paymentRecords.office.name;
-  const fields = [
-    ['Receipt number', payment.receipt],
-    ['Customer', customer?.name || 'Unknown customer'],
-    ['Account', customer?.account || '—'],
-    ['Barangay', customer?.barangay || '—'],
-    ['Billing month', bill.cycle],
-    ['Date paid', payment.date],
-    ['Payment method', payment.method],
-    ['Previous reading', Number.isFinite(bill.previous) ? bill.previous + ' m³' : 'Not recorded'],
-    ['Current reading', Number.isFinite(bill.current) ? bill.current + ' m³' : 'Not recorded'],
-    [
-      'Water consumed',
-      Number.isFinite(bill.consumption) ? bill.consumption + ' m³' : 'Not recorded',
-    ],
-    [
-      'Bill total',
-      WaterStore.money(Number.isFinite(payment.billTotal) ? payment.billTotal : bill.total),
-    ],
-    ['This payment', WaterStore.money(payment.amount)],
-    ['Balance after this receipt', WaterStore.money(after)],
-    ['Current remaining balance', WaterStore.money(WaterStore.balance(bill, paymentRecords))],
-  ];
-  fields.forEach(([label, value]) => {
-    const heading = document.createElement('dt');
-    heading.textContent = label;
-    const description = document.createElement('dd');
-    description.textContent = value;
-    details.append(heading, description);
-  });
+  const heading = receiptDialog.querySelector('.receipt-heading');
+  if (heading) heading.hidden = true;
+  const help = receiptDialog.querySelector('.form-help');
+  if (help) help.hidden = true;
+  renderReceiptPaper(
+    document.getElementById('receiptDetails'),
+    payment,
+    customer,
+    paymentRecords.office,
+  );
   receiptDialog.showModal();
 }
 function refreshPaymentFilters() {

@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html lang="en" data-page="payment-history" class="theme-teal">
   <head>
+    <link rel="icon" type="image/jpeg" href="../assets/images/water_system_logo.jpg" />
     <script src="../js/auth/auth.js"></script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <title>Record Payment — Pio Duran Water Supply</title>
+    <title>Payment — Pio Duran Water Supply</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -15,6 +16,11 @@
     <script src="../js/shared/theme.js"></script>
     <link rel="stylesheet" href="../css/shared/shared.css" />
     <link rel="stylesheet" href="../css/shared/admin.css" />
+    <link rel="stylesheet" href="../css/shared/back-button.css" />
+    <link rel="stylesheet" href="../css/shared/modals.css" />
+    <link rel="stylesheet" href="../css/shared/responsive-cards.css" />
+    <link rel="stylesheet" href="../css/payments/cashier.css" />
+    <link rel="stylesheet" href="../css/payments/receipt-paper.css" />
   </head>
   <body>
     <div class="sidebar-overlay" id="overlay"></div>
@@ -74,6 +80,20 @@
             </a>
           </li>
           <li>
+            <a href="barangays.html" class="sidebar-menu-item"
+              ><svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="m3 6 6-3 6 3 6-3v15l-6 3-6-3-6 3zM9 3v15M15 6v15" /></svg
+              ><span>Barangay Registry</span></a
+            >
+          </li>
+          <li>
             <a href="billing.html" class="sidebar-menu-item">
               <svg
                 viewBox="0 0 24 24"
@@ -121,6 +141,36 @@
               </svg>
               <span>Broadcast &amp; Notifications</span>
             </a>
+          </li>
+          <li>
+            <a href="disconnected.html" class="sidebar-menu-item"
+              ><svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M8 3v5M16 3v5M5 8h14v3a7 7 0 0 1-7 7v3M3 3l18 18" /></svg
+              ><span>Disconnected Accounts</span></a
+            >
+          </li>
+          <li>
+            <a href="feedback.html" class="sidebar-menu-item"
+              ><svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path
+                  d="M21 11a8 8 0 0 1-8 8H6l-4 3V5a3 3 0 0 1 3-3h8a8 8 0 0 1 8 9zM7 8h8M7 12h5"
+                /></svg
+              ><span>Customer Feedback</span></a
+            >
           </li>
           <li>
             <a href="reports.html" class="sidebar-menu-item">
@@ -201,7 +251,7 @@
         <main class="main-content payment-page">
           <header class="page-header">
             <div>
-              <h1>Record Payment</h1>
+              <h1>Payment</h1>
               <p>Customer payments and account balances</p>
             </div>
           </header>
@@ -209,7 +259,7 @@
             <a href="record-payment.html" aria-current="page"
               ><svg viewBox="0 0 24 24" aria-hidden="true">
                 <path d="M3 5h18v14H3z M3 9h18 M7 15h4" /></svg
-              ><span>Record Payment</span></a
+              ><span>Payment</span></a
             ><a href="payment-history.html"
               ><svg viewBox="0 0 24 24" aria-hidden="true">
                 <path d="M3 12a9 9 0 1 0 3-6 M3 3v5h5 M12 7v5l3 2" /></svg
@@ -221,66 +271,118 @@
             >
           </nav>
           <p id="pageMessage" role="status" tabindex="-1"></p>
-          <section class="panel">
-            <div class="panel-header"><h2>Record payment</h2></div>
+
+          <section class="panel" id="cashierRegistry">
+            <div class="panel-header">
+              <div>
+                <h2>Account ledger &amp; cashier</h2>
+                <p>Unpaid billing accounts</p>
+              </div>
+            </div>
             <div class="admin-body">
-              <section class="payment-customer-picker" aria-labelledby="findCustomerTitle">
-                <h3 id="findCustomerTitle">1. Find customer</h3>
-                <label class="payment-customer-search"
-                  >Search name or account<span class="payment-search-control"
-                    ><svg viewBox="0 0 24 24" aria-hidden="true">
-                      <circle cx="10.5" cy="10.5" r="6.5" />
-                      <path d="m16 16 5 5" /></svg
-                    ><input
-                      id="paymentCustomerSearch"
-                      class="admin-filter"
-                      type="search"
-                      placeholder="e.g. Ana Reyes or TEST-PWSS-00001"
-                      autocomplete="off"
-                      aria-describedby="customerSearchCount" /></span
-                ></label>
-                <ul
-                  id="paymentCustomerResults"
-                  class="customer-search-results"
-                  aria-label="Matching customers"
-                ></ul>
-                <p id="customerSearchCount" class="form-help" role="status"></p>
-                <div id="selectedPaymentCustomer" class="payment-customer-card" hidden>
-                  <div><span>Customer</span><strong id="selectedCustomerName"></strong></div>
-                  <div><span>Account</span><strong id="selectedCustomerAccount"></strong></div>
-                  <div><span>Barangay</span><strong id="selectedCustomerBarangay"></strong></div>
-                  <div>
-                    <span>Total unpaid balance</span><strong id="selectedCustomerBalance"></strong>
+              <div class="inline-record-toolbar">
+                <label
+                  >Search consumer<input
+                    id="cashierSearch"
+                    type="search"
+                    class="admin-filter"
+                    placeholder="Name, account or submitter number" /></label
+                ><label
+                  >Barangay<select id="cashierBarangay" class="admin-filter">
+                    <option value="">All barangays</option>
+                  </select></label
+                >
+              </div>
+              <div class="table-scroll">
+                <table class="cashier-table">
+                  <thead>
+                    <tr>
+                      <th>Submitter / account no.</th>
+                      <th>Full name</th>
+                      <th>Barangay</th>
+                      <th>Billing month</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody id="cashierRows"></tbody>
+                </table>
+              </div>
+              <nav
+                id="cashierPagination"
+                class="record-pagination"
+                aria-label="Unpaid accounts pages"
+              ></nav>
+            </div>
+          </section>
+          <section class="panel cashier-settlement" id="cashierSettlement" hidden>
+            <div class="panel-header">
+              <div>
+                <h2>Payment settlement</h2>
+                <p>Review the bill and register the cash payment.</p>
+              </div>
+              <button
+                type="button"
+                class="btn back-icon-button"
+                id="backToCashier"
+                aria-label="Back to payments"
+                data-tooltip="Back"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  aria-hidden="true"
+                >
+                  <path d="m12 5-7 7 7 7M5 12h14" />
+                </svg>
+              </button>
+            </div>
+            <div class="admin-body">
+              <h3 class="cashier-section-title">Consumer details</h3>
+              <dl id="cashierContext" class="cashier-details"></dl>
+              <h3 class="cashier-section-title">Meter readings</h3>
+              <dl id="cashierReadings" class="cashier-details three"></dl>
+              <h3 class="cashier-section-title">Charges and fees</h3>
+              <dl id="cashierCharges" class="cashier-details three"></dl>
+              <form id="paymentForm" class="admin-form">
+                <div hidden><select name="billId" id="paymentBill" required></select></div>
+                <h3 class="cashier-section-title wide">Cash counter</h3>
+                <div class="cashier-cash wide">
+                  <div class="cashier-amount-due">
+                    <span>Remaining amount due</span><strong id="cashierAmountDue"></strong>
+                  </div>
+                  <label
+                    >Amount received *<input
+                      name="amount"
+                      type="text"
+                      inputmode="decimal"
+                      required
+                      placeholder="0.00"
+                  /></label>
+                  <div class="cashier-validation">
+                    <span>Payment validation</span
+                    ><strong id="cashierValidation" role="status"></strong>
                   </div>
                 </div>
-                <p id="customerBillHelp" class="form-help" role="status">
-                  Search for a customer to see their outstanding bills.
-                </p>
-              </section>
-              <h3 class="payment-step-title">2. Record payment</h3>
-              <form id="paymentForm" class="admin-form">
-                <label>Bill to pay<select name="billId" id="paymentBill" required></select></label
-                ><label
-                  >Amount paid (₱)<input
-                    name="amount"
-                    type="text"
-                    inputmode="decimal"
-                    required
-                    placeholder="0.00"
-                  /><small
-                    >Automatically filled with the total unpaid balance. Enter a smaller amount if
-                    paying partially; the oldest bills are paid first.</small
-                  ></label
-                ><label
+                <label
                   >Payment method<select name="method">
                     <option>Cash</option>
                     <option>Bank transfer</option>
                     <option>GCash</option>
                   </select></label
                 >
+                <label class="wide"
+                  >Transaction remarks / internal notes<textarea
+                    name="remarks"
+                    rows="3"
+                    maxlength="500"
+                    placeholder="Optional payment notes"
+                  ></textarea>
+                </label>
                 <div class="wide">
-                  <button class="btn btn-primary" id="recordPaymentButton" type="submit" disabled>
-                    Save payment
+                  <button class="btn btn-primary" id="recordPaymentButton" type="submit">
+                    Review payment &rarr;
                   </button>
                 </div>
               </form>
@@ -294,6 +396,8 @@
     <script src="../js/shared/validation.js"></script>
     <script src="../js/shared/shared.js"></script>
     <script src="../js/payments/payment-receipt.js"></script>
+    <script src="../js/shared/pagination.js"></script>
+    <script src="../js/shared/confirmation.js"></script>
     <script src="../js/payments/record-payment.js"></script>
   </body>
 </html>

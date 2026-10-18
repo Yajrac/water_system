@@ -4,6 +4,8 @@ A plain HTML, CSS, and JavaScript admin website for managing water supply custom
 
 ## Features
 
+- Barangay registry, disconnected-account tracking, and customer feedback management.
+
 - Customer registration, profiles, document checks, and account activation.
 - Monthly meter readings, bill generation, and configurable rates and fees.
 - Full or partial payments, payment history, and printable receipts.

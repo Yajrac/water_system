@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html lang="en" data-page="billing" class="theme-teal">
   <head>
+    <link rel="icon" type="image/jpeg" href="../assets/images/water_system_logo.jpg" />
     <script src="../js/auth/auth.js"></script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <title>Meter Entry — Pio Duran Water Supply</title>
+    <title>Monthly Billing — Pio Duran Water Supply</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -15,6 +16,10 @@
     <script src="../js/shared/theme.js"></script>
     <link rel="stylesheet" href="../css/shared/shared.css" />
     <link rel="stylesheet" href="../css/shared/admin.css" />
+    <link rel="stylesheet" href="../css/shared/back-button.css" />
+    <link rel="stylesheet" href="../css/billing/ledger.css" />
+    <link rel="stylesheet" href="../css/shared/modals.css" />
+    <link rel="stylesheet" href="../css/shared/responsive-cards.css" />
   </head>
   <body>
     <div class="sidebar-overlay" id="overlay"></div>
@@ -74,6 +79,20 @@
             </a>
           </li>
           <li>
+            <a href="barangays.html" class="sidebar-menu-item"
+              ><svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="m3 6 6-3 6 3 6-3v15l-6 3-6-3-6 3zM9 3v15M15 6v15" /></svg
+              ><span>Barangay Registry</span></a
+            >
+          </li>
+          <li>
             <a href="billing.html" class="sidebar-menu-item active" aria-current="page">
               <svg
                 viewBox="0 0 24 24"
@@ -121,6 +140,36 @@
               </svg>
               <span>Broadcast &amp; Notifications</span>
             </a>
+          </li>
+          <li>
+            <a href="disconnected.html" class="sidebar-menu-item"
+              ><svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M8 3v5M16 3v5M5 8h14v3a7 7 0 0 1-7 7v3M3 3l18 18" /></svg
+              ><span>Disconnected Accounts</span></a
+            >
+          </li>
+          <li>
+            <a href="feedback.html" class="sidebar-menu-item"
+              ><svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path
+                  d="M21 11a8 8 0 0 1-8 8H6l-4 3V5a3 3 0 0 1 3-3h8a8 8 0 0 1 8 9zM7 8h8M7 12h5"
+                /></svg
+              ><span>Customer Feedback</span></a
+            >
           </li>
           <li>
             <a href="reports.html" class="sidebar-menu-item">
@@ -216,94 +265,285 @@
                 <path d="M14 2H6a2 2 0 0 0-2 2v16h16V8z M14 2v6h6 M8 12h8 M8 16h5" /></svg
               ><span>Generated Bills</span></a
             >
-            <a href="rates-fees.html"
-              ><svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M4 7h16 M4 17h16 M8 4v6 M16 14v6" /></svg
-              ><span>Rates & Fees</span></a
-            >
           </nav>
           <p id="pageMessage" role="status" tabindex="-1"></p>
-          <section class="panel monthly-billing-panel">
-            <div class="panel-header monthly-billing-header">
-              <h2>Monthly Billing</h2>
+
+          <div class="ledger-summary-heading">
+            <h2>Billing overview</h2>
+          </div>
+          <section class="billing-setup-summary" aria-label="Selected billing setup">
+            <div class="ledger-summary-card summary-area">
+              <span class="ledger-card-icon" aria-hidden="true"
+                ><svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.7"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="m3 6 6-3 6 3 6-3v15l-6 3-6-3-6 3ZM9 3v15M15 6v15" /></svg
+              ></span>
+              <div class="ledger-card-details">
+                <span>Target barangay</span><strong id="ledgerBarangay">Select barangay</strong>
+              </div>
             </div>
-            <div class="admin-body">
-              <p id="activeCycleStatus" role="status"></p>
-              <form id="billingForm" novalidate>
-                <div class="admin-form">
-                  <div class="active-cycle-display">
-                    <span>Billing month</span><strong id="activeCycleLabel"></strong
-                    ><small id="billingProgress" role="status"></small
-                    ><progress
-                      id="billingProgressBar"
-                      value="0"
-                      max="1"
-                      aria-label="Customers billed this month"
-                    ></progress>
-                  </div>
-                  <div class="billing-dates">
-                    <div class="generation-date-display">
-                      <span>Generation date</span><strong id="generationDateLabel"></strong>
-                    </div>
-                    <label>Payment due date<input name="due" type="date" required /></label>
-                  </div>
-                </div>
-                <p>
-                  Enter current meter readings for customers without a bill for the selected month.
-                </p>
-                <div class="payment-history-toolbar common-filter-toolbar">
-                  <label class="payment-history-search"
-                    >Search customers<input
-                      id="meterSearch"
-                      class="admin-filter"
+            <div class="ledger-summary-card summary-month">
+              <span class="ledger-card-icon" aria-hidden="true"
+                ><svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.7"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <rect x="3" y="5" width="18" height="16" rx="2" />
+                  <path d="M7 3v4M17 3v4M3 11h18M7 15h3" /></svg
+              ></span>
+              <div class="ledger-card-details">
+                <span>Billing month</span><strong id="ledgerMonth"></strong>
+              </div>
+            </div>
+            <div class="ledger-summary-card summary-due">
+              <span class="ledger-card-icon" aria-hidden="true"
+                ><svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.7"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <circle cx="12" cy="12" r="9" />
+                  <path d="M12 7v5l3 2" /></svg
+              ></span>
+              <div class="ledger-card-details">
+                <span>Due date</span><strong id="ledgerDue">Not configured</strong>
+              </div>
+            </div>
+            <div class="ledger-summary-card summary-rate">
+              <span class="ledger-card-icon" aria-hidden="true"
+                ><svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.7"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M6 3h12v18l-3-2-3 2-3-2-3 2ZM9 8h6M9 12h6M9 16h3" /></svg
+              ></span>
+              <div class="ledger-card-details">
+                <span>Rate / m&sup3;</span><strong id="ledgerRate">Not configured</strong>
+              </div>
+            </div>
+          </section>
+          <p id="generationDateLabel" class="form-help"></p>
+          <section class="panel ledger-panel">
+            <div class="panel-header">
+              <div>
+                <h2>Meter Entry</h2>
+                <p>Save each consumer entry before generating the barangay bills.</p>
+              </div>
+              <span id="draftCount" role="status"></span>
+            </div>
+            <div class="admin-body ledger-columns">
+              <div>
+                <div class="ledger-heading-tools">
+                  <label class="ledger-heading-search"
+                    ><span class="visually-hidden">Search consumer</span
+                    ><svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.8"
+                      aria-hidden="true"
+                    >
+                      <circle cx="10" cy="10" r="6" />
+                      <path d="m15 15 6 6" /></svg
+                    ><input
+                      id="ledgerSearch"
                       type="search"
-                      placeholder="Name or account number"
+                      placeholder="Search consumer or account"
+                      aria-label="Search consumer or account"
                   /></label>
-                  <details class="payment-filter-dropdown">
-                    <summary>
-                      <svg viewBox="0 0 24 24" aria-hidden="true">
-                        <path d="M4 7h16M7 12h10M10 17h4" /></svg
-                      >Filter<svg class="filter-chevron" viewBox="0 0 24 24" aria-hidden="true">
-                        <path d="m7 10 5 5 5-5" />
-                      </svg>
-                    </summary>
-                    <div class="payment-history-filters">
-                      <label
-                        >Barangay<select id="meterBarangay" class="admin-filter">
-                          <option value="">All barangays</option>
-                        </select></label
+                  <button type="button" class="btn" id="changeLedgerSetup">
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.8"
+                      aria-hidden="true"
+                    >
+                      <path d="m16 3 5 5-12 12H4v-5ZM14 5l5 5" /></svg
+                    >Change setup
+                  </button>
+                </div>
+                <div
+                  id="ledgerConsumers"
+                  class="ledger-consumers"
+                  aria-label="Consumer accounts"
+                ></div>
+              </div>
+              <form id="ledgerEntryForm" class="admin-form" novalidate>
+                <h3 id="ledgerSelected" class="wide">Select a consumer</h3>
+                <span id="ledgerEntryStatus" class="wide" role="status"></span>
+                <label>Previous reading (m&sup3;)<input id="ledgerPrevious" readonly /></label
+                ><label
+                  >Current reading (m&sup3;) *<input
+                    name="current"
+                    type="number"
+                    min="0"
+                    step="0.001"
+                    required
+                    disabled
+                /></label>
+                <label
+                  >Connection charge<select name="connection" disabled>
+                    <option>None</option>
+                    <option>New connection</option>
+                    <option>Reconnection</option>
+                  </select></label
+                ><label
+                  >Late fee<input
+                    name="late"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value="0"
+                    disabled /></label
+                ><label
+                  >Other charge<input
+                    name="other"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value="0"
+                    disabled
+                /></label>
+                <div class="ledger-totals wide">
+                  <div>
+                    <span class="ledger-total-label"
+                      ><svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.7"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        aria-hidden="true"
                       >
-                    </div>
-                  </details>
+                        <path d="M12 3s-7 8-7 12a7 7 0 0 0 14 0c0-4-7-12-7-12Z" />
+                        <path d="M8 15a4 4 0 0 0 4 4" /></svg
+                      >Consumption</span
+                    ><strong id="ledgerUsage">0 m&sup3;</strong>
+                  </div>
+                  <div>
+                    <span class="ledger-total-label"
+                      ><svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.7"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        aria-hidden="true"
+                      >
+                        <path
+                          d="M4 9h16M7 9V6h10v3M12 6V3M8 3h8M5 9v6h5v-3h10V9M7 18s-2 2-2 3a2 2 0 0 0 4 0c0-1-2-3-2-3Z"
+                        /></svg
+                      >Water charge</span
+                    ><strong id="ledgerWater"></strong>
+                  </div>
+                  <div>
+                    <span class="ledger-total-label"
+                      ><svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.7"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        aria-hidden="true"
+                      >
+                        <path d="M6 3h12v18l-3-2-3 2-3-2-3 2ZM9 8h6M9 12h6M9 16h3" /></svg
+                      >Total amount</span
+                    ><strong id="ledgerTotal"></strong>
+                  </div>
                 </div>
-                <div class="table-scroll">
-                  <table>
-                    <thead>
-                      <tr>
-                        <th>Customer</th>
-                        <th>Previous reading</th>
-                        <th>Current reading</th>
-                        <th>Consumption</th>
-                        <th>Connection charge</th>
-                        <th>Late fee</th>
-                        <th>Other charge</th>
-                      </tr>
-                    </thead>
-                    <tbody id="meterRows"></tbody>
-                  </table>
-                </div>
-                <nav
-                  class="record-pagination"
-                  id="meterPagination"
-                  aria-label="Meter entry pages"
-                ></nav>
-                <div class="billing-submit">
-                  <p id="draftCount" role="status"></p>
-                  <button class="btn btn-primary">Generate bills</button>
+                <div class="wide">
+                  <button class="btn btn-primary" id="saveLedgerEntry">Save consumer entry</button>
                 </div>
               </form>
             </div>
+            <div class="billing-submit">
+              <p id="ledgerProgress" role="status"></p>
+              <button type="button" class="btn btn-primary" id="generateLedgerBills">
+                Generate barangay bills
+              </button>
+            </div>
           </section>
+          <dialog
+            id="ledgerSetupDialog"
+            class="ledger-setup-dialog"
+            aria-labelledby="ledgerSetupTitle"
+          >
+            <form id="ledgerSetupForm" class="admin-form">
+              <header class="setup-modal-heading wide">
+                <span class="setup-modal-icon"
+                  ><svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    aria-hidden="true"
+                  >
+                    <path d="M4 7h16M4 17h16M8 4v6M16 14v6" /></svg
+                ></span>
+                <div>
+                  <span class="setup-eyebrow">MONTHLY BILLING</span>
+                  <h2 id="ledgerSetupTitle">Billing setup</h2>
+                  <p>Set your service area, due date and water rate.</p>
+                </div>
+                <button
+                  type="button"
+                  class="setup-modal-close"
+                  id="closeLedgerSetup"
+                  aria-label="Close billing setup"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    aria-hidden="true"
+                  >
+                    <path d="m6 6 12 12M18 6 6 18" />
+                  </svg>
+                </button>
+              </header>
+              <label class="wide"
+                >Target barangay <span class="setup-required">*</span
+                ><select id="ledgerSetupBarangay" required>
+                  <option value="">Select barangay</option>
+                </select></label
+              ><label>Coverage month<input id="ledgerSetupMonth" readonly /></label
+              ><label
+                >Due date <span class="setup-required">*</span
+                ><input id="ledgerSetupDue" type="date" required /></label
+              ><label class="wide"
+                >Rate per cubic meter <span class="setup-required">*</span
+                ><input id="ledgerSetupRate" type="number" min="0.01" step="0.01" required
+              /></label>
+              <div class="admin-actions wide setup-modal-footer">
+                <button type="button" class="btn" id="cancelLedgerSetup">Cancel</button
+                ><button class="btn btn-primary setup-continue">
+                  Continue <span aria-hidden="true">&rarr;</span>
+                </button>
+              </div>
+            </form>
+          </dialog>
         </main>
       </div>
     </div>
@@ -315,7 +555,6 @@
     <script src="../js/shared/pagination.js"></script>
     <script src="../js/shared/confirmation.js"></script>
     <script src="../js/billing/billing-confirmation.js"></script>
-    <script src="../js/billing/billing.js"></script>
-    <script src="../js/billing/billing-cycle.js"></script>
+    <script src="../js/billing/billing-ledger.js"></script>
   </body>
 </html>

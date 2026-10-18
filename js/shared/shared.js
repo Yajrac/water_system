@@ -62,6 +62,7 @@ const AdminUI = {
   cell(row, value, label) {
     const cell = document.createElement('td');
     cell.textContent = value;
+    if (typeof value === 'string' && value.includes('\u20b1')) cell.classList.add('money-value');
     if (label === 'Status' && ['Paid', 'Unpaid', 'Overdue'].includes(value)) {
       const badge = document.createElement('span');
       badge.className = 'payment-status status-' + value.toLowerCase();

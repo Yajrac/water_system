@@ -1,0 +1,167 @@
+.barangay-icon,
+.barangay-action svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.barangay-page .page-header > .btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.barangay-count {
+  color: var(--color-ink-muted);
+  font-size: 0.8rem;
+}
+.barangay-table-wrap {
+  margin-top: 22px;
+}
+.barangay-table td:first-child {
+  font-weight: 700;
+}
+.barangay-actions {
+  display: flex;
+  gap: 8px;
+}
+.btn.barangay-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 8px;
+}
+.barangay-form-panel {
+  max-width: 850px;
+}
+.barangay-location {
+  display: grid;
+  gap: 10px;
+  padding: 16px;
+  background: var(--table-heading);
+  border: 1px solid var(--color-border);
+  border-radius: 7px;
+}
+.barangay-location span {
+  color: var(--color-ink-muted);
+  font-size: 0.8rem;
+}
+.barangay-location strong {
+  font-size: 1rem;
+}
+@media (max-width: 600px) {
+  .barangay-table tr > :nth-child(2),
+  .barangay-table tr > :nth-child(3) {
+    display: none;
+  }
+  .barangay-table {
+    table-layout: fixed;
+  }
+  .barangay-table th:last-child {
+    width: 100px;
+  }
+  .barangay-count {
+    font-size: 0.7rem;
+  }
+  .barangay-form-panel select {
+    font-size: 16px;
+    min-height: 46px;
+  }
+  .btn.barangay-action {
+    width: 44px;
+    height: 44px;
+  }
+}
+.registry-status {
+  display: flex;
+  width: fit-content;
+  margin-top: 7px;
+}
+.barangay-form-panel {
+  overflow: visible;
+}
+.barangay-combobox {
+  position: relative;
+  min-width: 0;
+}
+.barangay-combobox > label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+.barangay-search-field {
+  position: relative;
+}
+.barangay-search-field > svg {
+  position: absolute;
+  top: 50%;
+  left: 13px;
+  transform: translateY(-50%);
+  width: 19px;
+  height: 19px;
+  fill: none;
+  stroke: var(--color-ink-muted);
+  stroke-width: 1.8;
+  pointer-events: none;
+}
+.admin-form .barangay-search-field > input[type='text'] {
+  width: 100%;
+  padding-left: 42px;
+  min-height: 46px;
+  box-sizing: border-box;
+}
+#barangayOptions {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  z-index: 15;
+  max-height: 290px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  list-style: none;
+  margin: 0;
+  padding: 6px;
+  border: 1px solid var(--color-border-strong);
+  border-radius: 8px;
+  background: var(--color-surface);
+  box-shadow: var(--shadow-md);
+}
+#barangayOptions > li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 11px 12px;
+  border-radius: 5px;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+#barangayOptions > li:hover,
+#barangayOptions > .is-highlighted {
+  background: var(--card-tint);
+}
+#barangayOptions > [aria-disabled='true'] {
+  cursor: not-allowed;
+  color: var(--color-ink-muted);
+}
+#barangayOptions .payment-status {
+  font-size: 0.65rem;
+}
+#barangayOptions .barangay-no-results {
+  color: var(--color-ink-muted);
+  cursor: default;
+}
+@media (max-width: 600px) {
+  .admin-form .barangay-search-field > input[type='text'] {
+    font-size: 16px;
+  }
+  #barangayOptions {
+    max-height: 240px;
+  }
+}

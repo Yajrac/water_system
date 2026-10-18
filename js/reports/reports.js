@@ -3,6 +3,7 @@ const reportBarangay = document.getElementById('reportBarangay');
 const reportCycle = document.getElementById('reportCycle');
 const reportStatus = document.getElementById('reportStatus');
 let reportRows = [];
+let reportMatchedBills = [];
 const reportHeadings = ['Account', 'Customer', 'Barangay', 'Cycle', 'Total', 'Balance', 'Status'];
 
 function showReport() {
@@ -12,6 +13,7 @@ function showReport() {
   body.replaceChildren();
   consumptionBody.replaceChildren();
   reportRows = [];
+  reportMatchedBills = [];
   // A barangay name is a record key, including names such as "constructor".
   const groups = Object.create(null);
   reportRecords.bills.forEach((bill) => {
@@ -32,6 +34,7 @@ function showReport() {
       status,
     ];
     reportRows.push(values);
+    reportMatchedBills.push({ bill, customer, status });
     const row = body.insertRow();
     AdminUI.customer(row, customer);
     values
@@ -73,12 +76,4 @@ WaterStore.barangays.forEach((barangay) => reportBarangay.add(new Option(baranga
   filter.addEventListener('change', showReport),
 );
 document.getElementById('reportSearch').addEventListener('input', showReport);
-document.getElementById('exportReport').addEventListener('click', () => {
-  // Short hugot excerpt: https://pinoycollection.com/hugot-lines/
-  showNotice(
-    'Napindot, pero hindi na-download.',
-    '?Pinagtagpo kayo ng tadhana pero di kayo ang itinakda.?',
-  );
-});
-document.getElementById('printReport').addEventListener('click', () => window.print());
 showReport();

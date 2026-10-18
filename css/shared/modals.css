@@ -1,0 +1,134 @@
+/* Shared dialog presentation. Receipt and calendar layouts retain their purpose. */
+dialog {
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  background: var(--color-surface);
+  color: var(--color-ink);
+  box-shadow: 0 28px 90px #001b3850;
+  max-height: calc(100dvh - 36px);
+}
+dialog::backdrop {
+  background: #071d356e;
+  backdrop-filter: blur(5px);
+}
+dialog[open] {
+  animation: shared-modal-enter 180ms ease-out;
+}
+dialog.confirmation-dialog {
+  padding: 28px;
+  width: min(500px, calc(100% - 28px));
+  overflow: auto;
+}
+dialog.confirmation-dialog.has-preview {
+  width: min(850px, calc(100% - 28px));
+}
+dialog.confirmation-dialog > h2,
+.customer-import-heading h2 {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 1.2rem;
+  line-height: 1.4;
+  color: var(--color-ink);
+  padding-bottom: 18px;
+  margin-bottom: 18px;
+  border-bottom: 1px solid var(--color-border);
+}
+dialog.confirmation-dialog > h2::before,
+.customer-import-heading h2::before {
+  content: '';
+  display: block;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: 10px;
+  background-color: #1198b81a;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23087fa3' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='4' y='3' width='16' height='18' rx='3'/%3E%3Cpath d='m8 12 3 3 5-6'/%3E%3C/svg%3E");
+  background-size: 24px;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+dialog.confirmation-dialog > p {
+  font-size: 0.85rem;
+  line-height: 1.7;
+  color: var(--color-ink-muted);
+}
+dialog .confirmation-actions {
+  gap: 10px;
+  padding-top: 20px;
+  margin-top: 22px;
+  border-top: 1px solid var(--color-border);
+  flex-wrap: wrap;
+}
+dialog .btn {
+  min-height: 42px;
+  border-radius: 7px;
+}
+dialog .btn-primary {
+  background: #087fa3;
+  border-color: #087fa3;
+  color: white;
+}
+dialog .btn-primary:hover {
+  background: #066781;
+  border-color: #066781;
+}
+dialog button:focus-visible,
+dialog input:focus-visible,
+dialog select:focus-visible,
+dialog textarea:focus-visible {
+  outline: 2px solid #1ca0bc;
+  outline-offset: 3px;
+}
+dialog.customer-import-dialog {
+  width: min(600px, calc(100% - 28px));
+}
+.customer-import-heading {
+  padding: 22px 24px;
+  gap: 16px;
+}
+.customer-import-heading h2 {
+  padding: 0;
+  margin: 0;
+  border: 0;
+  font-size: 1.05rem;
+}
+dialog.customer-import-dialog .admin-body {
+  padding: 24px;
+}
+@keyframes shared-modal-enter {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.99);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+@media (max-width: 480px) {
+  dialog.confirmation-dialog {
+    padding: 20px;
+  }
+  dialog.confirmation-dialog > h2 {
+    font-size: 1.05rem;
+  }
+  dialog .confirmation-actions .btn {
+    flex: 1;
+    justify-content: center;
+  }
+  .customer-import-heading,
+  dialog.customer-import-dialog .admin-body {
+    padding: 18px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  dialog[open] {
+    animation: none;
+  }
+}
+@media print {
+  dialog {
+    box-shadow: none;
+  }
+}

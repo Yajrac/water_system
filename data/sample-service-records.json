@@ -1,0 +1,103 @@
+{
+  "isTestData": true,
+  "disconnections": [
+    {
+      "id": "sample-disconnection-001",
+      "customerId": "test-customer-00003",
+      "reason": "Unpaid balances from previous billing months.",
+      "disconnectedOn": "2026-10-10",
+      "reconnectedOn": null,
+      "isTestData": true
+    },
+    {
+      "id": "sample-disconnection-002",
+      "customerId": "test-customer-00006",
+      "reason": "Temporary service closure requested by the customer.",
+      "disconnectedOn": "2026-10-12",
+      "reconnectedOn": null,
+      "isTestData": true
+    },
+    {
+      "id": "sample-disconnection-003",
+      "customerId": "test-customer-00008",
+      "reason": "Service line inspection and repair.",
+      "disconnectedOn": "2026-10-05",
+      "reconnectedOn": "2026-10-08",
+      "isTestData": true
+    },
+    {
+      "id": "sample-disconnection-004",
+      "customerId": "test-customer-00010",
+      "reason": "Temporary closure while the property is unoccupied.",
+      "disconnectedOn": "2026-10-14",
+      "reconnectedOn": null,
+      "isTestData": true
+    }
+  ],
+  "feedback": [
+    {
+      "id": "sample-feedback-001",
+      "isTestData": true,
+      "customerId": "test-customer-00001",
+      "date": "2026-10-10",
+      "category": "Billing",
+      "message": "Please explain the outstanding balances on my account.",
+      "status": "New",
+      "notes": ""
+    },
+    {
+      "id": "sample-feedback-002",
+      "isTestData": true,
+      "customerId": "test-customer-00002",
+      "date": "2026-10-11",
+      "category": "Water supply",
+      "message": "Low water pressure in our purok during the morning.",
+      "status": "In progress",
+      "notes": "Inspection scheduled with the maintenance team.",
+      "updatedOn": "2026-10-16"
+    },
+    {
+      "id": "sample-feedback-003",
+      "isTestData": true,
+      "customerId": "test-customer-00003",
+      "date": "2026-10-12",
+      "category": "Meter",
+      "message": "Please check the meter reading on my latest bill.",
+      "status": "New",
+      "notes": ""
+    },
+    {
+      "id": "sample-feedback-004",
+      "isTestData": true,
+      "customerId": "test-customer-00004",
+      "date": "2026-10-13",
+      "category": "Water supply",
+      "message": "Water service was restored after the line repair.",
+      "status": "Resolved",
+      "notes": "Service restoration confirmed with the customer.",
+      "updatedOn": "2026-10-16"
+    },
+    {
+      "id": "sample-feedback-005",
+      "isTestData": true,
+      "customerId": "test-customer-00005",
+      "date": "2026-10-14",
+      "category": "Billing",
+      "message": "I would like to confirm my latest cash payment.",
+      "status": "Resolved",
+      "notes": "Payment receipt verified in the payment history.",
+      "updatedOn": "2026-10-16"
+    },
+    {
+      "id": "sample-feedback-006",
+      "isTestData": true,
+      "customerId": "test-customer-00006",
+      "date": "2026-10-15",
+      "category": "Other",
+      "message": "Requesting information about a new service connection.",
+      "status": "In progress",
+      "notes": "Application requirements explained to the customer.",
+      "updatedOn": "2026-10-16"
+    }
+  ]
+}

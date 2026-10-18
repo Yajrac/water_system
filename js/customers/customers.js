@@ -1,4 +1,11 @@
 const customerRecords = WaterStore.load();
+const customerImportDialog = document.getElementById('customerImportDialog');
+document
+  .getElementById('openCustomerImport')
+  .addEventListener('click', () => customerImportDialog.showModal());
+document
+  .getElementById('closeCustomerImport')
+  .addEventListener('click', () => customerImportDialog.close());
 const importFields = [
   {
     name: 'name',
@@ -174,17 +181,27 @@ const importFields = [
   },
 ];
 
+const customerPagination = createPagination('customerPagination', showCustomers);
 function showCustomers() {
   const body = document.getElementById('customerRows');
   const search = document.getElementById('customerSearch').value.trim().toLowerCase();
   const barangay = document.getElementById('barangayFilter').value;
+  const status = document.getElementById('customerStatusFilter').value;
+  const type = document.getElementById('customerTypeFilter').value;
   body.replaceChildren();
   const customers = customerRecords.customers.filter(
     (customer) =>
       (!barangay || customer.barangay === barangay) &&
+      (!type || customer.customerType === type) &&
+      (!status ||
+        (status === 'inactive'
+          ? !WaterStore.isActive(customer)
+          : WaterStore.isActive(customer) &&
+            WaterStore.isRegistered(customer) === (status === 'registered'))) &&
       (customer.name + ' ' + customer.account).toLowerCase().includes(search),
   );
-  customers.forEach((customer) => {
+  customerPagination.update(customers.length);
+  customerPagination.items(customers).forEach((customer) => {
     const row = body.insertRow();
     const nameCell = AdminUI.cell(row, '', 'Customer');
     const identity = document.createElement('div');
@@ -215,7 +232,9 @@ function showCustomers() {
     status.className =
       'customer-status ' + (WaterStore.isRegistered(customer) ? 'is-registered' : 'is-pending');
     status.textContent = !WaterStore.isActive(customer)
-      ? 'Inactive'
+      ? customer.connectionStatus === 'Disconnected'
+        ? 'Disconnected'
+        : 'Inactive'
       : WaterStore.isRegistered(customer)
         ? 'Registered'
         : 'Pending';
@@ -247,6 +266,10 @@ function showCustomers() {
   document.getElementById('pendingCustomers').textContent =
     customerRecords.customers.length - registered;
 }
+
+['customerStatusFilter', 'customerTypeFilter'].forEach((id) => {
+  document.getElementById(id).addEventListener('change', resetCustomerPage);
+});
 
 function updateBarangays() {
   const select = document.getElementById('barangayFilter');
@@ -407,6 +430,7 @@ document.getElementById('importForm').addEventListener('submit', async (event) =
     updateBarangays();
     showCustomers();
     event.target.reset();
+    customerImportDialog.close();
     AdminUI.message(imported.length + ' customers imported.');
   } catch (error) {
     AdminUI.message(error.message + ' No rows were imported.');
@@ -420,8 +444,12 @@ document.getElementById('downloadTemplate').addEventListener('click', () => {
   AdminUI.download('customers-template.csv', names.join(',') + '\r\n');
 });
 
-document.getElementById('customerSearch').addEventListener('input', showCustomers);
-document.getElementById('barangayFilter').addEventListener('change', showCustomers);
+function resetCustomerPage() {
+  customerPagination.page = 1;
+  showCustomers();
+}
+document.getElementById('customerSearch').addEventListener('input', resetCustomerPage);
+document.getElementById('barangayFilter').addEventListener('change', resetCustomerPage);
 customerRecords.customers.forEach((customer) => {
   customer.barangay = WaterStore.normalizeBarangay(customer.barangay);
 });

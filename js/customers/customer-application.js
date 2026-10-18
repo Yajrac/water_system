@@ -16,7 +16,7 @@ if (isPreview) {
   back.href = applicationCustomer?.id
     ? 'customer-form.html?id=' + encodeURIComponent(applicationCustomer.id)
     : 'customer-form.html';
-  back.textContent = 'Back to customer form';
+  back.setAttribute('aria-label', 'Back to customer form');
 }
 const printButton = document.getElementById('printForm');
 if (!applicationCustomer) {

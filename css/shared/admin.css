@@ -2090,3 +2090,157 @@ textarea:focus-visible,
   font-size: 0.7rem;
   color: var(--color-ink-muted);
 }
+
+/* Tabular, ledger-style digits for currency amounts. */
+:root {
+  --font-money: 'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
+}
+.money-value,
+.record-card strong.money-value,
+#selectedCustomerBalance,
+#profileBalance,
+#profilePaid,
+#collectedToday,
+#collectedTotal,
+#installationTotal,
+#paymentForm input[name='amount'],
+.rate-money-field input,
+.rate-money-field > span,
+#setupRate,
+.receipt-details dd {
+  font-family: var(--font-money);
+  font-variant-numeric: tabular-nums lining-nums;
+  letter-spacing: -0.025em;
+}
+
+/* Always-visible filters beside each table search. */
+.inline-record-toolbar {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
+  align-items: start;
+  gap: 14px;
+  padding: 16px 0;
+}
+.inline-record-filter-fields {
+  display: contents;
+}
+.inline-record-toolbar label {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-ink-muted);
+  align-content: start;
+  line-height: 1.5;
+}
+.inline-record-toolbar .admin-filter {
+  width: 100%;
+  max-width: none;
+  min-width: 0;
+  margin: 0;
+  min-height: 46px;
+  height: 46px;
+  border-radius: 7px;
+}
+.inline-record-toolbar .payment-history-search {
+  grid-column: auto;
+  width: auto;
+  max-width: none;
+}
+.inline-record-toolbar .btn {
+  min-height: 44px;
+}
+.inline-record-toolbar .date-control {
+  width: 100%;
+  min-width: 0;
+  height: 46px;
+  box-sizing: border-box;
+  border-radius: 7px;
+}
+.inline-record-toolbar .date-control input {
+  flex: 1 1 0;
+  width: 0;
+  min-width: 0;
+  height: 100%;
+  min-height: 0;
+  border: 0;
+  border-radius: 0;
+}
+.inline-record-toolbar label > small {
+  font-size: 0.72rem;
+  font-weight: 400;
+  line-height: 1.5;
+}
+@media (max-width: 1000px) {
+  .inline-record-toolbar {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 600px) {
+  .inline-record-toolbar {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .inline-record-toolbar .admin-filter {
+    font-size: 16px;
+  }
+}
+
+/* Colored summary icons with neutral card surfaces. */
+.record-card:nth-child(4n + 1) .record-card-top svg {
+  color: #1685ba;
+}
+.record-card:nth-child(4n + 2) .record-card-top svg {
+  color: #8b65cc;
+}
+.record-card:nth-child(4n + 3) .record-card-top svg {
+  color: #c18122;
+}
+.record-card:nth-child(4n) .record-card-top svg {
+  color: #238768;
+}
+.profile-summary > div:nth-child(1) .profile-icon {
+  color: #c18122;
+}
+.profile-summary > div:nth-child(2) .profile-icon {
+  color: #238768;
+}
+.profile-summary > div:nth-child(3) .profile-icon {
+  color: #1685ba;
+}
+.profile-summary > div:nth-child(4) .profile-icon {
+  color: #8b65cc;
+}
+.customer-metric:nth-child(1) .metric-symbol {
+  color: #1685ba;
+}
+.customer-metric:nth-child(2) .metric-symbol {
+  color: #238768;
+}
+.customer-metric:nth-child(3) .metric-symbol {
+  color: #c18122;
+}
+.payment-history-summary .summary-label-with-icon {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.summary-label-with-icon svg {
+  width: 21px;
+  height: 21px;
+  flex-shrink: 0;
+}
+.payment-history-summary > div:nth-child(1) svg {
+  color: #1685ba;
+}
+.payment-history-summary > div:nth-child(2) svg {
+  color: #238768;
+}
+.payment-history-summary > div:nth-child(3) svg {
+  color: #8b65cc;
+}
+[data-theme='dark'] .record-card-top svg,
+[data-theme='dark'] .summary-label-with-icon svg,
+[data-theme='dark'] .profile-summary .profile-icon {
+  filter: brightness(1.35);
+}

@@ -70,6 +70,20 @@ WaterStore.barangays.forEach((barangay) =>
   document.getElementById('meterBarangay').add(new Option(barangay, barangay)),
 );
 
+function showFlatBillingSetup() {
+  const barangay = document.getElementById('meterBarangay').value;
+  const setup = WaterStore.flatBillingSetup(WaterStore.load(), activePeriod.active, barangay);
+  document.getElementById('flatRateSummary').textContent = setup
+    ? barangay + ' · ' + WaterStore.money(setup.rate) + ' per cubic meter'
+    : 'Configure a billing setup for each barangay before generating bills.';
+  billingForm.elements.due.value = setup?.due || WaterStore.today();
+}
+const requestedBillingBarangay = new URLSearchParams(location.search).get('barangay');
+if (WaterStore.barangays.includes(requestedBillingBarangay))
+  document.getElementById('meterBarangay').value = requestedBillingBarangay;
+document.getElementById('meterBarangay').addEventListener('change', showFlatBillingSetup);
+showFlatBillingSetup();
+
 function saveMeterDraft() {
   sessionStorage.setItem(
     draftKey,
@@ -242,9 +256,20 @@ billingForm.addEventListener('submit', async (event) => {
         : draft.connection === 'Reconnection'
           ? latest.rates.reconnection
           : 0;
+    const setup = WaterStore.flatBillingSetup(latest, cycle, customer.barangay);
+    if (!setup || setup.mode !== 'flat')
+      return showNotice(
+        'Billing setup required',
+        'Configure the price per cubic meter for ' + customer.barangay + ' in Rates & Fees.',
+      );
+    if (!Validation.date(setup.due) || setup.due < generatedOn)
+      return showNotice(
+        'Check due date',
+        'Update the billing setup due date for ' + customer.barangay + ' before generating bills.',
+      );
     let water;
     try {
-      water = WaterStore.consumptionCharge(consumption, customer.customerType, latest.rates);
+      water = WaterStore.flatWaterCharge(consumption, setup.rate);
     } catch (error) {
       return showNotice('Check water rates', customer.account + ': ' + error.message);
     }
@@ -259,16 +284,15 @@ billingForm.addEventListener('submit', async (event) => {
       customerId,
       cycle,
       generatedOn,
-      due,
+      due: setup.due,
       previous: customer.reading,
       current,
       consumption,
       customerType: customer.customerType,
-      rateVersion: latest.rates.version,
-      rateSnapshot: {
-        ...latest.rates[customer.customerType.toLowerCase()],
-        tiers: [...latest.rates[customer.customerType.toLowerCase()].tiers],
-      },
+      rateVersion: 3,
+      billingMode: 'flat',
+      ratePerCubic: setup.rate,
+      rateSnapshot: { mode: 'flat', rate: setup.rate, barangay: customer.barangay },
       water,
       monthly,
       connection,
@@ -310,9 +334,10 @@ billingForm.addEventListener('submit', async (event) => {
     return AdminUI.message('Bills could not be saved. Your entries are kept; please try again.');
   }
   Object.assign(billingRecords, latest);
-  meterDrafts = {};
-  sessionStorage.removeItem(draftKey);
-  document.getElementById('draftCount').textContent = '0 readings entered across all pages';
+  pending.forEach((bill) => {
+    delete meterDrafts[bill.customerId];
+  });
+  saveMeterDraft();
   showMeterRows();
   AdminUI.message(pending.length + ' bills generated. Open Generated Bills to review them.');
   updateBillingProgress();

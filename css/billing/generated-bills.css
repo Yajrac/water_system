@@ -1,9 +1,9 @@
 .main-content table.generated-bills-table {
-  min-width: 680px;
+  min-width: 1020px;
   table-layout: fixed;
 }
 .generated-bills-table th:first-child {
-  width: 24%;
+  width: 20%;
 }
 .main-content .generated-bills-table th,
 .main-content .generated-bills-table td {
@@ -19,8 +19,8 @@
   font-size: 0.7rem;
   color: var(--color-ink-muted);
 }
-.generated-bills-table td:nth-child(3),
-.generated-bills-table td:nth-child(4) {
+.generated-bills-table td:nth-child(6),
+.generated-bills-table td:nth-child(7) {
   font-weight: 700;
   font-variant-numeric: tabular-nums;
 }
@@ -61,7 +61,10 @@
   }
   .generated-bills-table tr > :nth-child(2),
   .generated-bills-table tr > :nth-child(3),
-  .generated-bills-table tr > :nth-child(5) {
+  .generated-bills-table tr > :nth-child(4),
+  .generated-bills-table tr > :nth-child(5),
+  .generated-bills-table tr > :nth-child(6),
+  .generated-bills-table tr > :nth-child(8) {
     display: none;
   }
   .generated-bills-table th:first-child {

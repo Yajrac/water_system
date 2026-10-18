@@ -8,7 +8,12 @@ function confirmGeneratedBills(bills, records) {
   [
     ['Billing month', cycle],
     ['Generation date', bills[0].generatedOn],
-    ['Due date', bills[0].due],
+    [
+      'Due date',
+      new Set(bills.map((bill) => bill.due)).size === 1
+        ? bills[0].due
+        : 'As configured per barangay',
+    ],
     ['Bills to generate', bills.length],
     ['Total charges', WaterStore.money(total)],
   ].forEach(([label, value]) => {
@@ -24,12 +29,14 @@ function confirmGeneratedBills(bills, records) {
   scroll.className = 'bill-preview-table';
   const table = document.createElement('table');
   const head = table.createTHead().insertRow();
-  ['Customer', 'Previous', 'Current', 'Consumed', 'Bill total'].forEach((label) => {
-    const cell = document.createElement('th');
-    cell.scope = 'col';
-    cell.textContent = label;
-    head.appendChild(cell);
-  });
+  ['Customer', 'Previous', 'Current', 'Consumed', 'Rate / m³', 'Due date', 'Bill total'].forEach(
+    (label) => {
+      const cell = document.createElement('th');
+      cell.scope = 'col';
+      cell.textContent = label;
+      head.appendChild(cell);
+    },
+  );
   const body = table.createTBody();
   bills.forEach((bill) => {
     const customer = records.customers.find((item) => item.id === bill.customerId);
@@ -39,12 +46,16 @@ function confirmGeneratedBills(bills, records) {
       bill.previous + ' m³',
       bill.current + ' m³',
       bill.consumption + ' m³',
+      WaterStore.money(bill.ratePerCubic),
+      bill.due,
       WaterStore.money(bill.total),
     ].forEach((value, index) =>
       AdminUI.cell(
         row,
         value,
-        ['Customer', 'Previous', 'Current', 'Consumed', 'Bill total'][index],
+        ['Customer', 'Previous', 'Current', 'Consumed', 'Rate / m³', 'Due date', 'Bill total'][
+          index
+        ],
       ),
     );
   });

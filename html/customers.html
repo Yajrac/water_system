@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en" data-page="customers" class="theme-teal">
   <head>
+    <link rel="icon" type="image/jpeg" href="../assets/images/water_system_logo.jpg" />
     <script src="../js/auth/auth.js"></script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -16,6 +17,9 @@
     <link rel="stylesheet" href="../css/shared/shared.css" />
     <link rel="stylesheet" href="../css/shared/admin.css" />
     <link rel="stylesheet" href="../css/customers/customer-ui.css" />
+    <link rel="stylesheet" href="../css/shared/back-button.css" />
+    <link rel="stylesheet" href="../css/shared/modals.css" />
+    <link rel="stylesheet" href="../css/shared/responsive-cards.css" />
   </head>
   <body>
     <div class="sidebar-overlay" id="overlay"></div>
@@ -75,6 +79,20 @@
             </a>
           </li>
           <li>
+            <a href="barangays.html" class="sidebar-menu-item"
+              ><svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="m3 6 6-3 6 3 6-3v15l-6 3-6-3-6 3zM9 3v15M15 6v15" /></svg
+              ><span>Barangay Registry</span></a
+            >
+          </li>
+          <li>
             <a href="billing.html" class="sidebar-menu-item">
               <svg
                 viewBox="0 0 24 24"
@@ -122,6 +140,36 @@
               </svg>
               <span>Broadcast &amp; Notifications</span>
             </a>
+          </li>
+          <li>
+            <a href="disconnected.html" class="sidebar-menu-item"
+              ><svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M8 3v5M16 3v5M5 8h14v3a7 7 0 0 1-7 7v3M3 3l18 18" /></svg
+              ><span>Disconnected Accounts</span></a
+            >
+          </li>
+          <li>
+            <a href="feedback.html" class="sidebar-menu-item"
+              ><svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path
+                  d="M21 11a8 8 0 0 1-8 8H6l-4 3V5a3 3 0 0 1 3-3h8a8 8 0 0 1 8 9zM7 8h8M7 12h5"
+                /></svg
+              ><span>Customer Feedback</span></a
+            >
           </li>
           <li>
             <a href="reports.html" class="sidebar-menu-item">
@@ -208,12 +256,30 @@
                 Manage your customers, review applications, and keep account details up to date.
               </p>
             </div>
-            <a
-              class="btn btn-primary customer-add-button"
-              id="addCustomer"
-              href="customer-form.html"
-              ><span aria-hidden="true">+</span> Add customer</a
-            >
+            <div class="customer-header-actions">
+              <button
+                type="button"
+                class="btn customer-import-button"
+                id="openCustomerImport"
+                aria-haspopup="dialog"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  aria-hidden="true"
+                >
+                  <path d="M12 16V3m-5 5 5-5 5 5M4 15v5a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5" /></svg
+                >Import existing customers
+              </button>
+              <a
+                class="btn btn-primary customer-add-button"
+                id="addCustomer"
+                href="customer-form.html"
+                ><span aria-hidden="true">+</span> Add customer</a
+              >
+            </div>
           </header>
           <p id="pageMessage" role="status" tabindex="-1"></p>
           <section class="customer-overview" aria-label="Customer summary">
@@ -258,7 +324,7 @@
               </div>
               <span id="customerCount" class="directory-count" aria-live="polite"></span>
             </div>
-            <div class="payment-history-toolbar common-filter-toolbar">
+            <div class="customer-directory-toolbar">
               <label class="payment-history-search"
                 >Search customers<span class="search-control"
                   ><svg viewBox="0 0 24 24" aria-hidden="true">
@@ -270,22 +336,27 @@
                     placeholder="Search by name or account number"
                     type="search" /></span
               ></label>
-              <details class="payment-filter-dropdown">
-                <summary>
-                  <svg viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="M4 7h16M7 12h10M10 17h4" /></svg
-                  >Filter<svg class="filter-chevron" viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="m7 10 5 5 5-5" />
-                  </svg>
-                </summary>
-                <div class="payment-history-filters">
-                  <label
-                    >Barangay<select id="barangayFilter" class="admin-filter">
-                      <option value="">All barangays</option>
-                    </select></label
-                  >
-                </div>
-              </details>
+
+              <label
+                >Barangay<select id="barangayFilter" class="admin-filter">
+                  <option value="">All barangays</option>
+                </select></label
+              >
+              <label
+                >Account status<select id="customerStatusFilter" class="admin-filter">
+                  <option value="">Any status</option>
+                  <option value="registered">Registered</option>
+                  <option value="pending">Pending</option>
+                  <option value="inactive">Inactive / disconnected</option>
+                </select></label
+              >
+              <label
+                >Customer type<select id="customerTypeFilter" class="admin-filter">
+                  <option value="">Any customer type</option>
+                  <option>Residential</option>
+                  <option>Commercial</option>
+                </select></label
+              >
             </div>
             <div class="table-scroll customers-table">
               <table class="mobile-summary-table mobile-summary-customers">
@@ -302,6 +373,11 @@
                 <tbody id="customerRows"></tbody>
               </table>
             </div>
+            <nav
+              id="customerPagination"
+              class="record-pagination customer-pagination"
+              aria-label="Customer table pages"
+            ></nav>
             <div class="directory-footer">
               <span>Need to register a new service connection?</span
               ><a href="customer-form.html"
@@ -309,14 +385,15 @@
               >
             </div>
           </section>
-          <details class="panel customer-import">
-            <summary>
-              <span class="import-symbol" aria-hidden="true">↑</span
-              ><span
-                ><strong>Import existing customers</strong
-                ><small>Bring your existing records into the customer directory.</small></span
-              ><span class="import-chevron" aria-hidden="true">⌄</span>
-            </summary>
+          <dialog
+            id="customerImportDialog"
+            class="customer-import-dialog"
+            aria-labelledby="customerImportTitle"
+          >
+            <div class="customer-import-heading">
+              <h2 id="customerImportTitle">Import existing customers</h2>
+              <button type="button" class="btn" id="closeCustomerImport">Close</button>
+            </div>
             <div class="admin-body">
               <p class="form-help">
                 Upload a CSV file up to 5 MB. Start with the template to use the correct columns.
@@ -336,7 +413,7 @@
                 </div>
               </form>
             </div>
-          </details>
+          </dialog>
         </main>
       </div>
     </div>
@@ -346,6 +423,7 @@
     <script src="../js/shared/shared.js"></script>
     <script src="../js/shared/skeleton.js"></script>
     <script src="../js/customers/sample-customers.js"></script>
+    <script src="../js/shared/pagination.js"></script>
     <script src="../js/customers/customers.js"></script>
   </body>
 </html>

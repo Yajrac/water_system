@@ -1,15 +1,29 @@
 <!doctype html>
 <html lang="en">
   <head>
+    <link rel="icon" type="image/jpeg" href="../assets/images/water_system_logo.jpg" />
     <script src="../js/auth/auth.js"></script>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>PWSS customer application</title>
     <link rel="stylesheet" href="../css/customers/application.css" />
+    <link rel="stylesheet" href="../css/shared/back-button.css" />
   </head>
   <body>
     <nav class="print-tools">
-      <a href="customers.html">Back to customers</a
+      <a
+        href="customers.html"
+        class="back-icon-button"
+        aria-label="Back to customers"
+        data-tooltip="Back"
+        ><svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          aria-hidden="true"
+        >
+          <path d="m12 5-7 7 7 7M5 12h14" /></svg></a
       ><button id="printForm" type="button">Print application</button
       ><span>Signature lines remain blank for signing.</span>
     </nav>

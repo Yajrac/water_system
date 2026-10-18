@@ -1,130 +1,144 @@
 const paymentRecords = WaterStore.load();
 const paymentForm = document.getElementById('paymentForm');
 const billSelect = document.getElementById('paymentBill');
-const customerSearch = document.getElementById('paymentCustomerSearch');
-const customerResults = document.getElementById('paymentCustomerResults');
 const paymentButton = document.getElementById('recordPaymentButton');
 let selectedCustomerId = '';
-
-function loadPaymentChoices() {
-  Object.assign(paymentRecords, WaterStore.load());
-  paymentForm.elements.amount.value = '';
-  paymentForm.elements.amount.setCustomValidity('');
-  paymentButton.disabled = true;
-  billSelect.replaceChildren(new Option('Select an outstanding bill', ''));
-  const customer = paymentRecords.customers.find((item) => item.id === selectedCustomerId);
-  const bills = paymentRecords.bills
-    .filter(
-      (bill) =>
-        bill.customerId === selectedCustomerId && WaterStore.balance(bill, paymentRecords) > 0,
-    )
-    .sort((a, b) => a.cycle.localeCompare(b.cycle) || a.due.localeCompare(b.due));
-  bills.forEach((bill) => {
-    billSelect.add(
-      new Option(
-        bill.cycle +
-          ' · Due ' +
-          bill.due +
-          ' · Balance ' +
-          WaterStore.money(WaterStore.balance(bill, paymentRecords)),
-        bill.id,
-      ),
-    );
-  });
-  billSelect.disabled = !bills.length;
-  if (bills.length)
-    billSelect.add(
-      new Option(
-        'All outstanding bills · ' +
-          WaterStore.money(
-            bills.reduce((sum, bill) => sum + WaterStore.balance(bill, paymentRecords), 0),
-          ),
-        'all',
-      ),
-      1,
-    );
-  document.getElementById('selectedPaymentCustomer').hidden = !customer;
-  if (customer) {
-    document.getElementById('selectedCustomerName').textContent = customer.name;
-    document.getElementById('selectedCustomerAccount').textContent = customer.account;
-    document.getElementById('selectedCustomerBarangay').textContent = customer.barangay;
-    document.getElementById('selectedCustomerBalance').textContent = WaterStore.money(
-      bills.reduce((sum, bill) => sum + WaterStore.balance(bill, paymentRecords), 0),
-    );
-  }
-  document.getElementById('customerBillHelp').textContent = !customer
-    ? 'Search for a customer to see their outstanding bills.'
-    : bills.length
-      ? bills.length + ' outstanding bills. Choose the billing month to pay below.'
-      : 'This customer has no outstanding bills.';
-  updatePaymentLinks(selectedCustomerId);
-  if (bills.length) {
-    billSelect.value = 'all';
-    updateSelectedBill();
-    document.getElementById('customerBillHelp').textContent =
-      'Total unpaid balance is filled in below. Enter the amount the customer can pay; it is applied to the oldest bills first. You may also choose a specific billing month.';
-  }
-}
-function updateSelectedBill() {
-  const bills = selectedPaymentBills();
-  const balance = bills.reduce((sum, bill) => sum + WaterStore.balance(bill, paymentRecords), 0);
-  paymentForm.elements.amount.value = bills.length ? balance.toFixed(2) : '';
-  paymentForm.elements.amount.setCustomValidity('');
-  paymentButton.disabled = !bills.length || balance <= 0;
-}
+const cashierPager = createPagination('cashierPagination', renderCashierRegistry);
+WaterStore.barangays.forEach((name) =>
+  document.getElementById('cashierBarangay').add(new Option(name, name)),
+);
 function selectedPaymentBills() {
   return paymentRecords.bills.filter(
     (bill) =>
       bill.customerId === selectedCustomerId &&
       WaterStore.balance(bill, paymentRecords) > 0 &&
-      (billSelect.value === 'all' || bill.id === billSelect.value),
+      bill.id === billSelect.value,
   );
 }
-function searchPaymentCustomers() {
-  const search = customerSearch.value.trim().toLowerCase();
-  customerResults.replaceChildren();
-  selectedCustomerId = '';
-  loadPaymentChoices();
-  if (!search) {
-    document.getElementById('customerSearchCount').textContent =
-      'Type a customer name or account number.';
-    return;
-  }
-  const matches = paymentRecords.customers.filter((customer) =>
-    (customer.name + ' ' + customer.account).toLowerCase().includes(search),
-  );
-  const exactAccount = matches.find((customer) => customer.account.toLowerCase() === search);
-  if (exactAccount || matches.length === 1) {
-    selectPaymentCustomer(exactAccount || matches[0]);
-  }
-  if (!selectedCustomerId)
-    document.getElementById('customerSearchCount').textContent = !matches.length
-      ? 'No matching customers found.'
-      : matches.length +
-        ' matches. Choose the correct account below' +
-        (matches.length > 20 ? ' or refine your search (first 20 shown).' : '.');
-  matches.slice(0, 20).forEach((customer) => {
-    const item = document.createElement('li');
+function readableCycle(cycle) {
+  return /^\d{4}-\d{2}$/.test(cycle)
+    ? new Intl.DateTimeFormat('en-PH', {
+        month: 'long',
+        year: 'numeric',
+        timeZone: 'Asia/Manila',
+      }).format(new Date(cycle + '-01T12:00:00+08:00'))
+    : cycle;
+}
+function renderCashierRegistry() {
+  Object.assign(paymentRecords, WaterStore.load());
+  const query = document.getElementById('cashierSearch').value.trim().toLowerCase();
+  const barangay = document.getElementById('cashierBarangay').value;
+  const bills = paymentRecords.bills
+    .filter((bill) => {
+      const c = paymentRecords.customers.find((c) => c.id === bill.customerId);
+      return (
+        c &&
+        WaterStore.balance(bill, paymentRecords) > 0 &&
+        (!barangay || c.barangay === barangay) &&
+        (c.name + ' ' + c.account + ' ' + (c.submitterNumber || '')).toLowerCase().includes(query)
+      );
+    })
+    .sort((a, b) => a.cycle.localeCompare(b.cycle));
+  cashierPager.update(bills.length);
+  const body = document.getElementById('cashierRows');
+  body.replaceChildren();
+  cashierPager.items(bills).forEach((bill) => {
+    const customer = paymentRecords.customers.find((c) => c.id === bill.customerId);
+    const row = body.insertRow();
+    AdminUI.cell(row, customer.submitterNumber || customer.account, 'Submitter / account no.');
+    AdminUI.cell(row, customer.name, 'Full name');
+    AdminUI.cell(row, customer.barangay, 'Barangay');
+    AdminUI.cell(row, readableCycle(bill.cycle), 'Billing month');
+    const action = AdminUI.cell(row, '', 'Action');
     const button = document.createElement('button');
     button.type = 'button';
-    button.className = 'customer-result-button';
-    const name = document.createElement('strong');
-    name.textContent = customer.name;
-    const account = document.createElement('span');
-    account.textContent = customer.account + ' · ' + customer.barangay;
-    button.append(name, account);
-    button.addEventListener('click', () => selectPaymentCustomer(customer));
-    item.appendChild(button);
-    customerResults.appendChild(item);
+    button.className = 'btn cashier-process';
+    button.textContent = 'Process payment';
+    button.addEventListener('click', () => openCashierBill(bill.id));
+    action.appendChild(button);
+  });
+  AdminUI.empty(body, 5, 'No unpaid bills match your search.');
+}
+function fillCashierDetails(id, rows) {
+  const container = document.getElementById(id);
+  container.replaceChildren();
+  rows.forEach(([label, value]) => {
+    const item = document.createElement('div');
+    const dt = document.createElement('dt');
+    dt.textContent = label;
+    const dd = document.createElement('dd');
+    dd.textContent = value;
+    item.append(dt, dd);
+    container.appendChild(item);
   });
 }
-function selectPaymentCustomer(customer) {
+function openCashierBill(id) {
+  Object.assign(paymentRecords, WaterStore.load());
+  const bill = paymentRecords.bills.find((b) => b.id === id);
+  const customer = paymentRecords.customers.find((c) => c.id === bill?.customerId);
+  if (!bill || !customer || WaterStore.balance(bill, paymentRecords) <= 0) {
+    renderCashierRegistry();
+    return showNotice('Bill no longer unpaid', 'This bill has changed or has already been paid.');
+  }
   selectedCustomerId = customer.id;
-  customerResults.replaceChildren();
-  document.getElementById('customerSearchCount').textContent =
-    'Customer found: ' + customer.name + ' · ' + customer.account;
-  loadPaymentChoices();
+  paymentForm.reset();
+  billSelect.replaceChildren(new Option(bill.cycle, bill.id));
+  billSelect.value = bill.id;
+  const balance = WaterStore.balance(bill, paymentRecords);
+  paymentForm.elements.amount.value = balance.toFixed(2);
+  fillCashierDetails('cashierContext', [
+    ['Submitter / account no.', customer.submitterNumber || customer.account],
+    ['Customer name', customer.name],
+    ['Billing month', readableCycle(bill.cycle)],
+    ['Due date', bill.due],
+  ]);
+  fillCashierDetails('cashierReadings', [
+    ['Previous reading', bill.previous + ' m\u00b3'],
+    ['Current reading', bill.current + ' m\u00b3'],
+    ['Consumption', bill.consumption + ' m\u00b3'],
+  ]);
+  fillCashierDetails('cashierCharges', [
+    ['Water charge', WaterStore.money(bill.water || 0)],
+    ['Connection / reconnection', WaterStore.money(bill.connection || 0)],
+    ['Late fee', WaterStore.money(bill.late || 0)],
+    ['Other charges', WaterStore.money(bill.other || 0)],
+    ['Bill total', WaterStore.money(bill.total)],
+    ['Previously paid', WaterStore.money(bill.total - balance)],
+  ]);
+  document.getElementById('cashierAmountDue').textContent = WaterStore.money(balance);
+  document.getElementById('cashierRegistry').hidden = true;
+  document.getElementById('cashierSettlement').hidden = false;
+  updateCashierValidation();
+  paymentForm.elements.amount.focus();
 }
+function updateCashierValidation() {
+  const amount = paymentForm.elements.amount.value.trim();
+  const bills = selectedPaymentBills();
+  const due = bills.reduce((sum, b) => sum + WaterStore.balance(b, paymentRecords), 0);
+  const valid = Validation.money(amount) && Number(amount) > 0 && Number(amount) <= due;
+  const label = document.getElementById('cashierValidation');
+  label.textContent = !valid
+    ? 'Enter a valid amount'
+    : Number(amount) === due
+      ? 'Exact amount verified'
+      : 'Partial payment';
+  label.parentElement.classList.toggle('is-valid', valid);
+  paymentButton.disabled = !valid;
+}
+function showCashierRegistry() {
+  document.getElementById('cashierSettlement').hidden = true;
+  document.getElementById('cashierRegistry').hidden = false;
+  selectedCustomerId = '';
+  renderCashierRegistry();
+}
+document.getElementById('backToCashier').addEventListener('click', showCashierRegistry);
+paymentForm.elements.amount.addEventListener('input', updateCashierValidation);
+['cashierSearch', 'cashierBarangay'].forEach((id) =>
+  document.getElementById(id).addEventListener(id === 'cashierSearch' ? 'input' : 'change', () => {
+    cashierPager.page = 1;
+    renderCashierRegistry();
+  }),
+);
 paymentForm.addEventListener('submit', async (event) => {
   event.preventDefault();
   Object.assign(paymentRecords, WaterStore.load());
@@ -132,6 +146,9 @@ paymentForm.addEventListener('submit', async (event) => {
   const amountText = paymentForm.elements.amount.value.trim();
   const amount = Number(amountText);
   const date = WaterStore.today();
+  const remarks = paymentForm.elements.remarks.value.trim();
+  if (remarks.length > 500 || /[<>\u0000-\u001f]/.test(remarks.replace(/[\r\n]/g, '')))
+    return AdminUI.message('Use plain text notes of up to 500 characters.');
   if (!bills.length || !selectedCustomerId || amount <= 0 || !Number.isFinite(amount))
     return AdminUI.message(
       'Select a customer with outstanding bills and enter a valid payment amount.',
@@ -171,7 +188,20 @@ paymentForm.addEventListener('submit', async (event) => {
     amount,
     date,
     method,
-    allocations,
+    allocations: allocations.map((item) => {
+      const source = bills.find((bill) => bill.id === item.billId);
+      return {
+        ...item,
+        water: source.water,
+        connection: source.connection,
+        late: source.late,
+        other: source.other,
+        monthly: source.monthly,
+      };
+    }),
+    createdAt: new Date().toISOString(),
+    collectedBy: 'Administrator',
+    remarks,
     scope: billSelect.value === 'all' ? 'account' : 'bill',
     balanceBefore,
     balanceAfter,
@@ -195,7 +225,7 @@ paymentForm.addEventListener('submit', async (event) => {
     return;
   }
   paymentForm.reset();
-  loadPaymentChoices();
+  showCashierRegistry();
   AdminUI.message(
     'Payment saved. Receipt: ' +
       receipt +
@@ -203,29 +233,8 @@ paymentForm.addEventListener('submit', async (event) => {
       WaterStore.money(balanceAfter),
   );
 });
-billSelect.addEventListener('change', updateSelectedBill);
-paymentForm.addEventListener(
-  'invalid',
-  (event) => {
-    const name = event.target.name;
-    const labels = {
-      receipt: 'receipt number',
-      amount: 'amount paid',
-      date: 'payment date',
-      billId: 'bill to pay',
-    };
-    AdminUI.message('Please check the ' + (labels[name] || 'required field') + ' before saving.');
-  },
-  true,
-);
-customerSearch.addEventListener('input', searchPaymentCustomers);
-searchPaymentCustomers();
+
 const requestedCustomerId = new URLSearchParams(location.search).get('customer');
-const requestedCustomer = paymentRecords.customers.find(
-  (customer) => customer.id === requestedCustomerId,
-);
-if (requestedCustomer) {
-  customerSearch.value = requestedCustomer.account;
-  searchPaymentCustomers();
-  selectPaymentCustomer(requestedCustomer);
-}
+const requestedCustomer = paymentRecords.customers.find((c) => c.id === requestedCustomerId);
+if (requestedCustomer) document.getElementById('cashierSearch').value = requestedCustomer.account;
+renderCashierRegistry();

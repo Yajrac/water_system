@@ -25,10 +25,31 @@ async function fetchSampleCustomers() {
     records.customers.map((customer) => customer.applicationNumber?.toLowerCase()).filter(Boolean),
   );
   let added = 0;
+  customers.forEach((sample) => {
+    const existing = records.customers.find(
+      (customer) => customer.id === sample.id && customer.isTestData,
+    );
+    if (
+      existing &&
+      !existing.submitterNumber &&
+      sample.submitterNumber &&
+      !records.customers.some((customer) => customer.submitterNumber === sample.submitterNumber)
+    ) {
+      existing.submitterNumber = sample.submitterNumber;
+      added++;
+    }
+  });
   // Update only unchanged sample references already loaded in this browser.
   customers.forEach((sample) => {
-    const existing = records.customers.find(customer => customer.id === sample.id && customer.isTestData);
-    if (!existing || existing.account !== 'TEST-' + sample.account || accounts.has(sample.account.toLowerCase())) return;
+    const existing = records.customers.find(
+      (customer) => customer.id === sample.id && customer.isTestData,
+    );
+    if (
+      !existing ||
+      existing.account !== 'TEST-' + sample.account ||
+      accounts.has(sample.account.toLowerCase())
+    )
+      return;
     accounts.delete(existing.account.toLowerCase());
     existing.account = sample.account;
     accounts.add(existing.account.toLowerCase());

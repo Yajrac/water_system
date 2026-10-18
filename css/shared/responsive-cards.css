@@ -1,0 +1,353 @@
+/* Shared sizing for summary cards on touch screens. */
+.admin-summary > *,
+.customer-overview > *,
+.profile-summary > *,
+.payment-history-summary > *,
+.billing-setup-summary > * {
+  min-width: 0;
+  box-sizing: border-box;
+}
+.record-card-top svg {
+  stroke: currentColor;
+}
+@media (max-width: 1180px) {
+  .admin-summary,
+  .profile-summary,
+  .billing-setup-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+  }
+  .customer-overview,
+  .payment-history-summary {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+  }
+  .customer-list-page .customer-metric {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 18px;
+  }
+  .profile-summary > div,
+  .payment-history-summary > div,
+  .record-card {
+    padding: 18px;
+  }
+  .profile-summary strong,
+  .payment-history-summary strong {
+    font-size: clamp(1.15rem, 2.5vw, 1.5rem);
+  }
+}
+@media (max-width: 600px) {
+  .admin-summary,
+  .profile-summary,
+  .customer-overview,
+  .payment-history-summary,
+  .billing-setup-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+  .customer-overview > :last-child:nth-child(odd),
+  .payment-history-summary > :last-child:nth-child(odd) {
+    grid-column: 1/-1;
+  }
+  .customer-list-page .customer-metric,
+  .profile-summary > div,
+  .payment-history-summary > div,
+  .record-card,
+  .billing-setup-summary .ledger-summary-card {
+    padding: 15px;
+    border-radius: 8px;
+  }
+  .customer-list-page .customer-metric {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .customer-overview > :last-child:nth-child(odd) {
+    flex-direction: row;
+    align-items: center;
+  }
+  .record-card-top {
+    margin-bottom: 12px;
+    gap: 8px;
+  }
+  .record-card-top svg {
+    width: 32px;
+    height: 32px;
+    padding: 7px;
+    border-radius: 8px;
+  }
+  .record-card h3,
+  .customer-metric p,
+  .profile-summary span,
+  .payment-history-summary span {
+    font-size: 0.73rem;
+    line-height: 1.5;
+  }
+  .record-card strong,
+  .profile-summary strong,
+  .payment-history-summary strong {
+    font-size: clamp(1.05rem, 4.5vw, 1.4rem);
+    line-height: 1.35;
+  }
+  .customer-list-page .customer-metric strong {
+    font-size: 1.5rem;
+  }
+  .record-card p,
+  .customer-metric div > span,
+  .payment-history-summary small {
+    font-size: 0.68rem;
+    line-height: 1.5;
+  }
+  .profile-summary span {
+    align-items: center;
+    gap: 7px;
+  }
+  .profile-summary .profile-icon {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+  }
+  .billing-setup-summary .ledger-summary-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .billing-setup-summary strong {
+    font-size: 0.9rem;
+    line-height: 1.4;
+  }
+  .billing-setup-summary .ledger-card-icon,
+  .customer-metric .metric-symbol {
+    width: 36px;
+    height: 36px;
+    border-radius: 9px;
+  }
+  .ledger-totals {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+    padding: 0 15px;
+  }
+  .ledger-totals > div {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px 0;
+  }
+  .ledger-totals > div + div {
+    border-top: 1px solid var(--color-border);
+  }
+  .ledger-totals .ledger-total-label {
+    margin: 0;
+  }
+  .ledger-totals strong {
+    text-align: right;
+    font-size: 1rem;
+  }
+}
+@media (max-width: 359px) {
+  .admin-summary,
+  .profile-summary,
+  .customer-overview,
+  .payment-history-summary,
+  .billing-setup-summary {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .customer-list-page .customer-metric {
+    flex-direction: row;
+    align-items: center;
+  }
+  .billing-setup-summary .ledger-summary-card {
+    flex-direction: row;
+    align-items: center;
+  }
+}
+
+/* Consistent search and filter sizing across record pages. */
+.inline-record-toolbar,
+.customer-directory-toolbar,
+.service-toolbar {
+  min-width: 0;
+  align-items: start;
+}
+.inline-record-toolbar > label,
+.inline-record-filter-fields > label,
+.customer-directory-toolbar > label,
+.service-toolbar > label {
+  min-width: 0;
+  align-content: start;
+}
+.inline-record-toolbar .admin-filter,
+.customer-directory-toolbar .admin-filter,
+.service-toolbar .admin-filter {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  max-width: none;
+  height: 46px;
+  margin: 0;
+}
+.inline-record-toolbar .search-control,
+.inline-record-toolbar .payment-search-control,
+.customer-directory-toolbar .search-control,
+.service-toolbar .search-control {
+  display: block;
+  width: 100%;
+  min-width: 0;
+}
+@media (max-width: 1180px) {
+  .inline-record-toolbar,
+  .customer-directory-toolbar,
+  .service-toolbar {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+    gap: 16px;
+  }
+  .inline-record-toolbar .payment-history-search,
+  .customer-directory-toolbar .payment-history-search {
+    width: 100%;
+    max-width: none;
+    grid-column: auto;
+  }
+}
+@media (max-width: 600px) {
+  .inline-record-toolbar,
+  .customer-directory-toolbar,
+  .service-toolbar {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 14px;
+  }
+  .inline-record-toolbar > *,
+  .customer-directory-toolbar > *,
+  .service-toolbar > * {
+    min-width: 0;
+    max-width: 100%;
+  }
+  .inline-record-toolbar label,
+  .customer-directory-toolbar label,
+  .service-toolbar label {
+    font-size: 0.78rem;
+    line-height: 1.5;
+  }
+  .inline-record-toolbar .admin-filter,
+  .customer-directory-toolbar .admin-filter,
+  .service-toolbar .admin-filter {
+    font-size: 16px;
+    height: 46px;
+  }
+  .inline-record-toolbar .date-control {
+    width: 100%;
+    min-width: 0;
+  }
+  .inline-record-toolbar .date-control input {
+    flex: 1 1 0;
+    width: 0;
+    min-width: 0;
+  }
+  .inline-record-toolbar .date-picker-button {
+    width: 44px;
+    min-width: 44px;
+  }
+  .inline-record-toolbar > .btn,
+  .service-toolbar > .btn {
+    width: 100%;
+    min-height: 44px;
+    justify-content: center;
+  }
+  .ledger-heading-tools {
+    gap: 10px;
+  }
+  .ledger-heading-search input {
+    min-height: 46px;
+  }
+}
+
+/* Payment history: align controls below a shared label row. */
+.payment-record-toolbar {
+  grid-template-columns: minmax(240px, 1.6fr) repeat(3, minmax(145px, 1fr)) auto;
+  align-items: start;
+}
+.payment-record-toolbar .payment-history-search {
+  display: grid;
+  gap: 8px;
+}
+.payment-record-toolbar #clearPaymentFilters {
+  align-self: start;
+  margin-top: 27px;
+  min-height: 46px;
+  height: 46px;
+  white-space: nowrap;
+  padding: 10px 18px;
+}
+.payment-record-toolbar .payment-search-control {
+  min-width: 0;
+}
+.payment-record-toolbar #paymentSearch {
+  text-overflow: ellipsis;
+}
+@media (max-width: 1250px) {
+  .payment-record-toolbar {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .payment-record-toolbar .payment-history-search {
+    grid-column: 1/-1;
+  }
+  .payment-record-toolbar #clearPaymentFilters {
+    margin-top: 0;
+    align-self: end;
+    height: 46px;
+  }
+}
+@media (max-width: 600px) {
+  .payment-record-toolbar {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .payment-record-toolbar .payment-history-search {
+    grid-column: auto;
+  }
+  .payment-record-toolbar #clearPaymentFilters {
+    margin-top: 0;
+    width: 100%;
+  }
+}
+
+/* Service search and status share the same label and input rows. */
+.service-toolbar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(210px, 250px);
+  align-items: start;
+  gap: 18px;
+}
+.service-toolbar > label,
+.service-toolbar > label.service-search {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  font-size: 0.8rem;
+  font-weight: 600;
+  line-height: 1.5;
+  color: var(--color-ink-muted);
+}
+.service-toolbar .payment-search-control {
+  display: block;
+  width: 100%;
+  min-width: 0;
+}
+.service-toolbar .admin-filter {
+  height: 46px;
+  margin: 0;
+}
+@media (max-width: 800px) {
+  .service-toolbar {
+    grid-template-columns: minmax(0, 1fr) minmax(160px, 0.65fr);
+    gap: 14px;
+  }
+}
+@media (max-width: 600px) {
+  .service-toolbar {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

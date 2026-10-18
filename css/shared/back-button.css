@@ -1,0 +1,62 @@
+.back-icon-button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  padding: 0;
+  border: 1px solid var(--color-border, #cbd5e1);
+  border-radius: 7px;
+  background: var(--color-surface, white);
+  color: var(--color-primary-deep, #155e75);
+  text-decoration: none;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+.back-icon-button svg {
+  width: 21px;
+  height: 21px;
+  flex-shrink: 0;
+}
+.back-icon-button::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 7px);
+  left: 50%;
+  transform: translate(-50%, -3px);
+  padding: 6px 10px;
+  border-radius: 5px;
+  background: #173245;
+  color: white;
+  font: 500 12px/1.4 sans-serif;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition:
+    opacity 150ms ease,
+    transform 150ms ease;
+}
+.back-icon-button:hover::after,
+.back-icon-button:focus-visible::after {
+  opacity: 1;
+  visibility: visible;
+  transform: translate(-50%, 0);
+}
+.back-icon-button:hover {
+  color: var(--color-primary, #0088a8);
+  border-color: currentColor;
+}
+@media (prefers-reduced-motion: reduce) {
+  .back-icon-button::after {
+    transition: none;
+  }
+}
+@media print {
+  .back-icon-button {
+    display: none !important;
+  }
+}

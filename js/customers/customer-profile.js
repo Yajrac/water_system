@@ -21,18 +21,26 @@ if (!profileCustomer) {
   AdminUI.message('Customer not found. Return to Customers and choose a saved profile.');
 } else {
   const customer = profileCustomer;
+  profileDetails('coreRegistryDetails', [
+    ['Full name', customer.name],
+    ['Submitter number', customer.submitterNumber],
+    ['Registered barangay', customer.barangay],
+    ['Username', customer.username],
+  ]);
   const bills = profileRecords.bills.filter((bill) => bill.customerId === profileId);
   const payments = profileRecords.payments.filter((payment) => payment.customerId === profileId);
   const balance = bills.reduce((sum, bill) => sum + WaterStore.balance(bill, profileRecords), 0);
   document.getElementById('profileName').textContent = customer.name;
-  document.getElementById('profileAccount').textContent = customer.account;
-  document.getElementById('profileAvatar').textContent = customer.name
-    .trim()
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((word) => word[0])
-    .join('')
-    .toUpperCase();
+  document.getElementById('profileAccount').textContent = 'Account ID: ' + customer.account;
+  const avatar = document.getElementById('profileAvatar');
+  const gender =
+    customer.gender === 'Male' ? 'male' : customer.gender === 'Female' ? 'female' : 'neutral';
+  const image = document.createElement('img');
+  image.src = '../assets/images/avatar-' + gender + '.svg';
+  image.alt = '';
+  image.width = 88;
+  image.height = 88;
+  avatar.replaceChildren(image);
   const status = document.getElementById('profileStatus');
   status.textContent = WaterStore.isRegistered(customer) ? 'Registered' : 'Pending application';
   status.className =
@@ -40,14 +48,24 @@ if (!profileCustomer) {
   const activity = document.createElement('span');
   activity.className =
     'customer-status ' + (WaterStore.isActive(customer) ? 'status-paid' : 'status-overdue');
-  activity.textContent = WaterStore.isActive(customer) ? 'Active' : 'Inactive';
+  activity.textContent =
+    customer.connectionStatus === 'Disconnected'
+      ? 'Disconnected'
+      : WaterStore.isActive(customer)
+        ? 'Active'
+        : 'Inactive';
   status.after(activity);
   const toggle = document.createElement('button');
   toggle.type = 'button';
   toggle.className = 'btn ' + (WaterStore.isActive(customer) ? 'action-deactivate' : 'action-view');
   toggle.textContent = WaterStore.isActive(customer) ? 'Deactivate account' : 'Activate account';
+  if (customer.connectionStatus === 'Disconnected') toggle.textContent = 'View disconnection';
   document.querySelector('.profile-actions').appendChild(toggle);
   toggle.addEventListener('click', async () => {
+    if (customer.connectionStatus === 'Disconnected') {
+      location.href = 'disconnected.html';
+      return;
+    }
     toggle.disabled = true;
     const active = WaterStore.isActive(customer);
     const accepted = await confirmAction(
@@ -114,6 +132,16 @@ if (!profileCustomer) {
     ['Application number', customer.applicationNumber],
   ]);
   profileDetails('connectionDetails', [
+    [
+      'Connection status',
+      customer.connectionStatus || (WaterStore.isActive(customer) ? 'Connected' : 'Inactive'),
+    ],
+    [
+      'Disconnection reason',
+      profileRecords.disconnections?.find(
+        (item) => item.customerId === profileId && !item.reconnectedOn,
+      )?.reason || '—',
+    ],
     ['Service status', customer.serviceStatus],
     ['Meter number', customer.meterNumber],
     ['Meter kind / size', [customer.meterKind, customer.meterSize].filter(Boolean).join(' / ')],
