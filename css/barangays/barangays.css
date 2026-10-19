@@ -165,3 +165,30 @@
     max-height: 240px;
   }
 }
+
+.barangay-add-dialog {
+  width: min(600px, calc(100% - 28px));
+}
+.barangay-modal-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.barangay-modal-heading h2 {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0;
+  font-size: 1.2rem;
+}
+.barangay-add-dialog > p {
+  margin: 16px 0 20px;
+}
+.barangay-search-field > .bi {
+  position: absolute;
+  left: 14px;
+  top: 15px;
+  color: #087de0;
+  font-size: 18px;
+}

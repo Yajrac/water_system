@@ -1,3 +1,4 @@
+const addBarangayDialog = document.getElementById('addBarangayDialog');
 const barangayForm = document.getElementById('barangayForm');
 const barangayChoice = document.getElementById('barangayChoice');
 const barangaySearchChoice = document.getElementById('barangaySearchChoice');
@@ -104,7 +105,7 @@ document.addEventListener('click', (event) => {
 });
 const saveBarangay = document.getElementById('saveBarangay');
 const retryBarangays = document.getElementById('retryBarangays');
-const originalBarangayCode = new URLSearchParams(location.search).get('code') || '';
+let originalBarangayCode = new URLSearchParams(location.search).get('code') || '';
 let barangayDirectory = [];
 let savingBarangay = false;
 async function loadBarangayChoices() {
@@ -141,7 +142,7 @@ async function loadBarangayChoices() {
     document.getElementById('barangayDirectoryStatus').textContent =
       'Official Pio Duran choices from the PSA PSGC directory.';
     if (originalBarangayCode) {
-      document.getElementById('barangayFormTitle').textContent = 'Edit Barangay';
+      if (!addBarangayDialog) document.getElementById('barangayFormTitle').textContent = 'Edit Barangay';
       saveBarangay.textContent = 'Save changes';
     }
   } catch (error) {
@@ -171,17 +172,45 @@ barangayForm.addEventListener('submit', async (event) => {
     );
     if (!accepted) return;
     if (JSON.stringify(WaterStore.load()) !== snapshot) {
-      throw new Error('Records changed while confirming. Please review the barangay and try again.');
+      throw new Error(
+        'Records changed while confirming. Please review the barangay and try again.',
+      );
     }
     WaterStore.save(records);
-    await showNotice('Barangay saved', entry.name + '\nPio Duran, Albay');
-    location.href = 'barangays.html';
+    if (addBarangayDialog) {
+      addBarangayDialog.close();
+      showBarangays();
+    }
+    await showNotice('Barangay saved successfully', entry.name + '\nPio Duran, Albay');
+    if (!addBarangayDialog) location.href = 'barangays.html';
   } catch (error) {
-    AdminUI.message(error.message);
+    if (addBarangayDialog) {
+      document.getElementById('barangayDirectoryStatus').textContent = error.message;
+    } else AdminUI.message(error.message);
   } finally {
     savingBarangay = false;
     saveBarangay.disabled = false;
   }
 });
 retryBarangays.addEventListener('click', loadBarangayChoices);
-loadBarangayChoices();
+function openBarangayModal(code = '') {
+  if (savingBarangay) return;
+  originalBarangayCode = code;
+  barangayForm.reset();
+  barangaySearchChoice.setCustomValidity('');
+  closeBarangayOptions();
+  const heading = document.getElementById('barangayFormTitle');
+  const icon = document.createElement('i');
+  icon.className = 'modal-heading-icon bi bi-' + (code ? 'pencil-square' : 'geo-alt-fill');
+  icon.setAttribute('aria-hidden', 'true');
+  heading.replaceChildren(icon, document.createTextNode(code ? 'Edit Barangay' : 'Add Barangay'));
+  saveBarangay.textContent = code ? 'Save changes' : 'Save barangay';
+  addBarangayDialog.showModal();
+  loadBarangayChoices();
+}
+if (addBarangayDialog) {
+  document.getElementById('openAddBarangay').addEventListener('click', () => openBarangayModal());
+  for (const id of ['closeAddBarangay', 'cancelAddBarangay']) {
+    document.getElementById(id).addEventListener('click', () => addBarangayDialog.close());
+  }
+} else loadBarangayChoices();

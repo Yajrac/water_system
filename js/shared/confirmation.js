@@ -1,3 +1,16 @@
+function modalHeadingIcon(title) {
+  const icon = document.createElement('i');
+  const success = /success|saved successfully|generated successfully/i.test(title);
+  const danger = /delete|remove/i.test(title);
+  icon.className =
+    'modal-heading-icon bi bi-' +
+    (success ? 'check-circle-fill' : danger ? 'exclamation-triangle-fill' : 'clipboard-check');
+  if (success) icon.classList.add('is-success');
+  if (danger) icon.classList.add('is-danger');
+  icon.setAttribute('aria-hidden', 'true');
+  return icon;
+}
+
 // Reusable confirmation dialog. Nothing is saved until Confirm is selected.
 function confirmAction(title, message, confirmLabel, preview = null) {
   if (document.getElementById('actionConfirmation')) return Promise.resolve(false);
@@ -10,6 +23,7 @@ function confirmAction(title, message, confirmLabel, preview = null) {
     const heading = document.createElement('h2');
     heading.id = 'confirmationTitle';
     heading.textContent = title;
+    heading.prepend(modalHeadingIcon(title));
     const description = document.createElement('p');
     description.id = 'confirmationMessage';
     description.textContent = message;
@@ -67,6 +81,7 @@ function showNotice(title, message, preview = null) {
     const heading = document.createElement('h2');
     heading.id = 'noticeTitle';
     heading.textContent = title;
+    heading.prepend(modalHeadingIcon(title));
     const description = document.createElement('p');
     description.id = 'noticeMessage';
     description.textContent = message;

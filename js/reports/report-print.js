@@ -87,9 +87,9 @@ document.getElementById('printReport').addEventListener('click', () => {
   labels.forEach((label) => head.append(node('th', label)));
   const body = table.createTBody();
   if (consumption) {
-    document.querySelectorAll('#consumptionRows tr').forEach((row) => {
-      const copy = row.cloneNode(true);
-      body.append(copy);
+    consumptionReportRows.forEach((values) => {
+      const row = body.insertRow();
+      values.forEach((value) => row.append(node('td', String(value))));
     });
   } else
     reportMatchedBills.forEach(({ bill, customer, status }, index) => {

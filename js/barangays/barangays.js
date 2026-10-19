@@ -1,22 +1,18 @@
 const registrySearch = document.getElementById('barangaySearch');
 const registryPager = createPagination('barangayPagination', showBarangays);
 function registryAction(parent, title, path, callback, href) {
-  const button = document.createElement(href ? 'a' : 'button');
-  if (href) button.href = href;
-  else {
-    button.type = 'button';
-    button.addEventListener('click', callback);
-  }
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.addEventListener('click', href
+    ? () => openBarangayModal(new URL(href, location.href).searchParams.get('code'))
+    : callback);
   button.className = 'btn barangay-action' + (href ? ' action-edit' : '');
   button.title = title;
   button.setAttribute('aria-label', title);
-  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-  svg.setAttribute('viewBox', '0 0 24 24');
-  svg.setAttribute('aria-hidden', 'true');
-  const shape = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-  shape.setAttribute('d', path);
-  svg.appendChild(shape);
-  button.appendChild(svg);
+  const icon = document.createElement('i');
+  icon.className = 'bi bi-' + (href ? 'pencil-square' : 'trash');
+  icon.setAttribute('aria-hidden', 'true');
+  button.appendChild(icon);
   parent.appendChild(button);
 }
 function showBarangays() {

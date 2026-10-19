@@ -2195,16 +2195,16 @@ textarea:focus-visible,
 }
 
 /* Colored summary icons with neutral card surfaces. */
-.record-card:nth-child(4n + 1) .record-card-top svg {
+.record-card:nth-child(4n + 1) .record-card-top :is(svg, .bi) {
   color: #1685ba;
 }
-.record-card:nth-child(4n + 2) .record-card-top svg {
+.record-card:nth-child(4n + 2) .record-card-top :is(svg, .bi) {
   color: #8b65cc;
 }
-.record-card:nth-child(4n + 3) .record-card-top svg {
+.record-card:nth-child(4n + 3) .record-card-top :is(svg, .bi) {
   color: #c18122;
 }
-.record-card:nth-child(4n) .record-card-top svg {
+.record-card:nth-child(4n) .record-card-top :is(svg, .bi) {
   color: #238768;
 }
 .profile-summary > div:nth-child(1) .profile-icon {
@@ -2247,7 +2247,7 @@ textarea:focus-visible,
 .payment-history-summary > div:nth-child(3) svg {
   color: #8b65cc;
 }
-[data-theme='dark'] .record-card-top svg,
+[data-theme='dark'] .record-card-top :is(svg, .bi),
 [data-theme='dark'] .summary-label-with-icon svg,
 [data-theme='dark'] .profile-summary .profile-icon {
   filter: brightness(1.35);
@@ -2351,4 +2351,273 @@ html body table .btn:has(svg):hover {
     width: 44px;
     height: 44px;
   }
+}
+
+/* Shared sidebar icon font, including collapsed navigation. */
+.sidebar-menu-item > .bi {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  flex: 0 0 24px;
+  font-size: 20px;
+  line-height: 1;
+  color: inherit;
+}
+
+.sidebar-collapse .bi,
+.sidebar-tools .btn .bi {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 19px;
+  height: 19px;
+  font-size: 19px;
+  flex-shrink: 0;
+  transition: transform 0.3s ease;
+}
+.sidebar-compact .sidebar-collapse .bi {
+  transform: rotate(180deg);
+}
+.record-card-top > .bi,
+.profile-summary .profile-icon,
+.summary-label-with-icon > .bi {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  border-radius: 8px;
+  font-size: 21px;
+  line-height: 1;
+}
+.record-card:nth-child(4n + 1) .record-card-top > .bi,
+.profile-summary > div:nth-child(1) .profile-icon,
+.summary-label-with-icon > .bi {
+  color: #087de0;
+  background: #e0f2ff;
+}
+.record-card:nth-child(4n + 2) .record-card-top > .bi,
+.profile-summary > div:nth-child(2) .profile-icon {
+  color: #8545e6;
+  background: #f0e7ff;
+}
+.record-card:nth-child(4n + 3) .record-card-top > .bi,
+.profile-summary > div:nth-child(3) .profile-icon {
+  color: #e87808;
+  background: #fff0d5;
+}
+.record-card:nth-child(4n) .record-card-top > .bi,
+.profile-summary > div:nth-child(4) .profile-icon {
+  color: #079650;
+  background: #ddf8e9;
+}
+[data-theme='dark'] .record-card-top > .bi,
+[data-theme='dark'] .profile-summary .profile-icon,
+[data-theme='dark'] .summary-label-with-icon > .bi {
+  background: #153b50;
+  filter: brightness(1.35);
+}
+@media (prefers-reduced-motion: reduce) {
+  .sidebar-collapse .bi {
+    transition: none;
+  }
+}
+
+.payment-history-summary > div:nth-child(1) .bi {
+  color: #079650;
+  background: #ddf8e9;
+}
+.payment-history-summary > div:nth-child(2) .bi {
+  color: #087de0;
+  background: #e0f2ff;
+}
+.payment-history-summary > div:nth-child(3) .bi {
+  color: #8545e6;
+  background: #f0e7ff;
+}
+
+/* Compact dashboard overview heading. */
+html[data-page='dashboard'] .dashboard-records-heading {
+  padding: 14px 20px;
+  min-height: 0;
+}
+html[data-page='dashboard'] .dashboard-records-heading h2 {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.4;
+}
+@media (max-width: 600px) {
+  html[data-page='dashboard'] .dashboard-records-heading {
+    padding: 12px 16px;
+  }
+}
+
+/* Consistent compact panel headings throughout the admin website. */
+html.theme-teal .panel-header {
+  padding: 14px 20px;
+  min-height: 0;
+}
+html.theme-teal .panel-header h2 {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.4;
+}
+.customer-overview .metric-symbol {
+  color: #087de0;
+  background: #e0f2ff;
+}
+.customer-overview .metric-symbol.verified {
+  color: #079650;
+  background: #ddf8e9;
+}
+.customer-overview .metric-symbol.pending {
+  color: #db7308;
+  background: #fff0d5;
+}
+.metric-symbol > .bi {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 23px;
+  line-height: 1;
+}
+#registryTitle > .bi {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  color: #087de0;
+  background: #e0f2ff;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+[data-theme='dark'] .customer-overview .metric-symbol,
+[data-theme='dark'] #registryTitle > .bi {
+  background: #153b50;
+  filter: brightness(1.35);
+}
+@media (max-width: 600px) {
+  html.theme-teal .panel-header {
+    padding: 12px 16px;
+  }
+}
+
+.billing-navigation :is(a, button) > .bi,
+.profile-tabs [role='tab'] > .bi {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+  font-size: 18px;
+  line-height: 1;
+  color: inherit;
+}
+
+.btn > .bi {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 18px;
+  line-height: 1;
+}
+html body table .btn:has(> .bi) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  padding: 0;
+  color: var(--color-primary);
+  background: var(--card-tint);
+  border-color: var(--color-border-strong);
+}
+html body table .btn > .bi { font-size: 20px; }
+@media (max-width: 600px) {
+  html body table .btn:has(> .bi) {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+  }
+}
+
+/* Destructive actions remain distinct from view and edit controls. */
+html body table .btn:is(.action-delete, :has(.bi-trash), :has(.bi-trash-fill)) {
+  color: #dc2626;
+  background: #fff1f2;
+  border-color: #fecdd3;
+}
+html body table .btn:is(.action-delete, :has(.bi-trash), :has(.bi-trash-fill)):hover {
+  color: #b91c1c;
+  background: #ffe4e6;
+  border-color: #fb7185;
+}
+html[data-theme='dark'] body table .btn:is(.action-delete, :has(.bi-trash), :has(.bi-trash-fill)) {
+  color: #ff8c98;
+  background: #45212d;
+  border-color: #a94356;
+}
+
+/* View actions use purple to distinguish them from blue edit actions. */
+html body table .btn:is(.action-view, .action-receipt, :has(> .bi-eye)) {
+  color: #7c3aed;
+  background: #f3eaff;
+  border-color: #d9bfff;
+}
+html body table .btn:is(.action-view, .action-receipt, :has(> .bi-eye)):hover {
+  color: #6d28d9;
+  background: #ead9ff;
+  border-color: #b58aec;
+}
+html[data-theme='dark'] body table .btn:is(.action-view, .action-receipt, :has(> .bi-eye)) {
+  color: #d2afff;
+  background: #302046;
+  border-color: #8055ad;
+}
+html[data-theme='dark'] body table .btn:is(.action-view, .action-receipt, :has(> .bi-eye)):hover {
+  color: #e6d3ff;
+  background: #432b60;
+  border-color: #b58aec;
+}
+
+/* Shared color for pagination and form navigation. */
+html body :is(.pager-controls .btn, .step-navigation-button) {
+  color: #ffffff;
+  background: #087fb5;
+  border: 1px solid #087fb5;
+  opacity: 1;
+}
+html body :is(.pager-controls .btn, .step-navigation-button):hover:not(:disabled) {
+  color: #ffffff;
+  background: #06658f;
+  border-color: #06658f;
+}
+html body :is(.pager-controls .btn, .step-navigation-button):disabled {
+  color: #316e92;
+  background: #dceefa;
+  border-color: #a9d1e9;
+  opacity: 1;
+  cursor: not-allowed;
+}
+html[data-theme='dark'] body :is(.pager-controls .btn, .step-navigation-button):disabled {
+  color: #94c8e7;
+  background: #193e55;
+  border-color: #38647e;
+}
+
+html body :is(.pager-controls .btn, .step-navigation-button):disabled,
+html[data-theme='dark'] body :is(.pager-controls .btn, .step-navigation-button):disabled {
+  color: #ffffff;
+  background: #438cb3;
+  border-color: #438cb3;
+  opacity: 1;
+  cursor: not-allowed;
 }

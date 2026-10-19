@@ -214,29 +214,28 @@ profileTabs.forEach((tab, index) => {
   });
 });
 
-// Inline SVG icons inherit the current theme and stay decorative beside text.
-function addProfileIcon(selector, path) {
+// Decorative icon fonts keep profile actions and summary cards consistent.
+function addProfileIcon(selector) {
+  const names = {
+    '#editProfile': 'pencil-square',
+    '#profileApplication': 'file-earmark-text',
+    '#profilePayments': 'clock-history',
+    '.profile-summary > div:nth-child(1) span': 'wallet2',
+    '.profile-summary > div:nth-child(2) span': 'check-circle-fill',
+    '.profile-summary > div:nth-child(3) span': 'droplet-fill',
+    '.profile-summary > div:nth-child(4) span': 'receipt',
+  };
   document.querySelectorAll(selector).forEach((element) => {
-    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    svg.setAttribute('viewBox', '0 0 24 24');
-    svg.setAttribute('aria-hidden', 'true');
-    svg.classList.add('profile-icon');
-    const shape = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    shape.setAttribute('d', path);
-    svg.appendChild(shape);
-    element.prepend(svg);
+    const icon = document.createElement('i');
+    icon.className = 'profile-icon bi bi-' + names[selector];
+    icon.setAttribute('aria-hidden', 'true');
+    element.prepend(icon);
   });
 }
-addProfileIcon('#editProfile', 'M15 5l4 4M4 20l5-1L20 8a3 3 0 0 0-4-4L5 15z');
-addProfileIcon('#profileApplication', 'M14 3H5v18h14V8zM14 3v5h5M8 12h8M8 16h5');
-addProfileIcon('#profilePayments', 'M4 8a9 9 0 1 1-1 8M3 3v5h5M12 7v5l3 2');
-addProfileIcon('.profile-summary > div:nth-child(1) span', 'M3 6h18v14H3zM3 10h18M16 14h5');
-addProfileIcon('.profile-summary > div:nth-child(2) span', 'M5 12l4 4L19 6M4 21h16');
-addProfileIcon(
-  '.profile-summary > div:nth-child(3) span',
-  'M12 3S5 11 5 15a7 7 0 0 0 14 0c0-4-7-12-7-12z',
-);
-addProfileIcon(
-  '.profile-summary > div:nth-child(4) span',
-  'M5 3h14v18l-3-2-4 2-4-2-3 2zM8 8h8M8 12h8',
-);
+addProfileIcon('#editProfile');
+addProfileIcon('#profileApplication');
+addProfileIcon('#profilePayments');
+addProfileIcon('.profile-summary > div:nth-child(1) span');
+addProfileIcon('.profile-summary > div:nth-child(2) span');
+addProfileIcon('.profile-summary > div:nth-child(3) span');
+addProfileIcon('.profile-summary > div:nth-child(4) span');

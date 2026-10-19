@@ -34,9 +34,27 @@ function renderDashboardCharts() {
     details.append(summary, table);
     container.appendChild(details);
   }
-  function renderMonthlyChart(id, title, values, format, line = false) {
+  function renderMonthlyChart(
+    id,
+    title,
+    values,
+    format,
+    line = false,
+    labels = monthKeys.map(monthLabel),
+  ) {
     const container = document.getElementById(id);
-    const svg = chartNode('svg', { viewBox: '0 0 560 260', role: 'img', 'aria-label': title });
+    const availableWidth = Math.max(0, container.clientWidth - 44);
+    const chartWidth = Math.max(560, 110 + values.length * 90,
+      id === 'consumptionChart' ? availableWidth : 0);
+    const svg = chartNode('svg', {
+      viewBox: '0 0 ' + chartWidth + ' 260',
+      role: 'img',
+      'aria-label': title,
+    });
+    if (labels.length > 6) {
+      svg.style.minWidth = chartWidth + 'px';
+      container.style.overflowX = 'auto';
+    }
     svg.appendChild(chartNode('title', {}, title));
     const defs = chartNode('defs');
     const colors = [
@@ -63,7 +81,9 @@ function renderDashboardCharts() {
     const points = [];
     for (let tick = 0; tick <= 4; tick++) {
       const y = 210 - tick * 45;
-      svg.appendChild(chartNode('line', { x1: 90, y1: y, x2: 540, y2: y, class: 'chart-grid' }));
+      svg.appendChild(
+        chartNode('line', { x1: 90, y1: y, x2: chartWidth - 20, y2: y, class: 'chart-grid' }),
+      );
       svg.appendChild(
         chartNode(
           'text',
@@ -73,7 +93,7 @@ function renderDashboardCharts() {
       );
     }
     values.forEach((value, index) => {
-      const x = 125 + index * 76;
+      const x = 125 + index * ((chartWidth - 180) / Math.max(values.length - 1, 1));
       const y = 210 - (value / maximum) * 180;
       points.push(x + ',' + y);
       const mark = chartNode(
@@ -83,7 +103,7 @@ function renderDashboardCharts() {
           : { x: x - 19, y, width: 38, height: 210 - y, rx: 4, class: 'chart-bar' },
       );
       if (!line) mark.setAttribute('fill', 'url(#' + id + '-gradient-' + (index % 3) + ')');
-      mark.appendChild(chartNode('title', {}, monthLabel(monthKeys[index]) + ': ' + format(value)));
+      mark.appendChild(chartNode('title', {}, labels[index] + ': ' + format(value)));
       svg.appendChild(mark);
       svg.appendChild(
         chartNode(
@@ -96,7 +116,7 @@ function renderDashboardCharts() {
         chartNode(
           'text',
           { x, y: 239, 'text-anchor': 'middle', class: 'chart-label' },
-          monthLabel(monthKeys[index]),
+          labels[index].replace(/^Barangay /, 'Brgy '),
         ),
       );
     });
@@ -115,17 +135,23 @@ function renderDashboardCharts() {
       empty.textContent = 'No records for these months yet.';
       container.appendChild(empty);
     }
-    chartTable(container, monthKeys.map(monthLabel), values, format);
+    chartTable(container, labels, values, format);
+    if (id === 'consumptionChart') {
+      container.chartResizeObserver?.disconnect();
+      const initialWidth = container.clientWidth;
+      container.chartResizeObserver = new ResizeObserver(() => {
+        if (Math.abs(container.clientWidth - initialWidth) < 2) return;
+        container.chartResizeObserver.disconnect();
+        container.replaceChildren();
+        renderMonthlyChart(id, title, values, format, line, labels);
+      });
+      container.chartResizeObserver.observe(container);
+    }
   }
   const collections = monthKeys.map((month) =>
     chartRecords.payments
       .filter((payment) => payment.date?.slice(0, 7) === month)
       .reduce((sum, payment) => sum + payment.amount, 0),
-  );
-  const consumption = monthKeys.map((month) =>
-    chartRecords.bills
-      .filter((bill) => bill.cycle === month)
-      .reduce((sum, bill) => sum + (Number.isFinite(bill.consumption) ? bill.consumption : 0), 0),
   );
   renderMonthlyChart(
     'collectionsChart',
@@ -133,12 +159,26 @@ function renderDashboardCharts() {
     collections,
     (value) => WaterStore.money(value),
   );
-  renderConsumptionChart(document.getElementById('consumptionChart'), monthKeys, consumption);
-  chartTable(
-    document.getElementById('consumptionChart'),
-    monthKeys.map(monthLabel),
-    consumption,
-    (value) => Number(value.toFixed(3)).toLocaleString() + ' m³',
+  // Use the same six-month coverage and bar style as monthly collections.
+  const barangayVolumes = new Map();
+  chartRecords.bills
+    .filter((bill) => monthKeys.includes(bill.cycle))
+    .forEach((bill) => {
+      const customer = chartRecords.customers.find((item) => item.id === bill.customerId);
+      const barangay = bill.barangay || customer?.barangay || 'Unassigned';
+      const volume = Number.isFinite(bill.consumption) ? bill.consumption : 0;
+      barangayVolumes.set(barangay, (barangayVolumes.get(barangay) || 0) + volume);
+    });
+  const barangayNames = [...barangayVolumes.keys()].sort((a, b) =>
+    a.localeCompare(b, undefined, { numeric: true }),
+  );
+  renderMonthlyChart(
+    'consumptionChart',
+    'Barangay consumption - last six months',
+    barangayNames.map((name) => barangayVolumes.get(name)),
+    (value) => Number(value.toFixed(3)).toLocaleString() + ' m\u00b3',
+    false,
+    barangayNames,
   );
 
   const statusLabels = ['Paid', 'Unpaid', 'Overdue'];

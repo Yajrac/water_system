@@ -1,7 +1,4 @@
-const feedbackForm = document.getElementById('feedbackForm');
 const feedbackPager = createPagination('feedbackPagination', showFeedback);
-let savingFeedback = false;
-AdminUI.options(document.getElementById('feedbackCustomer'), WaterStore.load().customers);
 function feedbackBadge(parent, status) {
   const badge = document.createElement('span');
   badge.className =
@@ -54,8 +51,7 @@ function showFeedback() {
     view.classList.add('action-view', 'table-icon-button');
     view.title = 'View feedback';
     view.setAttribute('aria-label', 'View feedback');
-    view.innerHTML =
-      '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>';
+    view.innerHTML = '<i class="bi bi-eye" aria-hidden="true"></i>';
   });
   AdminUI.empty(body, 6, 'No feedback matches your filters.');
 }
@@ -151,39 +147,6 @@ async function viewFeedback(id) {
     AdminUI.message(error.message);
   }
 }
-feedbackForm.addEventListener('submit', async (event) => {
-  event.preventDefault();
-  if (savingFeedback) return;
-  savingFeedback = true;
-  document.getElementById('feedbackSave').disabled = true;
-  try {
-    const records = WaterStore.load();
-    const entry = AccountRecords.addFeedback(
-      records,
-      document.getElementById('feedbackCustomer').value,
-      document.getElementById('feedbackCategory').value,
-      document.getElementById('feedbackMessage').value,
-    );
-    const accepted = await confirmAction(
-      'Save customer feedback?',
-      entry.category + '\n\n' + entry.message,
-      'Save feedback',
-    );
-    if (!accepted) return;
-    const latest = WaterStore.load();
-    AccountRecords.addFeedback(latest, entry.customerId, entry.category, entry.message);
-    WaterStore.save(latest);
-    feedbackForm.reset();
-    showFeedback();
-    document.querySelector('.service-entry').open = false;
-    await showNotice('Feedback saved successfully', 'Customer feedback recorded.');
-  } catch (error) {
-    AdminUI.message(error.message);
-  } finally {
-    savingFeedback = false;
-    document.getElementById('feedbackSave').disabled = false;
-  }
-});
 document.getElementById('feedbackSearch').addEventListener('input', () => {
   feedbackPager.page = 1;
   showFeedback();
@@ -194,19 +157,15 @@ document.getElementById('feedbackStatus').addEventListener('change', () => {
 });
 showFeedback();
 async function loadSampleFeedback() {
-  const button = document.getElementById('feedbackSave');
-  button.disabled = true;
   document.getElementById('feedbackRows').setAttribute('aria-busy', 'true');
   try {
     await fetchSampleServiceRecords();
-    AdminUI.options(document.getElementById('feedbackCustomer'), WaterStore.load().customers);
     showFeedback();
   } catch {
     AdminUI.message(
       'Could not load sample records. Use a local web preview; existing records are still available.',
     );
   } finally {
-    button.disabled = false;
     document.getElementById('feedbackRows').setAttribute('aria-busy', 'false');
   }
 }

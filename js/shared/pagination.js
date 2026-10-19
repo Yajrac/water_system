@@ -7,12 +7,12 @@ function createPagination(containerId, onChange) {
   controls.className = 'pager-controls';
   const previous = document.createElement('button');
   previous.type = 'button';
-  previous.className = 'btn';
+  previous.className = 'btn btn-primary step-navigation-button';
   previous.textContent = 'Previous';
   const label = document.createElement('span');
   const next = document.createElement('button');
   next.type = 'button';
-  next.className = 'btn';
+  next.className = 'btn btn-primary step-navigation-button';
   next.textContent = 'Next';
   controls.append(previous, label, next);
   container.append(summary, controls);

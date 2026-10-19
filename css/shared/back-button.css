@@ -60,3 +60,17 @@
     display: none !important;
   }
 }
+
+/* Consistent navigation color on admin, authentication and print-tool pages. */
+html body .back-icon-button,
+html body .back-to-login {
+  color: #ffffff;
+  background: #087fb5;
+  border: 1px solid #087fb5;
+}
+html body .back-icon-button:hover,
+html body .back-to-login:hover {
+  color: #ffffff;
+  background: #06658f;
+  border-color: #06658f;
+}

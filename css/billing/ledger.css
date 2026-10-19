@@ -191,7 +191,7 @@
   align-items: center;
   gap: 8px;
 }
-.ledger-summary-heading svg {
+.ledger-summary-heading :is(svg, .bi) {
   width: 18px;
   height: 18px;
 }
@@ -235,7 +235,7 @@
   font: inherit;
   font-size: 0.8rem;
 }
-.ledger-heading-search > svg {
+.ledger-heading-search > :is(svg, .bi) {
   position: absolute;
   top: 13px;
   left: 12px;
@@ -288,7 +288,7 @@
   white-space: nowrap;
   min-height: 44px;
 }
-.ledger-columns .ledger-heading-tools .btn svg {
+.ledger-columns .ledger-heading-tools .btn :is(svg, .bi) {
   width: 18px;
   height: 18px;
 }
@@ -355,7 +355,7 @@
   background: #1198b81a;
   color: var(--color-primary-deep);
 }
-.setup-modal-icon svg {
+.setup-modal-icon :is(svg, .bi) {
   width: 26px;
   height: 26px;
 }
@@ -389,7 +389,7 @@
   color: var(--color-ink-muted);
   cursor: pointer;
 }
-.setup-modal-close svg {
+.setup-modal-close :is(svg, .bi) {
   width: 18px;
   height: 18px;
 }
@@ -502,7 +502,7 @@
   background: var(--table-heading);
   color: var(--color-ink-muted);
 }
-.ledger-card-icon svg {
+.ledger-card-icon :is(svg, .bi) {
   width: 23px;
   height: 23px;
 }
@@ -525,35 +525,39 @@
   align-items: center;
   gap: 7px;
 }
-.ledger-total-label svg {
+.ledger-total-label :is(svg, .bi) {
   width: 19px;
   height: 19px;
   flex-shrink: 0;
 }
 
 .billing-setup-summary .summary-area .ledger-card-icon {
-  color: #1685ba;
+  color: #0284ed;
+  background: #e0f2ff;
 }
 .billing-setup-summary .summary-month .ledger-card-icon {
-  color: #8b65cc;
+  color: #8545e6;
+  background: #f0e7ff;
 }
 .billing-setup-summary .summary-due .ledger-card-icon {
-  color: #b97a19;
+  color: #d96c08;
+  background: #fff0d5;
 }
 .billing-setup-summary .summary-rate .ledger-card-icon {
-  color: #238768;
+  color: #079650;
+  background: #ddf8e9;
 }
-.ledger-totals > div:nth-child(1) .ledger-total-label svg {
-  color: #1685ba;
+.ledger-totals > div:nth-child(1) .ledger-total-label :is(svg, .bi) {
+  color: #0284ed;
 }
-.ledger-totals > div:nth-child(2) .ledger-total-label svg {
-  color: #079ab1;
+.ledger-totals > div:nth-child(2) .ledger-total-label :is(svg, .bi) {
+  color: #00a9bf;
 }
-.ledger-totals > div:nth-child(3) .ledger-total-label svg {
-  color: #238768;
+.ledger-totals > div:nth-child(3) .ledger-total-label :is(svg, .bi) {
+  color: #079650;
 }
-[data-theme='dark'] .ledger-card-icon svg,
-[data-theme='dark'] .ledger-total-label svg {
+[data-theme='dark'] .ledger-card-icon :is(svg, .bi),
+[data-theme='dark'] .ledger-total-label :is(svg, .bi) {
   filter: brightness(1.35);
 }
 
@@ -569,7 +573,7 @@
   border-radius: 50%;
   flex-shrink: 0;
 }
-.ledger-completion.is-completed svg {
+.ledger-completion.is-completed :is(svg, .bi) {
   width: 16px;
   height: 16px;
 }
@@ -589,4 +593,43 @@
   color: #ffe1a1;
   background: #473416;
   border-color: #94743a;
+}
+
+/* Icon font sizing follows the existing meter-entry layout. */
+.bi {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 20px;
+  line-height: 1;
+}
+.sidebar-menu-item > .bi {
+  width: 24px;
+  height: 24px;
+}
+.billing-navigation .bi {
+  font-size: 18px;
+}
+.ledger-card-icon .bi {
+  font-size: 21px;
+}
+.ledger-total-label .bi {
+  font-size: 19px;
+}
+.ledger-completion.is-completed .bi {
+  font-size: 16px;
+}
+
+.ledger-totals .ledger-total-label .bi {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+}
+.ledger-totals > div:nth-child(1) .bi { background: #e0f2ff; }
+.ledger-totals > div:nth-child(2) .bi { background: #ddf9fc; }
+.ledger-totals > div:nth-child(3) .bi { background: #ddf8e9; }
+[data-theme='dark'] .billing-setup-summary .ledger-card-icon,
+[data-theme='dark'] .ledger-totals .ledger-total-label .bi {
+  background: #153b50;
 }

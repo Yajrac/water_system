@@ -36,17 +36,31 @@ dialog.confirmation-dialog > h2,
 }
 dialog.confirmation-dialog > h2::before,
 .customer-import-heading h2::before {
-  content: '';
-  display: block;
+  content: none;
+}
+.modal-heading-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   width: 40px;
   height: 40px;
-  flex-shrink: 0;
+  flex: 0 0 40px;
   border-radius: 10px;
-  background-color: #1198b81a;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23087fa3' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='4' y='3' width='16' height='18' rx='3'/%3E%3Cpath d='m8 12 3 3 5-6'/%3E%3C/svg%3E");
-  background-size: 24px;
-  background-position: center;
-  background-repeat: no-repeat;
+  font-size: 24px;
+  color: #087de0;
+  background: #e0f2ff;
+}
+.modal-heading-icon.is-success {
+  color: #079650;
+  background: #ddf8e9;
+}
+.modal-heading-icon.is-danger {
+  color: #dc2626;
+  background: #fff1f2;
+}
+[data-theme='dark'] .modal-heading-icon {
+  background: #153b50;
+  filter: brightness(1.35);
 }
 dialog.confirmation-dialog > p {
   font-size: 0.85rem;
@@ -133,4 +147,37 @@ dialog.customer-import-dialog .admin-body {
   dialog {
     box-shadow: none;
   }
+}
+
+.entry-modal-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.entry-modal-heading h2 {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0;
+  font-size: 1.2rem;
+  line-height: 1.4;
+}
+.entry-modal-heading > .btn { flex-shrink: 0; }
+.entry-modal-description { margin: 0; line-height: 1.6; }
+dialog.ledger-setup-dialog.confirmation-dialog {
+  width: min(600px, calc(100% - 28px));
+  padding: 28px;
+}
+#ledgerSetupDialog #ledgerSetupForm {
+  padding: 0;
+  gap: 20px;
+}
+
+/* Keep close controls to one border, including keyboard focus. */
+dialog :is(button[aria-label^='Close'], .receipt-close, .setup-modal-close):is(:focus, :focus-visible) {
+  outline: none;
+  box-shadow: none;
+  border-color: var(--color-primary, #087fa3);
+  background: var(--table-heading);
 }

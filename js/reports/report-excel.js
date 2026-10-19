@@ -98,14 +98,7 @@ function exportCurrentReport() {
   const rows = [];
   if (consumption) {
     rows.push(['Barangay', 'Billed accounts', 'Consumption (m³)', 'Average per account (m³)']);
-    document.querySelectorAll('#consumptionRows tr').forEach((row) => {
-      if (row.cells.length === 4)
-        rows.push(
-          Array.from(row.cells, (cell, index) =>
-            index ? Number(cell.textContent) : cell.textContent,
-          ),
-        );
-    });
+    consumptionReportRows.forEach((values) => rows.push([...values]));
   } else {
     rows.push([
       'Submitter no.',

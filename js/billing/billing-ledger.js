@@ -95,17 +95,9 @@ function renderLedger() {
       if (isCompleted(customer)) {
         state.setAttribute('aria-label', 'Completed');
         state.title = 'Completed';
-        const check = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-        check.setAttribute('viewBox', '0 0 24 24');
-        check.setAttribute('fill', 'none');
-        check.setAttribute('stroke', 'currentColor');
-        check.setAttribute('stroke-width', '3');
-        check.setAttribute('stroke-linecap', 'round');
-        check.setAttribute('stroke-linejoin', 'round');
+        const check = document.createElement('i');
+        check.className = 'bi bi-check-lg';
         check.setAttribute('aria-hidden', 'true');
-        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-        path.setAttribute('d', 'm5 12 4 4L19 6');
-        check.appendChild(path);
         state.appendChild(check);
       } else state.textContent = 'Pending';
       button.append(identity, state);
@@ -156,9 +148,9 @@ function selectConsumer(id) {
     .forEach((f) => (f.disabled = false));
   const draft = meterDrafts[id] || { current: '', connection: 'None', late: '0', other: '0' };
   document.getElementById('ledgerPrevious').value = customer.reading;
-  entryForm.elements.current.min = customer.reading;
-  for (const key of ['current', 'connection', 'late', 'other'])
-    entryForm.elements[key].value = draft[key];
+  entryForm.elements.consumption.value =
+    draft.current === '' ? '' : Number((Number(draft.current) - customer.reading).toFixed(3));
+  for (const key of ['connection', 'late', 'other']) entryForm.elements[key].value = draft[key];
   document.getElementById('ledgerSelected').textContent = customer.name;
   document.getElementById('ledgerEntryStatus').textContent = isCompleted(customer)
     ? '\u2713 Completed'
@@ -166,11 +158,18 @@ function selectConsumer(id) {
   renderLedger();
   updateTotals();
 }
+function meterCurrentFromConsumption(previous, consumption) {
+  if (!/^\d+(\.\d{1,3})?$/.test(consumption)) return '';
+  const usage = Number(consumption);
+  const current = Number(previous || 0) + usage;
+  if (!Number.isFinite(current) || current > Number.MAX_SAFE_INTEGER / 1000) return '';
+  return String(Number(current.toFixed(3)));
+}
 function readEntry() {
   const customer = billingRecords.customers.find((c) => c.id === selectedConsumerId);
   return {
     previous: customer?.reading,
-    current: entryForm.elements.current.value,
+    current: meterCurrentFromConsumption(customer?.reading, entryForm.elements.consumption.value),
     connection: entryForm.elements.connection.value,
     late: entryForm.elements.late.value,
     other: entryForm.elements.other.value,
@@ -179,6 +178,7 @@ function readEntry() {
 }
 function updateTotals() {
   const draft = readEntry();
+  entryForm.elements.current.value = draft.current;
   const setup = setupForBarangay();
   const usage =
     draft.current === '' ? 0 : Math.max(0, Number(draft.current) - Number(draft.previous || 0));
@@ -224,7 +224,7 @@ entryForm.addEventListener('submit', async (event) => {
   if (!customer || !validDraft(customer, draft))
     return showNotice(
       'Entry not saved',
-      'Check the reading and charges. Current reading must be at least the previous reading.',
+      'Enter a valid non-negative consumption (up to 3 decimal places) and valid charges.',
     );
   meterDrafts = loadLedgerEntries();
   meterDrafts[customer.id] = { ...draft, completed: true };
@@ -261,7 +261,7 @@ entryForm.addEventListener('submit', async (event) => {
   if (next) {
     document.getElementById('ledgerSearch').value = '';
     selectConsumer(next.id);
-    entryForm.elements.current.focus();
+    entryForm.elements.consumption.focus();
     return;
   }
   renderLedger();
@@ -453,7 +453,7 @@ document.getElementById('generateLedgerBills').addEventListener('click', async (
   if (!pending.length)
     return showNotice(
       'No readings entered',
-      'Enter at least one current meter reading before generating bills.',
+      'Enter and save consumer consumption before generating bills.',
     );
   const entrySnapshot = localStorage.getItem(ledgerEntryKey);
   generatingBills = true;

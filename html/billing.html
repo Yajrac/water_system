@@ -21,6 +21,10 @@
     <link rel="stylesheet" href="../css/shared/modals.css" />
     <link rel="stylesheet" href="../css/shared/responsive-cards.css" />
     <link rel="stylesheet" href="../css/shared/form-controls.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.2/font/bootstrap-icons.min.css"
+    />
   </head>
   <body>
     <div class="sidebar-overlay" id="overlay"></div>
@@ -45,165 +49,59 @@
         <ul class="sidebar-menu">
           <li>
             <a href="index.html" class="sidebar-menu-item">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <rect x="3" y="3" width="7" height="9" rx="1.5" />
-                <rect x="14" y="3" width="7" height="5" rx="1.5" />
-                <rect x="14" y="12" width="7" height="9" rx="1.5" />
-                <rect x="3" y="16" width="7" height="5" rx="1.5" />
-              </svg>
+              <i class="bi bi-grid" aria-hidden="true"></i>
               <span>Dashboard Overview</span>
             </a>
           </li>
           <li>
             <a href="customers.html" class="sidebar-menu-item">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-                <circle cx="9" cy="7" r="4" />
-                <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-                <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-              </svg>
+              <i class="bi bi-people" aria-hidden="true"></i>
               <span>Customer Management</span>
             </a>
           </li>
           <li>
             <a href="barangays.html" class="sidebar-menu-item"
-              ><svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <path d="m3 6 6-3 6 3 6-3v15l-6 3-6-3-6 3zM9 3v15M15 6v15" /></svg
-              ><span>Barangay Registry</span></a
+              ><i class="bi bi-map" aria-hidden="true"></i><span>Barangay Registry</span></a
             >
           </li>
           <li>
             <a href="billing.html" class="sidebar-menu-item active" aria-current="page">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                <path d="M14 2v6h6" />
-                <path d="M9 15h6M9 11h2" />
-              </svg>
+              <i class="bi bi-file-earmark-text" aria-hidden="true"></i>
               <span>Billing &amp; Meter Reading</span>
             </a>
           </li>
           <li>
             <a href="payment-history.html" class="sidebar-menu-item">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <rect x="1" y="4" width="22" height="16" rx="2" />
-                <line x1="1" y1="10" x2="23" y2="10" />
-              </svg>
+              <i class="bi bi-credit-card" aria-hidden="true"></i>
               <span>Payment History</span>
             </a>
           </li>
           <li>
             <a href="broadcast.html" class="sidebar-menu-item">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-                <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-              </svg>
+              <i class="bi bi-bell" aria-hidden="true"></i>
               <span>Broadcast &amp; Notifications</span>
             </a>
           </li>
           <li>
             <a href="disconnected.html" class="sidebar-menu-item"
-              ><svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <path d="M8 3v5M16 3v5M5 8h14v3a7 7 0 0 1-7 7v3M3 3l18 18" /></svg
-              ><span>Disconnected Accounts</span></a
+              ><i class="bi bi-plug" aria-hidden="true"></i><span>Disconnected Accounts</span></a
             >
           </li>
           <li>
             <a href="feedback.html" class="sidebar-menu-item"
-              ><svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <path
-                  d="M21 11a8 8 0 0 1-8 8H6l-4 3V5a3 3 0 0 1 3-3h8a8 8 0 0 1 8 9zM7 8h8M7 12h5"
-                /></svg
+              ><i class="bi bi-chat-left-text" aria-hidden="true"></i
               ><span>Customer Feedback</span></a
             >
           </li>
           <li>
             <a href="reports.html" class="sidebar-menu-item">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <line x1="18" y1="20" x2="18" y2="10" />
-                <line x1="12" y1="20" x2="12" y2="4" />
-                <line x1="6" y1="20" x2="6" y2="14" />
-              </svg>
+              <i class="bi bi-bar-chart" aria-hidden="true"></i>
               <span>Reports &amp; Analytics</span>
             </a>
           </li>
           <li>
             <a href="settings.html" class="sidebar-menu-item">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <circle cx="12" cy="12" r="3" />
-                <path
-                  d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"
-                />
-              </svg>
+              <i class="bi bi-gear" aria-hidden="true"></i>
               <span>Settings</span>
             </a>
           </li>
@@ -234,17 +132,7 @@
             </div>
           </div>
           <button class="menu-toggle" id="menuToggle" aria-label="Open menu" aria-expanded="false">
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-            >
-              <line x1="3" y1="6" x2="21" y2="6" />
-              <line x1="3" y1="12" x2="21" y2="12" />
-              <line x1="3" y1="18" x2="21" y2="18" />
-            </svg>
+            <i class="bi bi-list" aria-hidden="true"></i>
           </button>
         </div>
 
@@ -257,13 +145,10 @@
           </header>
           <nav class="billing-navigation" aria-label="Billing sections">
             <a href="billing.html" aria-current="page"
-              ><svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M4 4h16v16H4z M8 8h2 M14 8h2 M8 12h2 M14 12h2 M8 16h2 M14 16h2" /></svg
-              ><span>Meter Entry</span></a
+              ><i class="bi bi-calculator" aria-hidden="true"></i><span>Meter Entry</span></a
             >
             <a href="generated-bills.html"
-              ><svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16h16V8z M14 2v6h6 M8 12h8 M8 16h5" /></svg
+              ><i class="bi bi-file-earmark-text" aria-hidden="true"></i
               ><span>Generated Bills</span></a
             >
           </nav>
@@ -275,15 +160,7 @@
           <section class="billing-setup-summary" aria-label="Selected billing setup">
             <div class="ledger-summary-card summary-area">
               <span class="ledger-card-icon" aria-hidden="true"
-                ><svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="1.7"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                >
-                  <path d="m3 6 6-3 6 3 6-3v15l-6 3-6-3-6 3ZM9 3v15M15 6v15" /></svg
+                ><i class="bi bi-map" aria-hidden="true"></i
               ></span>
               <div class="ledger-card-details">
                 <span>Target barangay</span><strong id="ledgerBarangay">Select barangay</strong>
@@ -291,16 +168,7 @@
             </div>
             <div class="ledger-summary-card summary-month">
               <span class="ledger-card-icon" aria-hidden="true"
-                ><svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="1.7"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                >
-                  <rect x="3" y="5" width="18" height="16" rx="2" />
-                  <path d="M7 3v4M17 3v4M3 11h18M7 15h3" /></svg
+                ><i class="bi bi-calendar3" aria-hidden="true"></i
               ></span>
               <div class="ledger-card-details">
                 <span>Billing month</span><strong id="ledgerMonth"></strong>
@@ -308,16 +176,7 @@
             </div>
             <div class="ledger-summary-card summary-due">
               <span class="ledger-card-icon" aria-hidden="true"
-                ><svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="1.7"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                >
-                  <circle cx="12" cy="12" r="9" />
-                  <path d="M12 7v5l3 2" /></svg
+                ><i class="bi bi-clock" aria-hidden="true"></i
               ></span>
               <div class="ledger-card-details">
                 <span>Due date</span><strong id="ledgerDue">Not configured</strong>
@@ -325,15 +184,7 @@
             </div>
             <div class="ledger-summary-card summary-rate">
               <span class="ledger-card-icon" aria-hidden="true"
-                ><svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="1.7"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                >
-                  <path d="M6 3h12v18l-3-2-3 2-3-2-3 2ZM9 8h6M9 12h6M9 16h3" /></svg
+                ><i class="bi bi-receipt" aria-hidden="true"></i
               ></span>
               <div class="ledger-card-details">
                 <span>Rate / m&sup3;</span><strong id="ledgerRate">Not configured</strong>
@@ -354,15 +205,7 @@
                 <div class="ledger-heading-tools">
                   <label class="ledger-heading-search"
                     ><span class="visually-hidden">Search consumer</span
-                    ><svg
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="1.8"
-                      aria-hidden="true"
-                    >
-                      <circle cx="10" cy="10" r="6" />
-                      <path d="m15 15 6 6" /></svg
+                    ><i class="bi bi-search" aria-hidden="true"></i
                     ><input
                       id="ledgerSearch"
                       type="search"
@@ -370,15 +213,7 @@
                       aria-label="Search consumer or account"
                   /></label>
                   <button type="button" class="btn" id="changeLedgerSetup">
-                    <svg
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="1.8"
-                      aria-hidden="true"
-                    >
-                      <path d="m16 3 5 5-12 12H4v-5ZM14 5l5 5" /></svg
-                    >Change setup
+                    <i class="bi bi-pencil-square" aria-hidden="true"></i>Change setup
                   </button>
                 </div>
                 <div
@@ -392,8 +227,8 @@
                 <span id="ledgerEntryStatus" class="wide" role="status"></span>
                 <label>Previous reading (m&sup3;)<input id="ledgerPrevious" readonly /></label
                 ><label
-                  >Current reading (m&sup3;) *<input
-                    name="current"
+                  >Consumption (m&sup3;) *<input
+                    name="consumption"
                     type="number"
                     min="0"
                     step="0.001"
@@ -401,6 +236,12 @@
                     disabled
                 /></label>
                 <label
+                  >Current reading (m&sup3;)<input
+                    name="current"
+                    readonly
+                    aria-label="Calculated current reading"
+                  /></label
+                ><label
                   >Connection charge<select name="connection" disabled>
                     <option>None</option>
                     <option>New connection</option>
@@ -426,50 +267,17 @@
                 <div class="ledger-totals wide">
                   <div>
                     <span class="ledger-total-label"
-                      ><svg
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="1.7"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        aria-hidden="true"
-                      >
-                        <path d="M12 3s-7 8-7 12a7 7 0 0 0 14 0c0-4-7-12-7-12Z" />
-                        <path d="M8 15a4 4 0 0 0 4 4" /></svg
-                      >Consumption</span
+                      ><i class="bi bi-droplet-fill" aria-hidden="true"></i>Consumption</span
                     ><strong id="ledgerUsage">0 m&sup3;</strong>
                   </div>
                   <div>
                     <span class="ledger-total-label"
-                      ><svg
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="1.7"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        aria-hidden="true"
-                      >
-                        <path
-                          d="M4 9h16M7 9V6h10v3M12 6V3M8 3h8M5 9v6h5v-3h10V9M7 18s-2 2-2 3a2 2 0 0 0 4 0c0-1-2-3-2-3Z"
-                        /></svg
-                      >Water charge</span
+                      ><i class="bi bi-water" aria-hidden="true"></i>Water charge</span
                     ><strong id="ledgerWater"></strong>
                   </div>
                   <div>
                     <span class="ledger-total-label"
-                      ><svg
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="1.7"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        aria-hidden="true"
-                      >
-                        <path d="M6 3h12v18l-3-2-3 2-3-2-3 2ZM9 8h6M9 12h6M9 16h3" /></svg
-                      >Total amount</span
+                      ><i class="bi bi-receipt" aria-hidden="true"></i>Total amount</span
                     ><strong id="ledgerTotal"></strong>
                   </div>
                 </div>
@@ -487,43 +295,15 @@
           </section>
           <dialog
             id="ledgerSetupDialog"
-            class="ledger-setup-dialog"
+            class="ledger-setup-dialog confirmation-dialog"
             aria-labelledby="ledgerSetupTitle"
           >
             <form id="ledgerSetupForm" class="admin-form">
-              <header class="setup-modal-heading wide">
-                <span class="setup-modal-icon"
-                  ><svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="1.8"
-                    aria-hidden="true"
-                  >
-                    <path d="M4 7h16M4 17h16M8 4v6M16 14v6" /></svg
-                ></span>
-                <div>
-                  <span class="setup-eyebrow">MONTHLY BILLING</span>
-                  <h2 id="ledgerSetupTitle">Billing setup</h2>
-                  <p>Set your service area, due date and water rate.</p>
-                </div>
-                <button
-                  type="button"
-                  class="setup-modal-close"
-                  id="closeLedgerSetup"
-                  aria-label="Close billing setup"
-                >
-                  <svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="1.8"
-                    aria-hidden="true"
-                  >
-                    <path d="m6 6 12 12M18 6 6 18" />
-                  </svg>
-                </button>
+              <header class="entry-modal-heading wide">
+                <h2 id="ledgerSetupTitle"><i class="modal-heading-icon bi bi-sliders" aria-hidden="true"></i>Billing setup</h2>
+                <button type="button" class="btn" id="closeLedgerSetup" aria-label="Close billing setup"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
               </header>
+              <p class="entry-modal-description wide">Set your service area, due date and water rate.</p>
               <label class="wide"
                 >Target barangay <span class="setup-required">*</span
                 ><select id="ledgerSetupBarangay" required>
@@ -537,10 +317,10 @@
                 >Rate per cubic meter <span class="setup-required">*</span
                 ><input id="ledgerSetupRate" type="number" min="0.01" step="0.01" required
               /></label>
-              <div class="admin-actions wide setup-modal-footer">
+              <div class="admin-actions wide">
                 <button type="button" class="btn" id="cancelLedgerSetup">Cancel</button
                 ><button class="btn btn-primary setup-continue">
-                  Continue <span aria-hidden="true">&rarr;</span>
+                  Continue <i class="bi bi-arrow-right" aria-hidden="true"></i>
                 </button>
               </div>
             </form>

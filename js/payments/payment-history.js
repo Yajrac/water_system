@@ -53,7 +53,7 @@ function showPayments() {
     receiptButton.setAttribute('aria-label', 'View receipt ' + payment.receipt);
     receiptButton.title = 'View receipt';
     receiptButton.innerHTML =
-      '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>';
+      '<i class="bi bi-eye" aria-hidden="true"></i>';
   });
   AdminUI.empty(
     body,

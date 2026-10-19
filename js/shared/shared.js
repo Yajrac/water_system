@@ -185,20 +185,17 @@ logoutButton.textContent = 'Log out';
 logoutButton.addEventListener('click', () => AdminAuth.logout());
 document.querySelector('.sidebar-tools').appendChild(logoutButton);
 // Keep the same sidebar on every page, with an optional compact desktop view.
-function sidebarIcon(path) {
-  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-  svg.setAttribute('viewBox', '0 0 24 24');
-  svg.setAttribute('aria-hidden', 'true');
-  const shape = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-  shape.setAttribute('d', path);
-  svg.appendChild(shape);
-  return svg;
+function sidebarIcon(name) {
+  const icon = document.createElement('i');
+  icon.className = 'bi bi-' + name;
+  icon.setAttribute('aria-hidden', 'true');
+  return icon;
 }
 const collapseButton = document.createElement('button');
 collapseButton.type = 'button';
 collapseButton.className = 'sidebar-collapse';
 collapseButton.setAttribute('aria-controls', 'sidebar');
-collapseButton.appendChild(sidebarIcon('M4 4h16v16H4zM9 4v16M16 9l-3 3 3 3'));
+collapseButton.appendChild(sidebarIcon('layout-sidebar-inset'));
 sidebar.querySelector('.sidebar-brand').after(collapseButton);
 function setSidebarCompact(compact) {
   document.documentElement.classList.toggle('sidebar-compact', compact);
@@ -229,11 +226,7 @@ const sidebarTheme = document.getElementById('themeToggle');
   label.className = 'sidebar-tool-label';
   label.textContent = button.textContent;
   button.replaceChildren(
-    sidebarIcon(
-      button === logoutButton
-        ? 'M9 4H4v16h5M13 8l4 4-4 4M8 12h13'
-        : 'M20 14A8 8 0 0 1 10 4a8 8 0 1 0 10 10z',
-    ),
+    sidebarIcon(button === logoutButton ? 'box-arrow-right' : 'moon-stars'),
     label,
   );
   button.setAttribute(
@@ -314,26 +307,29 @@ window.addEventListener('error', (event) => {
 
 // Use the same arrow and close icons on static and dynamically created controls.
 function applyNavigationIcon(button) {
-  if (button.querySelector('svg')) return;
+  if (/^(Previous|Next|Back)(\s|$)/i.test(button.textContent.trim()) ||
+      /^(Previous|Next|Back)(\s|$)/i.test(button.getAttribute('aria-label') || '')) {
+    button.classList.add('step-navigation-button');
+  }
+  const actionLabel = button.textContent.trim();
+  if (/^(Edit|View)(\s|$)/i.test(actionLabel) && !button.querySelector('svg, .bi')) {
+    const icon = document.createElement('i');
+    icon.className = 'bi bi-' + (/^Edit/i.test(actionLabel) ? 'pencil-square' : 'eye');
+    icon.setAttribute('aria-hidden', 'true');
+    button.prepend(icon);
+  }
+  if (button.querySelector('svg, .bi')) return;
   const label = button.textContent.trim();
-  const paths = {
-    Previous: 'm12 5-7 7 7 7M5 12h14',
-    Back: 'm12 5-7 7 7 7M5 12h14',
-    Next: 'm12 5 7 7-7 7M19 12H5',
-    Close: 'm6 6 12 12M18 6 6 18',
+  const icons = {
+    Previous: 'arrow-left',
+    Back: 'arrow-left',
+    Next: 'arrow-right',
+    Close: 'x-lg',
   };
-  if (!paths[label]) return;
-  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-  svg.setAttribute('viewBox', '0 0 24 24');
-  svg.setAttribute('fill', 'none');
-  svg.setAttribute('stroke', 'currentColor');
-  svg.setAttribute('stroke-width', '2');
-  svg.setAttribute('stroke-linecap', 'round');
-  svg.setAttribute('stroke-linejoin', 'round');
+  if (!icons[label]) return;
+  const svg = document.createElement('i');
+  svg.className = 'bi bi-' + icons[label];
   svg.setAttribute('aria-hidden', 'true');
-  const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-  path.setAttribute('d', paths[label]);
-  svg.appendChild(path);
   const caption = document.createElement('span');
   caption.textContent = label;
   button.classList.add('navigation-icon-control');

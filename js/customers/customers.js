@@ -206,23 +206,13 @@ function showCustomers() {
     const nameCell = AdminUI.cell(row, '', 'Customer');
     const identity = document.createElement('div');
     identity.className = 'customer-identity';
-    const avatar = document.createElement('span');
-    avatar.className = 'customer-avatar';
-    avatar.setAttribute('aria-hidden', 'true');
-    avatar.textContent = customer.name
-      .trim()
-      .split(/\s+/)
-      .slice(0, 2)
-      .map((word) => word[0])
-      .join('')
-      .toUpperCase();
     const details = document.createElement('div');
     const name = document.createElement('strong');
     name.textContent = customer.name;
     const type = document.createElement('small');
     type.textContent = customer.account;
     details.append(name, type);
-    identity.append(avatar, details);
+    identity.append(details);
     nameCell.appendChild(identity);
     AdminUI.cell(row, customer.barangay, 'Barangay');
     AdminUI.cell(row, customer.contact || '—', 'Contact');
@@ -247,12 +237,16 @@ function showCustomers() {
     const edit = document.createElement('a');
     edit.className = 'btn action-edit';
     edit.href = 'customer-form.html?id=' + encodeURIComponent(customer.id);
-    edit.textContent = 'Edit';
+    edit.innerHTML = '<i class="bi bi-pencil-square" aria-hidden="true"></i>';
+    edit.title = 'Edit customer';
+    edit.setAttribute('aria-label', 'Edit ' + customer.name);
     actions.appendChild(edit);
     const history = document.createElement('a');
     history.className = 'btn action-view';
     history.href = 'customer-profile.html?id=' + encodeURIComponent(customer.id);
-    history.textContent = 'View profile';
+    history.innerHTML = '<i class="bi bi-eye" aria-hidden="true"></i>';
+    history.title = 'View profile';
+    history.setAttribute('aria-label', 'View profile of ' + customer.name);
     actions.appendChild(history);
   });
   AdminUI.empty(body, 6, 'No customers found. Add a customer or import a CSV file.');

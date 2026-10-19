@@ -21,6 +21,10 @@
     <link rel="stylesheet" href="../css/shared/modals.css" />
     <link rel="stylesheet" href="../css/shared/responsive-cards.css" />
     <link rel="stylesheet" href="../css/shared/form-controls.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.2/font/bootstrap-icons.min.css"
+    />
   </head>
   <body>
     <div class="sidebar-overlay" id="overlay"></div>
@@ -45,165 +49,59 @@
         <ul class="sidebar-menu">
           <li>
             <a href="index.html" class="sidebar-menu-item">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <rect x="3" y="3" width="7" height="9" rx="1.5" />
-                <rect x="14" y="3" width="7" height="5" rx="1.5" />
-                <rect x="14" y="12" width="7" height="9" rx="1.5" />
-                <rect x="3" y="16" width="7" height="5" rx="1.5" />
-              </svg>
+              <i class="bi bi-grid" aria-hidden="true"></i>
               <span>Dashboard Overview</span>
             </a>
           </li>
           <li>
             <a href="customers.html" class="sidebar-menu-item">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-                <circle cx="9" cy="7" r="4" />
-                <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-                <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-              </svg>
+              <i class="bi bi-people" aria-hidden="true"></i>
               <span>Customer Management</span>
             </a>
           </li>
           <li>
             <a href="barangays.html" class="sidebar-menu-item active" aria-current="page"
-              ><svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <path d="m3 6 6-3 6 3 6-3v15l-6 3-6-3-6 3zM9 3v15M15 6v15" /></svg
-              ><span>Barangay Registry</span></a
+              ><i class="bi bi-map" aria-hidden="true"></i><span>Barangay Registry</span></a
             >
           </li>
           <li>
             <a href="billing.html" class="sidebar-menu-item">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                <path d="M14 2v6h6" />
-                <path d="M9 15h6M9 11h2" />
-              </svg>
+              <i class="bi bi-file-earmark-text" aria-hidden="true"></i>
               <span>Billing &amp; Meter Reading</span>
             </a>
           </li>
           <li>
             <a href="payment-history.html" class="sidebar-menu-item">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <rect x="1" y="4" width="22" height="16" rx="2" />
-                <line x1="1" y1="10" x2="23" y2="10" />
-              </svg>
+              <i class="bi bi-credit-card" aria-hidden="true"></i>
               <span>Payment History</span>
             </a>
           </li>
           <li>
             <a href="broadcast.html" class="sidebar-menu-item">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-                <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-              </svg>
+              <i class="bi bi-bell" aria-hidden="true"></i>
               <span>Broadcast &amp; Notifications</span>
             </a>
           </li>
           <li>
             <a href="disconnected.html" class="sidebar-menu-item"
-              ><svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <path d="M8 3v5M16 3v5M5 8h14v3a7 7 0 0 1-7 7v3M3 3l18 18" /></svg
-              ><span>Disconnected Accounts</span></a
+              ><i class="bi bi-plug" aria-hidden="true"></i><span>Disconnected Accounts</span></a
             >
           </li>
           <li>
             <a href="feedback.html" class="sidebar-menu-item"
-              ><svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <path
-                  d="M21 11a8 8 0 0 1-8 8H6l-4 3V5a3 3 0 0 1 3-3h8a8 8 0 0 1 8 9zM7 8h8M7 12h5"
-                /></svg
+              ><i class="bi bi-chat-left-text" aria-hidden="true"></i
               ><span>Customer Feedback</span></a
             >
           </li>
           <li>
             <a href="reports.html" class="sidebar-menu-item">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <line x1="18" y1="20" x2="18" y2="10" />
-                <line x1="12" y1="20" x2="12" y2="4" />
-                <line x1="6" y1="20" x2="6" y2="14" />
-              </svg>
+              <i class="bi bi-bar-chart" aria-hidden="true"></i>
               <span>Reports &amp; Analytics</span>
             </a>
           </li>
           <li>
             <a href="settings.html" class="sidebar-menu-item">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <circle cx="12" cy="12" r="3" />
-                <path
-                  d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"
-                />
-              </svg>
+              <i class="bi bi-gear" aria-hidden="true"></i>
               <span>Settings</span>
             </a>
           </li>
@@ -254,11 +152,9 @@
               <h1>Barangay Registry</h1>
               <p>Registered water service areas in Pio Duran, Albay</p>
             </div>
-            <a class="btn btn-primary" href="barangay-form.html"
-              ><svg class="barangay-icon" viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M12 5v14M5 12h14" /></svg
-              >Add barangay</a
-            >
+            <button type="button" class="btn btn-primary" id="openAddBarangay">
+              <i class="bi bi-plus-lg" aria-hidden="true"></i>Add barangay
+            </button>
           </header>
           <p id="pageMessage" role="status" tabindex="-1"></p>
           <section class="panel">
@@ -300,6 +196,63 @@
               ></nav>
             </div>
           </section>
+          <dialog
+            id="addBarangayDialog"
+            class="confirmation-dialog barangay-add-dialog"
+            aria-labelledby="barangayFormTitle"
+          >
+            <div class="entry-modal-heading">
+              <h2 id="barangayFormTitle">
+                <i class="modal-heading-icon bi bi-geo-alt-fill" aria-hidden="true"></i>Add Barangay
+              </h2>
+              <button
+                type="button"
+                class="btn"
+                id="closeAddBarangay"
+                aria-label="Close add barangay"
+              >
+                <i class="bi bi-x-lg" aria-hidden="true"></i>
+              </button>
+            </div>
+            <p>Select a service area from the Pio Duran barangay directory.</p>
+            <form id="barangayForm" class="admin-form">
+              <div class="wide barangay-combobox">
+                <label for="barangaySearchChoice">Barangay *</label>
+                <div class="barangay-search-field">
+                  <i class="bi bi-search" aria-hidden="true"></i
+                  ><input
+                    id="barangaySearchChoice"
+                    type="text"
+                    placeholder="Search or select a barangay"
+                    autocomplete="off"
+                    role="combobox"
+                    aria-autocomplete="list"
+                    aria-expanded="false"
+                    aria-controls="barangayOptions"
+                    required
+                    disabled
+                  /><input id="barangayChoice" type="hidden" />
+                  <ul
+                    id="barangayOptions"
+                    role="listbox"
+                    aria-label="Pio Duran barangays"
+                    hidden
+                  ></ul>
+                </div>
+              </div>
+              <div class="barangay-location">
+                <span>Municipality / City</span><strong>Pio Duran</strong>
+              </div>
+              <div class="barangay-location"><span>Province</span><strong>Albay</strong></div>
+              <p class="form-help wide" id="barangayDirectoryStatus" role="status"></p>
+              <div class="admin-actions wide">
+                <button id="saveBarangay" type="submit" class="btn btn-primary" disabled>
+                  Save barangay</button
+                ><button type="button" class="btn" id="cancelAddBarangay">Cancel</button
+                ><button id="retryBarangays" type="button" class="btn" hidden>Retry loading</button>
+              </div>
+            </form>
+          </dialog>
         </main>
       </div>
     </div>
@@ -311,5 +264,6 @@
     <script src="../js/shared/pagination.js"></script>
     <script src="../js/barangays/registry-store.js"></script>
     <script src="../js/barangays/barangays.js"></script>
+    <script src="../js/barangays/barangay-form.js"></script>
   </body>
 </html>
