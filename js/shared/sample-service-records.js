@@ -65,6 +65,27 @@ async function fetchSampleServiceRecords() {
       !records.customers.some((customer) => customer.id === entry.customerId && customer.isTestData)
     )
       return;
+    // Refresh only untouched original demo conversations; preserve admin edits/replies.
+    const originalMessages = [
+      'Please explain the outstanding balances on my account.',
+      'Low water pressure in our purok during the morning.',
+      'Please check the meter reading on my latest bill.',
+      'Water service was restored after the line repair.',
+      'I would like to confirm my latest cash payment.',
+      'Requesting information about a new service connection.',
+    ];
+    const originalNotes = ['', 'Inspection scheduled with the maintenance team.', '',
+      'Service restoration confirmed with the customer.',
+      'Payment receipt verified in the payment history.',
+      'Application requirements explained to the customer.'];
+    const existing = records.feedback.find((item) => item.id === entry.id && item.isTestData);
+    const position = Number(entry.id.split('-').pop()) - 1;
+    if (existing && existing.message === originalMessages[position] &&
+      (existing.notes || '') === originalNotes[position] && existing.status === entry.status &&
+      !(existing.replies || []).length) {
+      Object.assign(existing, entry);
+      changed = true;
+    }
     if (
       records.sampleServiceImports.includes(entry.id) ||
       records.feedback.some((item) => item.id === entry.id)

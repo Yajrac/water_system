@@ -13,8 +13,5 @@ officeForm.addEventListener('submit', (event) => {
     contact: officeForm.elements.contact.value.trim(),
   };
   WaterStore.save(settingsRecords);
-  AdminUI.message('Office details saved.');
-});
-document.getElementById('backupRecords').addEventListener('click', () => {
-  showNotice('Download not available yet', 'Record downloads are not enabled yet. No file has been downloaded.');
+  showNotice('Saved successfully', 'Office details have been updated.');
 });

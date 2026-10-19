@@ -351,3 +351,24 @@
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+.settings-log-toolbar {
+  grid-template-columns: minmax(0, 1.3fr) minmax(180px, 1fr) auto;
+}
+.settings-log-toolbar > .btn {
+  margin-top: 26px;
+  height: 46px;
+}
+@media (max-width: 900px) {
+  .settings-log-toolbar {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .settings-log-toolbar > .btn {
+    margin-top: 0;
+  }
+}
+@media (max-width: 600px) {
+  .settings-log-toolbar {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

@@ -41,7 +41,7 @@
       "customerId": "test-customer-00001",
       "date": "2026-10-10",
       "category": "Billing",
-      "message": "Please explain the outstanding balances on my account.",
+      "message": "Admin, bakit parang mas mabilis pa tumaas bill ko kaysa sahod ko? Haha. Pacheck naman po kung may naiwan akong balance noong nakaraan. Salamat!",
       "status": "New",
       "notes": ""
     },
@@ -51,10 +51,19 @@
       "customerId": "test-customer-00002",
       "date": "2026-10-11",
       "category": "Water supply",
-      "message": "Low water pressure in our purok during the morning.",
+      "message": "Good morning po. Yung tubig namin tuwing umaga parang nahihiya lumabas. Patak-patak lang, naunahan pa ako ng kapitbahay maligo hahaha. Patingin naman po dito sa purok namin.",
       "status": "In progress",
-      "notes": "Inspection scheduled with the maintenance team.",
-      "updatedOn": "2026-10-16"
+      "notes": "Naka-schedule ang pressure inspection sa purok.",
+      "updatedOn": "2026-10-16",
+      "replies": [
+        {
+          "id": "sample-reply-002",
+          "author": "Admin",
+          "message": "Magandang umaga po! Ipapasuri namin ang pressure sa inyong purok. Pakisabi kung anong oras pinakamahina para maisama sa inspection. Yung timba po, standby muna natin.",
+          "date": "2026-10-16",
+          "createdAt": "2026-10-16T02:30:00.000Z"
+        }
+      ]
     },
     {
       "id": "sample-feedback-003",
@@ -62,7 +71,7 @@
       "customerId": "test-customer-00003",
       "date": "2026-10-12",
       "category": "Meter",
-      "message": "Please check the meter reading on my latest bill.",
+      "message": "Pacheck po ng metro namin. Parang naka-cardio kahit wala namang gumagamit ng tubig hahaha. May tagas kaya o mali lang basa ko?",
       "status": "New",
       "notes": ""
     },
@@ -72,10 +81,19 @@
       "customerId": "test-customer-00004",
       "date": "2026-10-13",
       "category": "Water supply",
-      "message": "Water service was restored after the line repair.",
+      "message": "May tubig na ulit! Akala ko magiging permanent na gym equipment yung mga timba namin hahaha. Salamat po sa mga nag-ayos!",
       "status": "Resolved",
-      "notes": "Service restoration confirmed with the customer.",
-      "updatedOn": "2026-10-16"
+      "notes": "Nakumpirma ng customer na bumalik na ang tubig.",
+      "updatedOn": "2026-10-16",
+      "replies": [
+        {
+          "id": "sample-reply-004",
+          "author": "Admin",
+          "message": "Salamat din po sa paghihintay! Kung humina ulit o may makitang tagas, message lang po rito. Pahinga muna sa pagbubuhat ng timba.",
+          "date": "2026-10-16",
+          "createdAt": "2026-10-16T02:30:00.000Z"
+        }
+      ]
     },
     {
       "id": "sample-feedback-005",
@@ -83,10 +101,19 @@
       "customerId": "test-customer-00005",
       "date": "2026-10-14",
       "category": "Billing",
-      "message": "I would like to confirm my latest cash payment.",
+      "message": "Hello po, pumasok na ba yung bayad kong cash? May resibo ako rito, tinago ko nang mas maayos kaysa birth certificate ko hahaha. Pakiconfirm po, salamat.",
       "status": "Resolved",
-      "notes": "Payment receipt verified in the payment history.",
-      "updatedOn": "2026-10-16"
+      "notes": "Na-verify ang cash payment at receipt number.",
+      "updatedOn": "2026-10-16",
+      "replies": [
+        {
+          "id": "sample-reply-005",
+          "author": "Admin",
+          "message": "Na-check na po ang inyong cash payment at recorded na sa payment history. Itabi pa rin po ang resibo, pero ingatan din natin ang birth certificate haha.",
+          "date": "2026-10-16",
+          "createdAt": "2026-10-16T02:30:00.000Z"
+        }
+      ]
     },
     {
       "id": "sample-feedback-006",
@@ -94,10 +121,19 @@
       "customerId": "test-customer-00006",
       "date": "2026-10-15",
       "category": "Other",
-      "message": "Requesting information about a new service connection.",
+      "message": "Admin, ano po kailangan para magpakabit? Gusto ko na rin ng sariling gripo, nahihiya na akong makitimba. Baka singilin na ako ng friendship fee hahaha.",
       "status": "In progress",
-      "notes": "Application requirements explained to the customer.",
-      "updatedOn": "2026-10-16"
+      "notes": "Naipaliwanag ang requirements para sa bagong connection.",
+      "updatedOn": "2026-10-16",
+      "replies": [
+        {
+          "id": "sample-reply-006",
+          "author": "Admin",
+          "message": "Hello po! Ihanda ang barangay certification at filled-out application form. Daan po sa opisina para ma-check ang requirements at installation estimate. Libre po magtanong, walang friendship fee.",
+          "date": "2026-10-16",
+          "createdAt": "2026-10-16T02:30:00.000Z"
+        }
+      ]
     }
   ]
 }

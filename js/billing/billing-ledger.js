@@ -92,7 +92,22 @@ function renderLedger() {
       const state = document.createElement('span');
       state.className = 'ledger-completion';
       state.classList.toggle('is-completed', Boolean(isCompleted(customer)));
-      state.textContent = isCompleted(customer) ? '\u2713 Completed' : 'Pending';
+      if (isCompleted(customer)) {
+        state.setAttribute('aria-label', 'Completed');
+        state.title = 'Completed';
+        const check = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        check.setAttribute('viewBox', '0 0 24 24');
+        check.setAttribute('fill', 'none');
+        check.setAttribute('stroke', 'currentColor');
+        check.setAttribute('stroke-width', '3');
+        check.setAttribute('stroke-linecap', 'round');
+        check.setAttribute('stroke-linejoin', 'round');
+        check.setAttribute('aria-hidden', 'true');
+        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        path.setAttribute('d', 'm5 12 4 4L19 6');
+        check.appendChild(path);
+        state.appendChild(check);
+      } else state.textContent = 'Pending';
       button.append(identity, state);
       button.addEventListener('click', () => selectConsumer(customer.id));
       list.appendChild(button);
@@ -196,7 +211,7 @@ entryForm.addEventListener('input', () => {
   renderLedger();
   updateTotals();
 });
-entryForm.addEventListener('submit', (event) => {
+entryForm.addEventListener('submit', async (event) => {
   event.preventDefault();
   if (!selectedConsumerId)
     return showNotice(
@@ -219,6 +234,14 @@ entryForm.addEventListener('submit', (event) => {
     return AdminUI.message('Entry could not be saved. Please try again.');
   }
   document.getElementById('ledgerEntryStatus').textContent = '\u2713 Completed';
+  renderLedger();
+  const saveButton = document.getElementById('saveLedgerEntry');
+  saveButton.disabled = true;
+  await showNotice(
+    'Entry saved successfully',
+    customer.name + '\nThe meter entry is ready for bill generation.',
+  );
+  saveButton.disabled = false;
   Object.assign(billingRecords, latest);
   const consumers = eligibleConsumers();
   if (!selectedBarangay || !setupForBarangay())
@@ -470,7 +493,13 @@ document.getElementById('generateLedgerBills').addEventListener('click', async (
   selectedConsumerId = null;
   renderLedger();
   clearEntry();
-  AdminUI.message(pending.length + ' bills generated. Open Generated Bills to review them.');
+  await showNotice(
+    'Bills generated successfully',
+    pending.length +
+      ' bills saved for ' +
+      selectedBarangay +
+      '. Open Generated Bills to review them.',
+  );
 });
 
 const requested = new URLSearchParams(location.search).get('barangay');

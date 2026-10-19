@@ -1022,7 +1022,7 @@
   margin-bottom: 28px;
   border-bottom: 1px solid var(--color-border);
 }
-:is(.billing-navigation a, .profile-tabs button) {
+:is(.billing-navigation :is(a, button), .profile-tabs button) {
   position: relative;
   display: flex;
   align-items: center;
@@ -1038,7 +1038,7 @@
     color 0.2s ease,
     background 0.2s ease;
 }
-:is(.billing-navigation a, .profile-tabs button) svg {
+:is(.billing-navigation :is(a, button), .profile-tabs button) svg {
   width: 18px;
   height: 18px;
   flex-shrink: 0;
@@ -1048,16 +1048,20 @@
   stroke-linecap: round;
   stroke-linejoin: round;
 }
-:is(.billing-navigation a, .profile-tabs button):hover {
+:is(.billing-navigation :is(a, button), .profile-tabs button):hover {
   background: var(--card-tint);
   color: var(--color-ink);
 }
-:is(.billing-navigation [aria-current='page'], .profile-tabs [aria-selected='true']) {
+:is(
+  .billing-navigation [aria-current='page'],
+  .billing-navigation button[aria-selected='true'],
+  .profile-tabs [aria-selected='true']
+) {
   color: var(--color-primary-deep);
   background: var(--card-tint);
   font-weight: 800;
 }
-:is(.billing-navigation a, .profile-tabs button)::after {
+:is(.billing-navigation :is(a, button), .profile-tabs button)::after {
   content: '';
   position: absolute;
   bottom: -1px;
@@ -1073,23 +1077,27 @@
     transform 0.24s ease,
     opacity 0.24s ease;
 }
-:is(.billing-navigation a, .profile-tabs button):hover::after,
-:is(.billing-navigation a, .profile-tabs button):focus-visible::after {
+:is(.billing-navigation :is(a, button), .profile-tabs button):hover::after,
+:is(.billing-navigation :is(a, button), .profile-tabs button):focus-visible::after {
   transform: scaleX(0.55);
   opacity: 0.45;
 }
-:is(.billing-navigation a[aria-current='page'], .profile-tabs button[aria-selected='true'])::after {
+:is(
+  .billing-navigation :is(a, button)[aria-current='page'],
+  .billing-navigation button[aria-selected='true'],
+  .profile-tabs button[aria-selected='true']
+)::after {
   transform: scaleX(1);
   opacity: 1;
   animation: billing-tab-reveal 0.3s ease-out;
 }
-:is(.billing-navigation a, .profile-tabs button) svg {
+:is(.billing-navigation :is(a, button), .profile-tabs button) svg {
   transition: transform 0.2s ease;
 }
-:is(.billing-navigation a, .profile-tabs button):hover svg {
+:is(.billing-navigation :is(a, button), .profile-tabs button):hover svg {
   transform: translateY(-2px);
 }
-:is(.billing-navigation a, .profile-tabs button):active svg {
+:is(.billing-navigation :is(a, button), .profile-tabs button):active svg {
   transform: scale(0.92);
 }
 .billing-page > .panel {
@@ -1116,19 +1124,19 @@
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  :is(.billing-navigation a, .profile-tabs button),
-  :is(.billing-navigation a, .profile-tabs button)::after,
-  :is(.billing-navigation a, .profile-tabs button) svg,
+  :is(.billing-navigation :is(a, button), .profile-tabs button),
+  :is(.billing-navigation :is(a, button), .profile-tabs button)::after,
+  :is(.billing-navigation :is(a, button), .profile-tabs button) svg,
   .billing-page > .panel {
     animation: none;
     transition: none;
   }
-  :is(.billing-navigation a, .profile-tabs button):hover svg,
-  :is(.billing-navigation a, .profile-tabs button):active svg {
+  :is(.billing-navigation :is(a, button), .profile-tabs button):hover svg,
+  :is(.billing-navigation :is(a, button), .profile-tabs button):active svg {
     transform: none;
   }
 }
-:is(.billing-navigation a, .profile-tabs button):focus-visible {
+:is(.billing-navigation :is(a, button), .profile-tabs button):focus-visible {
   outline: 2px solid var(--color-primary);
   outline-offset: 3px;
 }
@@ -1193,7 +1201,7 @@
     gap: 4px;
     padding: 0;
   }
-  :is(.billing-navigation a, .profile-tabs button) {
+  :is(.billing-navigation :is(a, button), .profile-tabs button) {
     flex: 1;
     flex-direction: column;
     gap: 7px;
@@ -2243,4 +2251,104 @@ textarea:focus-visible,
 [data-theme='dark'] .summary-label-with-icon svg,
 [data-theme='dark'] .profile-summary .profile-icon {
   filter: brightness(1.35);
+}
+
+.navigation-icon-control {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+}
+.navigation-icon-control svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+@media print {
+  .navigation-icon-control {
+    display: none !important;
+  }
+}
+
+.billing-navigation.section-tabs button svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Blue/teal secondary tones replace gray in the admin interface. */
+:root {
+  --color-ink-muted: #356c8b;
+  --color-ink-faint: #427c9c;
+  --color-border: #cce6f3;
+  --color-border-strong: #94c5df;
+}
+:root[data-theme='dark'] {
+  --color-ink-muted: #a3d7ef;
+  --color-ink-faint: #88c5e1;
+  --color-border: #225270;
+  --color-border-strong: #377da1;
+}
+input::placeholder,
+textarea::placeholder {
+  color: var(--color-ink-muted);
+  opacity: 1;
+}
+.pager-controls .btn:disabled,
+.customer-form-actions .btn:disabled,
+#recordPaymentButton:disabled {
+  opacity: 1;
+  color: var(--color-primary-deep);
+  background: var(--card-tint);
+  border-color: var(--color-border);
+  box-shadow: none;
+}
+input[readonly] {
+  background: var(--table-heading);
+  color: var(--color-primary-deep);
+}
+
+/* One size and palette for table action icons. */
+html body table .btn:has(svg) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px;
+  min-height: 40px;
+  width: 40px;
+  height: 40px;
+  padding: 9px;
+  color: var(--color-primary-deep);
+  background: var(--card-tint);
+  border: 1px solid var(--color-border-strong);
+  border-radius: 7px;
+}
+html body table .btn svg {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+html body table .btn:has(svg):hover {
+  color: var(--color-primary-deep);
+  background: var(--table-heading);
+  border-color: var(--color-primary);
+}
+@media (max-width: 600px) {
+  html body table .btn:has(svg) {
+    min-width: 44px;
+    min-height: 44px;
+    width: 44px;
+    height: 44px;
+  }
 }

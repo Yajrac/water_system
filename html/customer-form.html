@@ -20,6 +20,7 @@
     <link rel="stylesheet" href="../css/shared/back-button.css" />
     <link rel="stylesheet" href="../css/shared/modals.css" />
     <link rel="stylesheet" href="../css/shared/responsive-cards.css" />
+    <link rel="stylesheet" href="../css/shared/form-controls.css" />
   </head>
   <body>
     <div class="sidebar-overlay" id="overlay"></div>
@@ -253,20 +254,19 @@
               <h1 id="customerTitle">Add customer</h1>
               <p>Water service connection application</p>
             </div>
-            <a
-              class="btn back-icon-button"
-              href="customers.html"
-              aria-label="Back to customers"
-              data-tooltip="Back"
+            <a class="btn customer-return-button" href="customers.html"
               ><svg
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
                 stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
                 aria-hidden="true"
               >
                 <path d="m12 5-7 7 7 7M5 12h14" /></svg
-            ></a>
+              ><span>Back to customers</span></a
+            >
           </header>
           <p id="pageMessage" role="status" tabindex="-1"></p>
           <section class="panel customer-page-form">
@@ -289,14 +289,54 @@
                 <fieldset class="customer-section">
                   <legend>1. Applicant basic information</legend>
                   <div class="admin-form">
+                    <input name="name" type="hidden" />
+                    <div class="applicant-name-fields wide">
+                      <label
+                        ><span class="name-field-caption"
+                          >First name <span class="required-marker">*</span></span
+                        ><input
+                          name="firstName"
+                          type="text"
+                          required
+                          maxlength="60"
+                          autocomplete="given-name"
+                      /></label>
+                      <label
+                        ><span class="name-field-caption"
+                          >Middle name <small>(optional)</small></span
+                        ><input
+                          name="middleName"
+                          type="text"
+                          maxlength="60"
+                          autocomplete="additional-name"
+                      /></label>
+                      <label
+                        ><span class="name-field-caption"
+                          >Last name <span class="required-marker">*</span></span
+                        ><input
+                          name="lastName"
+                          type="text"
+                          required
+                          maxlength="60"
+                          autocomplete="family-name"
+                      /></label>
+                      <label
+                        ><span class="name-field-caption">Extension name</span
+                        ><select name="extensionName">
+                          <option value="">None</option>
+                          <option>Jr.</option>
+                          <option>Sr.</option>
+                          <option>II</option>
+                          <option>III</option>
+                          <option>IV</option>
+                          <option>V</option>
+                        </select></label
+                      >
+                    </div>
                     <label
-                      >Name of applicant <span class="required-marker">*</span
-                      ><input name="name" type="text" required maxlength="120" autocomplete="name"
-                    /></label>
-
-                    <label
-                      >Gender<select name="gender">
-                        <option value="">Select gender</option>
+                      ><span>Gender <span class="required-marker">*</span></span
+                      ><select name="gender" required>
+                        <option value="" disabled selected>Select gender</option>
                         <option value="Male">Male</option>
                         <option value="Female">Female</option>
                       </select></label
@@ -314,10 +354,7 @@
                           autocomplete="tel-national"
                           aria-label="Philippine mobile number after +63"
                           placeholder="9123456789" /></span
-                      ><small
-                        >Enter 10 digits starting with 9. Country code +63 is already
-                        included.</small
-                      ></label
+                      ><small>Enter 10 digits starting with 9. </small></label
                     ><label
                       >Purok <span class="required-marker">*</span
                       ><select name="address" required>
@@ -357,8 +394,35 @@
                   <div class="admin-form">
                     <label
                       >Date applied <span class="required-marker">*</span
-                      ><input name="dateApplied" type="date" required /></label
-                    ><label>Date approved<input name="dateApproved" type="date" /></label
+                      ><span class="application-date-display"
+                        ><svg
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="1.7"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          aria-hidden="true"
+                        >
+                          <rect x="3" y="5" width="18" height="16" rx="2" />
+                          <path d="M7 3v4M17 3v4M3 11h18M8 15h3" /></svg
+                        ><time id="dateAppliedDisplay"></time></span
+                      ><input name="dateApplied" type="hidden" /></label
+                    ><label
+                      >Date approved<span class="application-date-display"
+                        ><svg
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="1.7"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          aria-hidden="true"
+                        >
+                          <rect x="3" y="5" width="18" height="16" rx="2" />
+                          <path d="M7 3v4M17 3v4M3 11h18M8 15h3" /></svg
+                        ><time id="dateApprovedDisplay"></time></span
+                      ><input name="dateApproved" type="hidden" /></label
                     ><label
                       >Service status <span class="required-marker">*</span
                       ><select name="serviceStatus" required>
@@ -533,7 +597,6 @@
                           autocomplete="new-password"
                           minlength="8"
                           maxlength="128"
-                          aria-describedby="customerPasswordHelp"
                         />
                         <button
                           id="toggleCustomerPassword"
@@ -554,10 +617,6 @@
                           </svg>
                         </button>
                       </div>
-                      <small id="customerPasswordHelp"
-                        >Customer app login is not connected. This password is preview only and will
-                        not be saved.</small
-                      >
                     </div>
                   </div>
                 </fieldset>
@@ -579,7 +638,18 @@
                       <path d="m12 5-7 7 7 7M5 12h14" /></svg
                     >Back</button
                   ><button type="button" class="btn btn-primary" id="nextCustomerStep">
-                    Next <span aria-hidden="true">&rarr;</span>
+                    Next
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      aria-hidden="true"
+                    >
+                      <path d="m12 5 7 7-7 7M19 12H5" />
+                    </svg>
                   </button>
                 </div>
                 <div class="customer-form-actions admin-actions">

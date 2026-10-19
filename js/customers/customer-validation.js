@@ -1,7 +1,17 @@
 // Explicit rules are checked again on save, independent of HTML input attributes.
 const CustomerValidation = {
   workTypes: ['New connection', 'Reconnection', 'Meter replacement', 'Service repair'],
+  extensions: ['', 'Jr.', 'Sr.', 'II', 'III', 'IV', 'V'],
+  fullName(customer) {
+    return [customer.firstName, customer.middleName, customer.lastName, customer.extensionName]
+      .map((part) => (part || '').trim())
+      .filter(Boolean)
+      .join(' ');
+  },
   textLimits: {
+    firstName: 60,
+    middleName: 60,
+    lastName: 60,
     username: 40,
     name: 120,
     street: 200,
@@ -37,6 +47,7 @@ const CustomerValidation = {
       'barangay',
       'customerType',
       'gender',
+      'extensionName',
       'serviceStatus',
       'contact',
     ];
@@ -46,10 +57,20 @@ const CustomerValidation = {
     this.checks.forEach((name) => {
       customer[name] = form.elements[name].checked;
     });
+    customer.name = this.fullName(customer);
     return customer;
   },
   error(customer, form, existingNatureOfWork = '') {
-    if (!['', 'Male', 'Female'].includes(customer.gender)) return 'Select a valid gender option.';
+    if (!customer.firstName || !customer.lastName) return 'Enter the first and last name.';
+    for (const key of ['firstName', 'middleName', 'lastName']) {
+      if (
+        customer[key] &&
+        (!/^[\p{L}\p{M} .,'-]+$/u.test(customer[key]) || !/\p{L}/u.test(customer[key]))
+      )
+        return 'Name fields accept letters, spaces and name punctuation only.';
+    }
+    if (!this.extensions.includes(customer.extensionName)) return 'Select a valid extension name.';
+    if (!['Male', 'Female'].includes(customer.gender)) return 'Select Male or Female for gender.';
     if (customer.username && !/^[A-Za-z0-9._-]{3,40}$/.test(customer.username))
       return 'Username must contain 3–40 letters, numbers, periods, underscores or hyphens.';
     if (

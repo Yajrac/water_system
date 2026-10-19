@@ -73,12 +73,14 @@ dialog .btn-primary:hover {
   background: #066781;
   border-color: #066781;
 }
-dialog button:focus-visible,
-dialog input:focus-visible,
-dialog select:focus-visible,
-dialog textarea:focus-visible {
+dialog button:focus-visible {
   outline: 2px solid #1ca0bc;
   outline-offset: 3px;
+}
+dialog :is(input, select, textarea):is(:focus, :focus-visible) {
+  outline: none;
+  box-shadow: none;
+  border-color: var(--color-primary, #087fa3);
 }
 dialog.customer-import-dialog {
   width: min(600px, calc(100% - 28px));

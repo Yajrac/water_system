@@ -56,7 +56,7 @@ function confirmAction(title, message, confirmLabel, preview = null) {
 }
 
 // Informational messages need only one acknowledgment button.
-function showNotice(title, message) {
+function showNotice(title, message, preview = null) {
   if (document.getElementById('actionConfirmation')) return Promise.resolve();
   return new Promise((resolve) => {
     const dialog = document.createElement('dialog');
@@ -80,6 +80,10 @@ function showNotice(title, message) {
     button.autofocus = true;
     form.appendChild(button);
     dialog.append(heading, description, form);
+    if (preview) {
+      dialog.classList.add('has-preview');
+      dialog.insertBefore(preview, form);
+    }
     dialog.addEventListener(
       'close',
       () => {

@@ -50,7 +50,6 @@ function syncContractDate() {
 customerForm.elements.contractReceived.addEventListener('change', syncContractDate);
 const contactField = customerForm.elements.contact;
 const applicantNameField = customerForm.elements.name;
-let lastApplicantName = '';
 function generateCustomerCredentials() {
   const name = applicantNameField.value.trim();
   const existing = customerRecords.customers.find((item) => item.id === editingCustomerId);
@@ -90,26 +89,29 @@ function generateCustomerCredentials() {
       draftSubmitterNumber.split('-').pop();
 }
 const applicantCharacters = /^[\p{L}\p{M} .,'-]*$/u;
-applicantNameField.addEventListener('beforeinput', (event) => {
-  if (!event.isComposing && event.data && !applicantCharacters.test(event.data))
-    event.preventDefault();
-});
-applicantNameField.addEventListener('paste', (event) => {
-  const value = event.clipboardData.getData('text');
-  if (!applicantCharacters.test(value)) {
-    event.preventDefault();
-    AdminUI.message(
-      'Applicant name accepts letters, spaces, periods, commas, apostrophes and hyphens only.',
-    );
-  }
-});
-applicantNameField.addEventListener('input', (event) => {
-  if (event.isComposing) return;
-  if (applicantCharacters.test(applicantNameField.value) && applicantNameField.value.length <= 120)
-    lastApplicantName = applicantNameField.value;
-  else applicantNameField.value = lastApplicantName;
+function syncApplicantName() {
+  applicantNameField.value = CustomerValidation.fullName({
+    firstName: customerForm.elements.firstName.value,
+    middleName: customerForm.elements.middleName.value,
+    lastName: customerForm.elements.lastName.value,
+    extensionName: customerForm.elements.extensionName.value,
+  });
   generateCustomerCredentials();
+}
+['firstName', 'middleName', 'lastName'].forEach((name) => {
+  const field = customerForm.elements[name];
+  field.addEventListener('beforeinput', (event) => {
+    if (!event.isComposing && event.data && !applicantCharacters.test(event.data))
+      event.preventDefault();
+  });
+  field.addEventListener('input', () => {
+    field.setCustomValidity(
+      applicantCharacters.test(field.value) ? '' : 'Use letters and name punctuation only.',
+    );
+    syncApplicantName();
+  });
 });
+customerForm.elements.extensionName.addEventListener('change', syncApplicantName);
 const registrationFields = [
   'certificateReceived',
   'contractReceived',
@@ -130,7 +132,9 @@ const conditionalLabels = [...registrationFields, ...installationFields].map((na
 });
 let lastContactValue = '';
 customerForm.querySelectorAll('label').forEach((label) => {
-  const marker = Array.from(label.children).find((child) => child.classList.contains('required-marker'));
+  const marker = Array.from(label.children).find((child) =>
+    child.classList.contains('required-marker'),
+  );
   if (!marker) return;
   const caption = document.createElement('span');
   label.insertBefore(caption, label.firstChild);
@@ -195,8 +199,17 @@ function openCustomer(customer) {
     customerForm.elements.contact.value = (customer.contact || '').replace(/^(\+63|0)/, '');
   }
   lastContactValue = contactField.value;
-  lastApplicantName = applicantNameField.value;
-  generateCustomerCredentials();
+  if (customer && !customer.firstName && !customer.lastName) {
+    // Legacy records keep all name words; staff can adjust compound surnames when editing.
+    const parts = customer.name.trim().split(/\s+/);
+    const suffix = parts[parts.length - 1];
+    if (CustomerValidation.extensions.includes(suffix)) {
+      customerForm.elements.extensionName.value = parts.pop();
+    }
+    customerForm.elements.lastName.value = parts.length > 1 ? parts.pop() : '';
+    customerForm.elements.firstName.value = parts.join(' ');
+  }
+  syncApplicantName();
   const purok = customer?.address?.match(/^Purok\s*([1-7])(?:\b|,)/i);
   customerForm.elements.address.value = purok ? 'Purok ' + purok[1] : '';
   customerForm.elements.street.value =
@@ -216,6 +229,7 @@ function openCustomer(customer) {
   customerForm.elements.reading.disabled = Boolean(
     customer && customerRecords.bills.some((bill) => bill.customerId === customer.id),
   );
+  updateApplicationDateDisplays();
   updateInstallationTotal();
   syncContractDate();
   updateRegistrationButtons();
@@ -263,6 +277,8 @@ customerForm.addEventListener('submit', async (event) => {
     return AdminUI.message('Complete the required verification before registering this customer.');
   // Refresh the saved records before assigning numbers.
   Object.assign(customerRecords, WaterStore.load());
+  const reviewSnapshot = JSON.stringify(customerRecords);
+  const reviewDate = WaterStore.today();
   syncContractDate();
   generateCustomerCredentials();
   const input = CustomerValidation.read(customerForm);
@@ -331,48 +347,42 @@ customerForm.addEventListener('submit', async (event) => {
   ) {
     return AdminUI.message('That account number is already registered.');
   }
-  const index = customerRecords.customers.findIndex((item) => item.id === editingCustomerId);
-  if (index === -1) customerRecords.customers.push(customer);
-  else customerRecords.customers[index] = customer;
+  savingCustomer = true;
+  registerCustomerButton.disabled = true;
   try {
+    const accepted = await confirmAction(
+      'Review customer application',
+      'Check the details before confirming registration.',
+      'Confirm and save',
+      customerRegistrationSummary(customer),
+    );
+    if (!accepted) return;
+    if (JSON.stringify(WaterStore.load()) !== reviewSnapshot || WaterStore.today() !== reviewDate)
+      return AdminUI.message(
+        'Records or dates changed. Review the application again before saving.',
+      );
+    const index = customerRecords.customers.findIndex((item) => item.id === editingCustomerId);
+    if (index === -1) customerRecords.customers.push(customer);
+    else customerRecords.customers[index] = customer;
     WaterStore.save(customerRecords);
   } catch {
     return AdminUI.message('Customer could not be saved. Please try again.');
+  } finally {
+    savingCustomer = false;
+    updateRegistrationButtons();
   }
-  savingCustomer = true;
-  registerCustomerButton.disabled = true;
   await showNotice(
     'Customer saved successfully',
-    'Please check the saved details:\n\n' +
-      'Customer: ' +
-      customer.name +
-      '\n' +
-      'Account number: ' +
-      customer.account +
-      '\nSubmitter number: ' +
-      customer.submitterNumber +
-      '\n' +
-      'Application number: ' +
-      customer.applicationNumber +
-      '\n' +
-      'Contact: ' +
-      customer.contact +
-      '\n' +
-      'Address: ' +
-      [customer.address, customer.street, customer.barangay].filter(Boolean).join(', ') +
-      '\n' +
-      'Status: ' +
-      customer.registrationStatus,
+    customer.name + ' has been registered.\nAccount number: ' + customer.account,
   );
-  savingCustomer = false;
-  openCustomer(customer);
-  history.replaceState(null, '', 'customer-form.html?id=' + encodeURIComponent(customer.id));
-  const back = document.getElementById('cancelCustomer');
-  back.classList.add('back-icon-button');
-  back.setAttribute('aria-label', 'Back to customers');
-  back.dataset.tooltip = 'Back';
-  back.innerHTML =
-    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m12 5-7 7 7 7M5 12h14"/></svg>';
+  openCustomer(null);
+  customerForm.querySelectorAll('input, select, textarea').forEach((field) => {
+    field.setCustomValidity('');
+    field.removeAttribute('aria-invalid');
+  });
+  history.replaceState(null, '', 'customer-form.html');
+  showCustomerStep(0, false);
+  customerForm.elements.firstName.focus();
 });
 
 function installationTotal() {
@@ -430,4 +440,71 @@ if (requestedCustomerId && !requestedCustomer) {
   AdminUI.message('Customer not found. Return to the customer list to choose an existing record.');
 } else {
   openCustomer(requestedCustomer || null);
+}
+
+function customerRegistrationSummary(customer) {
+  const paper = document.createElement('section');
+  paper.className = 'registration-paper';
+  const header = document.createElement('header');
+  const logo = document.createElement('img');
+  logo.src = '../assets/images/water_system_logo.jpg';
+  logo.alt = 'PWSS logo';
+  const title = document.createElement('div');
+  const name = document.createElement('strong');
+  name.textContent = 'PIO DURAN WATER SUPPLY SYSTEM';
+  const subtitle = document.createElement('p');
+  subtitle.textContent = 'Customer registration record';
+  title.append(name, subtitle);
+  header.append(logo, title);
+  paper.appendChild(header);
+  const details = document.createElement('dl');
+  const rows = [
+    ['Account number', customer.account],
+    ['Submitter number', customer.submitterNumber],
+    ['Application number', customer.applicationNumber],
+    ['Registration status', customer.registrationStatus],
+    ['Full name', customer.name],
+    ['Gender', customer.gender],
+    ['Mobile number', customer.contact],
+    ['Customer type', customer.customerType],
+    [
+      'Service address',
+      [customer.address, customer.street, customer.barangay].filter(Boolean).join(', '),
+    ],
+    ['Date applied', customer.dateApplied],
+    ['Date approved', customer.dateApproved],
+    ['Approved by', customer.approvedBy],
+    ['Service status', customer.serviceStatus],
+    ['Meter number', customer.meterNumber],
+    ['Initial / current reading', customer.reading + ' m\u00b3'],
+    ['Username', customer.username],
+  ];
+  rows.forEach(([label, value]) => {
+    const group = document.createElement('div');
+    const term = document.createElement('dt');
+    const description = document.createElement('dd');
+    term.textContent = label;
+    description.textContent = value || 'Not recorded';
+    group.append(term, description);
+    details.appendChild(group);
+  });
+  paper.appendChild(details);
+  return paper;
+}
+
+function updateApplicationDateDisplays() {
+  ['dateApplied', 'dateApproved'].forEach((name) => {
+    const value = customerForm.elements[name].value;
+    const display = document.getElementById(name + 'Display');
+    display.dateTime = value;
+    display.textContent =
+      value && Validation.date(value)
+        ? new Intl.DateTimeFormat('en-PH', {
+            month: 'long',
+            day: 'numeric',
+            year: 'numeric',
+            timeZone: 'Asia/Manila',
+          }).format(new Date(value + 'T12:00:00+08:00'))
+        : 'Not recorded';
+  });
 }

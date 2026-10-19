@@ -311,3 +311,46 @@ window.addEventListener('storage', (event) => {
 window.addEventListener('error', (event) => {
   AdminUI.message('The operation could not finish. ' + event.message);
 });
+
+// Use the same arrow and close icons on static and dynamically created controls.
+function applyNavigationIcon(button) {
+  if (button.querySelector('svg')) return;
+  const label = button.textContent.trim();
+  const paths = {
+    Previous: 'm12 5-7 7 7 7M5 12h14',
+    Back: 'm12 5-7 7 7 7M5 12h14',
+    Next: 'm12 5 7 7-7 7M19 12H5',
+    Close: 'm6 6 12 12M18 6 6 18',
+  };
+  if (!paths[label]) return;
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('viewBox', '0 0 24 24');
+  svg.setAttribute('fill', 'none');
+  svg.setAttribute('stroke', 'currentColor');
+  svg.setAttribute('stroke-width', '2');
+  svg.setAttribute('stroke-linecap', 'round');
+  svg.setAttribute('stroke-linejoin', 'round');
+  svg.setAttribute('aria-hidden', 'true');
+  const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  path.setAttribute('d', paths[label]);
+  svg.appendChild(path);
+  const caption = document.createElement('span');
+  caption.textContent = label;
+  button.classList.add('navigation-icon-control');
+  button.replaceChildren(...(label === 'Next' ? [caption, svg] : [svg, caption]));
+}
+function scanNavigationIcons(root) {
+  if (!(root instanceof Element)) return;
+  if (root.matches('button, a.btn')) applyNavigationIcon(root);
+  root.querySelectorAll('button, a.btn').forEach(applyNavigationIcon);
+  const parent = root.closest('button');
+  if (parent) applyNavigationIcon(parent);
+}
+scanNavigationIcons(document.body);
+new MutationObserver((changes) => {
+  changes.forEach((change) => {
+    if (change.target instanceof Element && change.target.matches('button'))
+      applyNavigationIcon(change.target);
+    change.addedNodes.forEach(scanNavigationIcons);
+  });
+}).observe(document.body, { childList: true, subtree: true });

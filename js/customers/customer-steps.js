@@ -44,6 +44,18 @@ previousCustomerStep.addEventListener('click', () => showCustomerStep(currentCus
 function customerStepError(field) {
   const value = field.value.trim();
   const fields = customerForm.elements;
+  if (field.name === 'gender' && !['Male', 'Female'].includes(value))
+    return 'Select a gender before continuing.';
+  if (['firstName', 'lastName'].includes(field.name) && !value)
+    return 'Complete this required name field.';
+  if (
+    ['firstName', 'middleName', 'lastName'].includes(field.name) &&
+    value &&
+    (!/^[\p{L}\p{M} .,'-]+$/u.test(value) || !/\p{L}/u.test(value))
+  )
+    return 'Enter letters and name punctuation only.';
+  if (field.name === 'extensionName' && !CustomerValidation.extensions.includes(value))
+    return 'Select a valid extension name.';
   if (field.name === 'name' && !/^[\p{L}\p{M} .,'-]+$/u.test(value))
     return 'Enter the applicant name using letters and name punctuation only.';
   if (field.name === 'name' && !/\p{L}/u.test(value)) return 'Enter the applicant name.';

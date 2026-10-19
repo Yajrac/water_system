@@ -1,0 +1,62 @@
+/* Consistent controls across admin forms, filters and dialogs. */
+html
+  body
+  :is(
+    input:not([type='checkbox']):not([type='radio']):not([type='hidden']):not([type='submit']):not(
+        [type='button']
+      ):not([type='file']):not([type='range']),
+    select
+  ) {
+  box-sizing: border-box;
+  min-height: 46px;
+  height: 46px;
+  min-width: 0;
+  border-radius: 7px;
+}
+html body textarea {
+  box-sizing: border-box;
+  min-height: 88px;
+  border-radius: 7px;
+}
+html body :is(input, select, textarea):is(:focus, :focus-visible) {
+  outline: none;
+  outline-offset: 0;
+  box-shadow: none;
+  border-color: var(--color-primary, #087fa3);
+}
+html body :is(input[type='checkbox'], input[type='radio']):focus-visible {
+  outline: 2px solid var(--color-primary, #087fa3);
+  outline-offset: 2px;
+}
+html body :is(.date-control, .phone-input-group, .password-field):focus-within {
+  outline: none;
+  box-shadow: none;
+  border-color: var(--color-primary, #087fa3);
+}
+html body :is(.date-control, .phone-input-group, .password-field) {
+  box-sizing: border-box;
+  min-height: 46px;
+  border-radius: 7px;
+}
+html body :is(.date-control, .phone-input-group, .password-field) input,
+html body :is(.date-control, .phone-input-group, .password-field) input:is(:focus, :focus-visible) {
+  border: 0;
+  border-radius: 0;
+  height: 44px;
+  min-height: 44px;
+  outline: none;
+  box-shadow: none;
+}
+html
+  body
+  :is(.admin-form, .service-toolbar, .inline-record-toolbar, .customer-directory-toolbar)
+  label {
+  min-width: 0;
+}
+@media (max-width: 600px) {
+  html
+    body
+    :is(input:not([type='checkbox']):not([type='radio']):not([type='hidden']), select, textarea) {
+    font-size: 16px;
+  }
+}

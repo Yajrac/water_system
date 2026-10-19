@@ -415,10 +415,20 @@
   margin: 0;
   border-radius: 0;
 }
-#ledgerSetupForm input:focus-visible,
-#ledgerSetupForm select:focus-visible {
-  outline: 2px solid #1ca0bc;
-  outline-offset: 2px;
+#ledgerSetupForm input:is(:focus, :focus-visible),
+#ledgerSetupForm select:is(:focus, :focus-visible) {
+  outline: none;
+  outline-offset: 0;
+  box-shadow: none;
+  border-color: #1ca0bc;
+}
+#ledgerSetupForm .date-control:focus-within {
+  outline: none;
+  box-shadow: none;
+  border-color: #1ca0bc;
+}
+#ledgerSetupForm .date-control input:is(:focus, :focus-visible) {
+  border: 0;
 }
 .setup-required {
   color: #db3c50;
@@ -545,4 +555,38 @@
 [data-theme='dark'] .ledger-card-icon svg,
 [data-theme='dark'] .ledger-total-label svg {
   filter: brightness(1.35);
+}
+
+.ledger-completion.is-completed {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  background: #12ad48;
+  color: #ffffff;
+  border: 0;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.ledger-completion.is-completed svg {
+  width: 16px;
+  height: 16px;
+}
+[data-theme='dark'] .ledger-completion.is-completed {
+  background: #12ad48;
+  color: #ffffff;
+}
+
+.ledger-completion:not(.is-completed) {
+  color: #805000;
+  background: #fff3d6;
+  border: 1px solid #e8c77d;
+  font-weight: 700;
+  opacity: 1;
+}
+[data-theme='dark'] .ledger-completion:not(.is-completed) {
+  color: #ffe1a1;
+  background: #473416;
+  border-color: #94743a;
 }

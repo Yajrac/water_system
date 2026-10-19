@@ -19,6 +19,7 @@
     <link rel="stylesheet" href="../css/shared/back-button.css" />
     <link rel="stylesheet" href="../css/shared/modals.css" />
     <link rel="stylesheet" href="../css/shared/responsive-cards.css" />
+    <link rel="stylesheet" href="../css/shared/form-controls.css" />
   </head>
   <body>
     <div class="sidebar-overlay" id="overlay"></div>
@@ -253,8 +254,86 @@
               <p>Municipal water supply administration</p>
             </div>
           </header>
+          <nav
+            class="billing-navigation section-tabs"
+            role="tablist"
+            aria-label="Settings sections"
+          >
+            <button
+              type="button"
+              id="officeSettingsTab"
+              role="tab"
+              aria-controls="officeSettingsPanel"
+              aria-selected="true"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                width="20"
+                height="20"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M4 21h16M6 21V3h12v18M9 7h1m4 0h1M9 11h1m4 0h1M10 21v-5h4v5" /></svg
+              ><span>Office details</span>
+            </button>
+            <button
+              type="button"
+              id="adminLogsTab"
+              role="tab"
+              aria-controls="adminLogsPanel"
+              aria-selected="false"
+              tabindex="-1"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                width="20"
+                height="20"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <rect x="5" y="4" width="14" height="17" rx="2" />
+                <path d="M9 4V2h6v2M9 9h6M9 13h6M9 17h4" /></svg
+              ><span>Admin logs</span>
+            </button>
+            <button
+              type="button"
+              id="consumerLogsTab"
+              role="tab"
+              aria-controls="consumerLogsPanel"
+              aria-selected="false"
+              tabindex="-1"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                width="20"
+                height="20"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <circle cx="9" cy="7" r="3" />
+                <path d="M3 21v-2a6 6 0 0 1 12 0v2M17 8h4M17 12h4M18 16h3" /></svg
+              ><span>Consumer logs</span>
+            </button>
+          </nav>
           <p id="pageMessage" role="status" tabindex="-1"></p>
-          <section class="panel">
+          <section
+            class="panel section-tab-panel"
+            id="officeSettingsPanel"
+            role="tabpanel"
+            aria-labelledby="officeSettingsTab"
+          >
             <div class="panel-header"><h2>Office details</h2></div>
             <div class="admin-body">
               <form id="officeForm" class="admin-form">
@@ -265,11 +344,87 @@
               </form>
             </div>
           </section>
-          <section class="panel">
-            <div class="panel-header"><h2>Local records</h2></div>
+          <section
+            class="panel section-tab-panel"
+            id="adminLogsPanel"
+            role="tabpanel"
+            aria-labelledby="adminLogsTab"
+            hidden
+          >
+            <div class="panel-header"><h2>Admin activity logs</h2></div>
             <div class="admin-body">
-              <p>Record downloads will be available in a future update.</p>
-              <button id="backupRecords" class="btn" type="button">Download records</button>
+              <div class="inline-record-toolbar settings-log-toolbar">
+                <label
+                  >Search logs<input
+                    id="activitySearch"
+                    class="admin-filter"
+                    type="search"
+                    placeholder="Action, account or admin" /></label
+                ><label>Date<input id="activityDate" class="admin-filter" type="date" /></label
+                ><button class="btn" id="clearActivityFilters" type="button">Clear filters</button>
+              </div>
+              <div class="table-scroll">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Date / time</th>
+                      <th>Action</th>
+                      <th>Account / record</th>
+                      <th>Details</th>
+                      <th>Admin</th>
+                    </tr>
+                  </thead>
+                  <tbody id="activityRows"></tbody>
+                </table>
+              </div>
+              <nav
+                id="activityPagination"
+                class="record-pagination"
+                aria-label="Activity log pages"
+              ></nav>
+            </div>
+          </section>
+          <section
+            class="panel section-tab-panel"
+            id="consumerLogsPanel"
+            role="tabpanel"
+            aria-labelledby="consumerLogsTab"
+            hidden
+          >
+            <div class="panel-header"><h2>Consumer activity logs</h2></div>
+            <div class="admin-body">
+              <div class="inline-record-toolbar settings-log-toolbar">
+                <label
+                  >Search logs<input
+                    id="consumerActivitySearch"
+                    class="admin-filter"
+                    type="search"
+                    placeholder="Action, account or consumer" /></label
+                ><label
+                  >Date<input id="consumerActivityDate" class="admin-filter" type="date" /></label
+                ><button type="button" class="btn" id="clearConsumerActivityFilters">
+                  Clear filters
+                </button>
+              </div>
+              <div class="table-scroll">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Date / time</th>
+                      <th>Action</th>
+                      <th>Account / record</th>
+                      <th>Details</th>
+                      <th>Consumer</th>
+                    </tr>
+                  </thead>
+                  <tbody id="consumerActivityRows"></tbody>
+                </table>
+              </div>
+              <nav
+                id="consumerActivityPagination"
+                class="record-pagination"
+                aria-label="Consumer log pages"
+              ></nav>
             </div>
           </section>
         </main>
@@ -281,6 +436,9 @@
     <script src="../js/shared/shared.js"></script>
     <script src="../js/shared/calendar.js"></script>
     <script src="../js/shared/confirmation.js"></script>
+    <script src="../js/shared/pagination.js"></script>
+    <script src="../js/shared/section-tabs.js"></script>
     <script src="../js/settings/settings.js"></script>
+    <script src="../js/settings/activity-logs.js"></script>
   </body>
 </html>

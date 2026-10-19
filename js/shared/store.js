@@ -63,7 +63,75 @@ const WaterStore = {
     };
   },
   save(records) {
-    localStorage.setItem(this.key, JSON.stringify(records));
+    const previous = this.load();
+    const changes = this.activityChanges(previous, records);
+    const activityLogs = [...(previous.activityLogs || []), ...changes];
+    // Store the records and their log entries together: failed saves produce no success log.
+    localStorage.setItem(this.key, JSON.stringify({ ...records, activityLogs }));
+    records.activityLogs = activityLogs;
+  },
+  activityChanges(previous, records) {
+    const changes = [];
+    const add = (action, target, details) =>
+      changes.push({
+        id: this.id(),
+        timestamp: new Date().toISOString(),
+        actor: 'Administrator',
+        action,
+        target: String(target || ''),
+        details,
+      });
+    const collections = [
+      ['customers', 'Customer'],
+      ['bills', 'Bill'],
+      ['payments', 'Payment'],
+      ['barangays', 'Barangay'],
+      ['feedback', 'Feedback'],
+      ['notices', 'Announcement'],
+      ['disconnections', 'Disconnection'],
+    ];
+    collections.forEach(([key, label]) => {
+      const before = previous[key] || [];
+      const after = records[key] || [];
+      const identity = (item) => item.id || item.code || item.name;
+      after.forEach((item) => {
+        const old = before.find((entry) => identity(entry) === identity(item));
+        if (JSON.stringify(old) === JSON.stringify(item) || (!old && item.isTestData)) return;
+        const customer = records.customers.find((entry) => entry.id === item.customerId);
+        const target =
+          item.account || customer?.account || item.name || item.receipt || identity(item);
+        let action = label + (old ? ' updated' : ' added');
+        let details = item.receipt || item.cycle || item.name || label;
+        if (key === 'customers' && old && this.isActive(old) !== this.isActive(item))
+          action = this.isActive(item) ? 'Customer activated' : 'Customer deactivated';
+        if (key === 'bills' && !old) action = 'Bill generated';
+        if (key === 'payments' && !old) {
+          action = 'Payment recorded';
+          details = (item.receipt || '') + ' - ' + this.money(item.amount);
+        }
+        if (key === 'feedback' && old && (item.replies || []).length > (old.replies || []).length)
+          action = 'Feedback reply added';
+        add(action, target, details);
+      });
+      before
+        .filter((item) => !after.some((entry) => identity(entry) === identity(item)))
+        .forEach((item) =>
+          add(label + ' removed', item.account || item.name || identity(item), label),
+        );
+    });
+    if (JSON.stringify(previous.office) !== JSON.stringify(records.office))
+      add('Office settings updated', records.office?.name, 'Office details changed');
+    Object.entries(records.billingSetups || {}).forEach(([month, setups]) => {
+      Object.entries(setups).forEach(([barangay, setup]) => {
+        if (JSON.stringify(previous.billingSetups?.[month]?.[barangay]) !== JSON.stringify(setup))
+          add(
+            'Billing setup saved',
+            barangay,
+            month + ' - ' + this.money(setup.rate) + ' / m\u00b3',
+          );
+      });
+    });
+    return changes;
   },
   flatBillingSetup(records, cycle, barangay) {
     return records.billingSetups?.[cycle]?.[this.normalizeBarangay(barangay)] || null;

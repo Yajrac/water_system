@@ -88,7 +88,10 @@ function showDisconnections() {
         }
         WaterStore.save(fresh);
         showDisconnections();
-        AdminUI.message(active ? 'Account deactivated.' : 'Account activated.');
+        await showNotice(
+          'Status updated successfully',
+          active ? 'Account deactivated.' : 'Account activated.',
+        );
       } catch (error) {
         AdminUI.message(error.message);
       } finally {
