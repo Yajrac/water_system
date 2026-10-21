@@ -51,6 +51,9 @@ test('dashboard loads authenticated database data, prevents concurrent refresh, 
     renderDashboard(data) {
       renders.push(data);
     },
+    renderDashboardCharts(data) {
+      renders.push(data);
+    },
   });
   vm.runInContext(source, context);
   await new Promise(setImmediate);
@@ -60,7 +63,7 @@ test('dashboard loads authenticated database data, prevents concurrent refresh, 
   assert.equal(requests, 1);
   resolveRequest(payload);
   await new Promise(setImmediate);
-  assert.deepEqual(renders, [payload]);
+  assert.deepEqual(renders, [payload, payload]);
   assert.equal(nodes.get('refreshDashboard').disabled, false);
   context.AdminAPI.request = async () => {
     throw new Error('Unavailable');
@@ -68,5 +71,5 @@ test('dashboard loads authenticated database data, prevents concurrent refresh, 
   await nodes.get('refreshDashboard').click();
   assert.match(messages.at(-1), /Unavailable.*Refresh/);
   assert.equal(nodes.get('refreshDashboard').disabled, false);
-  assert.equal(renders.length, 1);
+  assert.equal(renders.length, 2);
 });

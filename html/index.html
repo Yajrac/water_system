@@ -18,6 +18,7 @@
     <script src="../js/shared/theme.js"></script>
     <link rel="stylesheet" href="../css/shared/shared.css" />
     <link rel="stylesheet" href="../css/shared/admin.css" />
+    <link rel="stylesheet" href="../css/dashboard/dashboard-charts.css" />
     <link rel="stylesheet" href="../css/shared/back-button.css" />
     <link rel="stylesheet" href="../css/shared/modals.css" />
     <link rel="stylesheet" href="../css/shared/responsive-cards.css" />
@@ -159,6 +160,20 @@
           </header>
           <p id="pageMessage" role="status" tabindex="-1"></p>
           <section id="summary" class="admin-summary" aria-label="Dashboard totals"></section>
+          <section class="dashboard-charts" aria-label="Billing and collection charts">
+            <section class="panel">
+              <div class="panel-header"><h2>Monthly collections</h2></div>
+              <div class="dashboard-chart" id="collectionsChart"></div>
+            </section>
+            <section class="panel">
+              <div class="panel-header"><h2>Bill status &middot; All periods</h2></div>
+              <div class="dashboard-chart" id="statusChart"></div>
+            </section>
+            <section class="panel consumption-panel">
+              <div class="panel-header"><h2>Barangay consumption</h2></div>
+              <div class="dashboard-chart" id="consumptionChart"></div>
+            </section>
+          </section>
         </main>
       </div>
     </div>
@@ -169,6 +184,7 @@
     <script src="../js/shared/calendar.js"></script>
     <script src="../js/shared/skeleton.js"></script>
     <script src="../js/dashboard/dashboard.js"></script>
+    <script src="../js/dashboard/dashboard-charts.js"></script>
     <script src="../js/dashboard/dashboard-init.js"></script>
   </body>
 </html>
