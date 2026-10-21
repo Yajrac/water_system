@@ -11,7 +11,7 @@ async function showFeedback(){
       const row=body.insertRow();AdminUI.customer(row,{id:entry.customerId,name:entry.name,account:entry.account});
       AdminUI.cell(row,entry.date,'Date');AdminUI.cell(row,entry.category,'Category');
       AdminUI.cell(row,(entry.message||'').slice(0,100),'Feedback');
-      const status=AdminUI.cell(row,entry.status,'Status');status.style.color=entry.status==='Resolved'?'#15803d':'#b45309';
+      const status=AdminUI.cell(row,entry.status,'Status');status.style.color=['New','Resolved'].includes(entry.status)?'#15803d':'#b45309';
       const actions=AdminUI.cell(row,'','View');const button=document.createElement('button');
       button.type='button';button.className='btn action-view';button.title='View feedback';button.setAttribute('aria-label','View feedback');
       const icon=document.createElement('i');icon.className='bi bi-eye';icon.setAttribute('aria-hidden','true');button.appendChild(icon);
