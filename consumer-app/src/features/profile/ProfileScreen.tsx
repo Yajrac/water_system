@@ -1,22 +1,25 @@
 import { Text, View, StyleSheet } from 'react-native';
 import { Avatar } from '@/components/consumer/Avatar';
 import { Button, Card, Detail, Screen, Sheet, text } from '@/components/consumer/ui';
-import { customer } from '@/data/sample';
+import { useConsumerProfile } from './useConsumerProfile';
 import { useSession } from '@/features/session/SessionProvider';
 import { useState } from 'react';
 import { colors } from '@/theme/tokens';
 
 export default function ProfileScreen() {
   const { signOut, openChangePassword } = useSession();
+  const { profile:customer, error, busy, reload } = useConsumerProfile();
   const [confirm, setConfirm] = useState(false);
   return (
     <Screen title="My profile">
-      <Card>
+      {!!error && <Text style={text.muted}>{error}</Text>}
+      <Button label={busy ? 'Loading profile...' : 'Refresh profile'} disabled={busy} onPress={() => void reload()} />
+      {customer && <Card>
         <View style={styles.identity}>
           <Avatar size={76} active={customer.status === 'Active'} />
           <View style={{ flex: 1, gap: 6 }}>
             <Text style={text.heading}>{customer.name}</Text>
-            <Text style={text.muted}>Residential consumer</Text>
+            <Text style={text.muted}>{customer.customerType} consumer</Text>
           </View>
         </View>
         <Detail label="Account number" value={customer.account} />
@@ -24,7 +27,7 @@ export default function ProfileScreen() {
         <Detail label="Service address" value={customer.address} />
         <Detail label="Mobile number" value={customer.contact} />
         <Detail label="Meter number" value={customer.meter} />
-      </Card>
+      </Card>}
       <Text style={text.muted}>Contact the PWSS office to update your registered details.</Text>
       <Button label="Change password" onPress={openChangePassword} />
       <Button label="Log out" secondary onPress={() => setConfirm(true)} />

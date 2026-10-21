@@ -49,3 +49,14 @@ npx expo lint
 ```
 
 The template has no ESLint setup yet. Its first lint run requires a working connection to install tooling. Review audit findings before release; do not force incompatible dependency upgrades.
+
+
+Profile and feedback now use the authenticated API: `/api/v1/consumer/profile`
+returns only the linked consumer's public profile fields. Home identity and meter
+number use that same profile. Feedback is submission-only with category/message,
+server storage and the consumer's own submission history. Admin Feedback can view
+submissions and change review status, with no reply/chat endpoint. Other financial
+screens and Home totals/advisory preview still contain sample data pending their
+own integration. Deploy the updated backend before testing these screens against
+Render; local and hosted accounts remain separate. No new migration is required
+for profile/feedback (uses existing migration 010 tables).

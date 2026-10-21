@@ -12,6 +12,8 @@ import billRoutes from './routes/bill.routes.js';
 import paymentRoutes from './routes/payment.routes.js';
 import dashboardRoutes from './routes/dashboard.routes.js';
 import notificationRoutes from './routes/notification.routes.js';
+import consumerRoutes from './routes/consumer.routes.js';
+import feedbackRoutes from './routes/feedback.routes.js';
 
 import { env } from './config/env.js';
 
@@ -51,6 +53,8 @@ app.use('/api/v1/bills', billRoutes);
 app.use('/api/v1/payments', paymentRoutes);
 app.use('/api/v1/dashboard', dashboardRoutes);
 app.use('/api/v1/notifications', notificationRoutes);
+app.use('/api/v1/consumer', consumerRoutes);
+app.use('/api/v1/feedback', feedbackRoutes);
 app.use(notFound);
 app.use(errorHandler);
 

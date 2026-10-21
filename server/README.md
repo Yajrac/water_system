@@ -378,3 +378,14 @@ announcements without recipient links remain hidden from the consumer feed.
 Local: `npm run db:migrate`. Aiven: run `node scripts/migrate-aiven.js "path/to/ca.pem"`
 before deploying migration-dependent code. The customer cleanup helper also
 removes announcement recipient links when clearing customer records.
+
+
+Consumer profile and submission-only feedback:
+- Consumer-only `GET /api/v1/consumer/profile`, `GET /api/v1/consumer/feedback`,
+  `POST /api/v1/consumer/feedback` (category/message only, 1500 characters maximum).
+  Customer identity comes exclusively from the authenticated user's linked record.
+- Admin-only `GET /api/v1/feedback` (search/status/page) and
+  `PATCH /api/v1/feedback/:id` (status only: New/In progress/Resolved).
+- No reply endpoint. Existing internal notes and legacy admin messages are not
+  exposed to consumers. Submission/status changes are transactional with audit logs.
+  These features use existing feedback tables; no additional migration is needed.

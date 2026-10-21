@@ -1,13 +1,15 @@
+import { useConsumerProfile } from '../profile/useConsumerProfile';
 import { router } from 'expo-router';
 import { Pressable, Text, View } from 'react-native';
 import { Avatar } from '@/components/consumer/Avatar';
 import { Icon, type IconName } from '@/components/consumer/Icon';
 import { Badge, Button, Card, CardTitle, Screen, text } from '@/components/consumer/ui';
-import { announcements, bills, customer } from '@/data/sample';
+import { announcements, bills } from '@/data/sample';
 import { money } from '@/theme/tokens';
 import { styles } from './home.styles';
 
 export default function HomeScreen() {
+  const {profile:customer} = useConsumerProfile();
   const latest = bills[0];
   const balance = bills.reduce((sum, bill) => sum + bill.total - bill.paid, 0);
   const usage = latest.current - latest.previous;
@@ -23,16 +25,16 @@ export default function HomeScreen() {
     <Screen title="Home">
       <View style={styles.welcome}>
         <View style={{ flex: 1 }}>
-          <Text style={text.muted}>Welcome back, Ana</Text>
+          <Text style={text.muted}>Welcome back{customer?.firstName ? ', ' + customer.firstName : ''}</Text>
           <Text style={styles.welcomeTitle}>Your water service</Text>
-          <Text style={text.muted}>{customer.account}</Text>
+          <Text style={text.muted}>{customer?.account || ''}</Text>
         </View>
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="View my profile"
           onPress={() => router.push('/profile')}
         >
-          <Avatar active={customer.status === 'Active'} />
+          <Avatar active={customer?.status === 'Active'} />
         </Pressable>
       </View>
       <View style={styles.balanceCard}>
@@ -99,7 +101,7 @@ export default function HomeScreen() {
             <Text style={styles.reading}>{latest.current} m³</Text>
           </View>
         </View>
-        <Text style={text.muted}>Meter no. {customer.meter}</Text>
+        <Text style={text.muted}>Meter no. {customer?.meter || 'Not recorded'}</Text>
       </Card>
       <Card>
         <CardTitle title="Latest advisory" icon="news" />

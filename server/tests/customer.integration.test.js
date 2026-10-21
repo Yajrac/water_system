@@ -588,6 +588,32 @@ test(
       assert.equal((await request('/customers/connections?state=disconnected')).data.pagination.total,0);
       const [[disconnectEvents]] = await control.execute("SELECT COUNT(*) AS total FROM connection_events WHERE customer_id=? AND new_status='Disconnected'",[customer.id]);
       assert.equal(Number(disconnectEvents.total),1);
+      const ownProfile=await request('/consumer/profile','GET',undefined,ownerToken);
+      assert.equal(ownProfile.status,200,JSON.stringify(ownProfile));
+      assert.equal(ownProfile.data.account,customer.account);
+      assert.equal(ownProfile.data.name,'Anna Reyes');
+      assert.equal(ownProfile.data.password_hash,undefined);
+      assert.equal((await request('/consumer/profile','GET')).status,403);
+      const submission=await request('/consumer/feedback','POST',{category:'Water supply',message:'Test low water pressure'},ownerToken);
+      assert.equal(submission.status,201,JSON.stringify(submission));
+      const mine=await request('/consumer/feedback','GET',undefined,ownerToken);
+      assert.equal(mine.data.length,1);
+      assert.equal(mine.data[0].message,'Test low water pressure');
+      assert.equal(mine.data[0].internal_notes,undefined);
+      const notMine=await request('/consumer/feedback','GET',undefined,nextLogin.data.accessToken);
+      assert.equal(notMine.data.length,0);
+      assert.equal((await request('/consumer/feedback','POST',{category:'Other',message:'x',customerId:'1'},ownerToken)).status,400);
+      assert.equal((await request('/feedback','GET',undefined,ownerToken)).status,403);
+      const feedbackList=await request('/feedback?status=New');
+      assert.equal(feedbackList.status,200,JSON.stringify(feedbackList));
+      assert.equal(feedbackList.data.pagination.total,1);
+      assert.equal((await request('/feedback/'+submission.data.id,'PATCH',{status:'Resolved',reply:'No replies'})).status,400);
+      assert.equal((await request('/feedback/'+submission.data.id,'PATCH',{status:'Resolved'})).status,200);
+      const resolved=await request('/consumer/feedback','GET',undefined,ownerToken);
+      assert.equal(resolved.data[0].status,'Resolved');
+      const [[messageCount]]=await control.execute('SELECT COUNT(*) AS total FROM feedback_messages WHERE thread_id=?',[submission.data.id]);
+      assert.equal(Number(messageCount.total),1);
+
 
 
     } finally {
