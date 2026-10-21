@@ -24,12 +24,8 @@ async function viewFeedback(entry){
   if(feedbackSaving)return;feedbackSaving=true;
   try{
     const preview=document.createElement('section'),message=document.createElement('p');message.textContent=entry.message||'';
-    const label=document.createElement('label');label.textContent='Status';
-    const status=document.createElement('select');['New','In progress','Resolved'].forEach(value=>status.add(new Option(value,value)));
-    status.value=entry.status;label.appendChild(status);preview.append(message,label);
-    if(!(await confirmAction('Customer feedback',entry.name+' | '+entry.category+' | '+entry.date,'Save status',preview)))return;
-    await AdminAPI.request('/feedback/'+encodeURIComponent(entry.id),{method:'PATCH',body:{status:status.value}});
-    await showFeedback();await showNotice('Feedback updated successfully','Review status saved.');
+    preview.appendChild(message);
+    await showNotice('Customer feedback',entry.name+' | '+entry.category+' | '+entry.date,preview);
   }catch(error){AdminUI.message(error.message);}finally{feedbackSaving=false;}
 }
 document.getElementById('feedbackSearch').addEventListener('input',()=>{

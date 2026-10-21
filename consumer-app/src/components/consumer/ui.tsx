@@ -20,7 +20,8 @@ export function Screen({
   title,
   children,
   footer,
-}: PropsWithChildren<{ title: string; footer?: ReactNode }>) {
+  headerAction,
+}: PropsWithChildren<{ title: string; footer?: ReactNode; headerAction?: ReactNode }>) {
   const scroll = useRef<ScrollView>(null);
   const screenIcons: Record<string, IconName> = {
     'My water account': 'home',
@@ -35,7 +36,8 @@ export function Screen({
       <View style={styles.header}>
         <Text style={styles.brand}>PWSS</Text>
         <Icon name={screenIcons[title] || 'home'} size={20} />
-        <Text style={styles.title}>{title}</Text>
+        <Text style={[styles.title, { flex: 1 }]}>{title}</Text>
+        {headerAction}
       </View>
       <KeyboardAvoidingView
         style={{ flex: 1 }}

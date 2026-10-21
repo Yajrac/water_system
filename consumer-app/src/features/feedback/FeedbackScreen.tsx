@@ -1,6 +1,7 @@
+import { Icon } from '@/components/consumer/Icon';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Text, TextInput, View, StyleSheet } from 'react-native';
-import { Button, Card, Detail, Screen, text } from '@/components/consumer/ui';
+import { Text, TextInput, View, StyleSheet, Pressable } from 'react-native';
+import { Button, Card, Detail, Screen, Sheet, text } from '@/components/consumer/ui';
 import { colors } from '@/theme/tokens';
 import { useSession } from '../session/SessionProvider';
 import { consumerRequest } from '../session/api';
@@ -13,6 +14,7 @@ export default function FeedbackScreen() {
   const [busy,setBusy]=useState(false);
   const [loading,setLoading]=useState(false);
   const [notice,setNotice]=useState('');
+  const [historyOpen,setHistoryOpen]=useState(false);
   const sending=useRef(false);
   const load=useCallback(async()=>{
     if(!accessToken)return;
@@ -31,8 +33,13 @@ export default function FeedbackScreen() {
     }catch(failure){setNotice(failure instanceof Error?failure.message:'Could not send feedback.');}
     finally{sending.current=false;setBusy(false);}
   }
-  return <Screen title="Feedback">
-    <Text style={text.body}>Send your concern to the PWSS office. Feedback is for submission only; replies are not available here.</Text>
+  return <Screen title="Feedback" headerAction={
+    <Pressable accessibilityRole="button" accessibilityLabel="Feedback history"
+      onPress={()=>{setHistoryOpen(true);void load();}} hitSlop={8} style={styles.historyButton}>
+      <Icon name="bills" size={22}/>
+    </Pressable>
+  }>
+    <Text style={text.body}>Send your concern to the PWSS office.</Text>
     <Card>
       <Text style={text.heading}>Category</Text>
       <View style={styles.categories}>{['Billing','Water supply','Meter','Other'].map(value=>
@@ -45,15 +52,18 @@ export default function FeedbackScreen() {
       <Button label={busy?'Sending...':'Send feedback'} disabled={busy||!message.trim()} onPress={()=>void send()}/>
     </Card>
     {!!notice && <Text accessibilityRole="alert" style={text.muted}>{notice}</Text>}
+    <Sheet title="Feedback history" visible={historyOpen} onClose={()=>setHistoryOpen(false)}>
     <Button label={loading?'Loading...':'Refresh submissions'} secondary disabled={loading||busy} onPress={()=>void load()}/>
     {!loading&&!items.length&&<Text style={text.muted}>No feedback submitted yet.</Text>}
     {items.map(item=><Card key={item.id}>
       <Text style={text.heading}>{item.category}</Text><Text style={text.body}>{item.message}</Text>
       <Text style={text.muted}>{item.date}</Text><Detail label="Status" value={item.status}/>
     </Card>)}
+    </Sheet>
   </Screen>;
 }
 const styles=StyleSheet.create({
+  historyButton:{minWidth:44,minHeight:44,alignItems:'center',justifyContent:'center'},
   categories:{gap:8},input:{minHeight:120,borderWidth:1,borderColor:colors.border,borderRadius:8,
     padding:12,color:colors.ink,textAlignVertical:'top'},
 });
