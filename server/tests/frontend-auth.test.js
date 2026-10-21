@@ -9,6 +9,19 @@ const sources = await Promise.all(
   ),
 );
 
+test('API config uses Render and allows switching local preview back to the local API', () => {
+  for (const [local, hostname, expected] of [
+    [false, '127.0.0.1', 'https://water-system-1.onrender.com/api/v1'],
+    [true, 'localhost', 'http://localhost:3000/api/v1'],
+    [true, '127.0.0.1', 'http://127.0.0.1:3000/api/v1'],
+    [true, 'water.example.com', 'https://water-system-1.onrender.com/api/v1'],
+  ]) {
+    const context = vm.createContext({ location: { hostname } });
+    vm.runInContext(sources[0].replace('const useLocalAdminApi = false;', 'const useLocalAdminApi = ' + local + ';'), context);
+    assert.equal(vm.runInContext('AdminApiConfig.baseUrl', context), expected);
+  }
+});
+
 function browser({ page = 'login.html', search = '', stored = {}, respond } = {}) {
   const storage = new Map(Object.entries(stored));
   const redirects = [];
