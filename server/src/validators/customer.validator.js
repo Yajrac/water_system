@@ -183,9 +183,9 @@ export function validateCustomer(body, { existing = null, importing = false } = 
   ) {
     throw new AppError('Consumer password must contain 8–128 characters.', 400);
   }
-  if (result.username && !/^[A-Za-z0-9._-]{3,40}$/.test(result.username)) {
+  if (result.username && !/^(?!.*[<>])[\x21-\x7e]{3,40}$/.test(result.username)) {
     throw new AppError(
-      'Username must contain 3–40 letters, numbers, periods, underscores or hyphens.',
+      'Username must contain 3–40 characters using letters, numbers or symbols, without spaces or angle brackets.',
       400,
     );
   }

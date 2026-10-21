@@ -184,3 +184,13 @@ test('customer view maps IDs, registration flags and fingerprint without passwor
   assert.notEqual(customerView({ ...row, firstName: 'Anna' }).revision, view.revision);
   assert.equal(view.password_hash, undefined);
 });
+
+
+test('consumer usernames accept symbols while rejecting whitespace, markup and invalid lengths', () => {
+  for (const username of ['test','test@','test1','test!#$%&*+=?','name@email.com']) {
+    assert.equal(validateCustomer({...input,username,password:'password123'}).username,username);
+  }
+  for (const username of ['ab','a'.repeat(41),'test name','test<','test>','ab\u0000cd']) {
+    assert.throws(()=>validateCustomer({...input,username,password:'password123'}));
+  }
+});

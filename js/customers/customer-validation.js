@@ -62,8 +62,8 @@ const CustomerValidation = {
     }
     if (!this.extensions.includes(customer.extensionName)) return 'Select a valid extension name.';
     if (!['Male', 'Female'].includes(customer.gender)) return 'Select Male or Female for gender.';
-    if (customer.username && !/^[A-Za-z0-9._-]{3,40}$/.test(customer.username))
-      return 'Username must contain 3–40 letters, numbers, periods, underscores or hyphens.';
+    if (customer.username && !/^(?!.*[<>])[\x21-\x7e]{3,40}$/.test(customer.username))
+      return 'Username must contain 3–40 characters using letters, numbers or symbols, without spaces or angle brackets.';
     if (
       !customer.name ||
       !customer.address ||
