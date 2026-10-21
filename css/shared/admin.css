@@ -2409,6 +2409,10 @@ html body table .btn:has(svg):hover {
   color: #e87808;
   background: #fff0d5;
 }
+.profile-summary > div:nth-child(3) .profile-icon {
+  color: #087de0;
+  background: #e1f2ff;
+}
 .record-card:nth-child(4n) .record-card-top > .bi,
 .profile-summary > div:nth-child(4) .profile-icon {
   color: #079650;

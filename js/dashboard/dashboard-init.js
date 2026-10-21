@@ -1,21 +1,34 @@
-// Load the JSON fixtures before drawing charts; saved records still work offline.
+let dashboardLoading = false;
 async function startDashboard() {
-  const finish = [
-    Skeleton.start(document.getElementById('summary'), 'cards'),
-    ...['collectionsChart', 'statusChart', 'consumptionChart'].map((id) =>
-      Skeleton.start(document.getElementById(id), 'chart', 1),
-    ),
-  ];
-  try {
-    await fetchSampleCustomers();
-  } catch {
-    AdminUI.message(
-      'Sample chart data could not load. Showing saved records. Use a local web preview to load the JSON.',
-    );
-  } finally {
-    finish.forEach((stop) => stop());
+  if (dashboardLoading) return;
+  dashboardLoading = true;
+  if (!(await AdminAuth.ready)) {
+    dashboardLoading = false;
+    return;
   }
-  renderDashboard();
-  renderDashboardCharts();
+  const button = document.getElementById('refreshDashboard');
+  button.disabled = true;
+  AdminUI.message('');
+  const containers = ['summary', 'collectionsChart', 'statusChart', 'consumptionChart'];
+  const finish = containers.map((id) => {
+    const container = document.getElementById(id);
+    container.chartResizeObserver?.disconnect();
+    container.replaceChildren();
+    return Skeleton.start(container, id === 'summary' ? 'cards' : 'chart', 1);
+  });
+  try {
+    const data = await AdminAPI.request('/dashboard');
+    finish.forEach((stop) => stop());
+    renderDashboard(data);
+    renderDashboardCharts(data);
+  } catch (error) {
+    finish.forEach((stop) => stop());
+    containers.forEach((id) => document.getElementById(id).replaceChildren());
+    AdminUI.message(error.message + ' Select Refresh to try again.');
+  } finally {
+    dashboardLoading = false;
+    button.disabled = false;
+  }
 }
+document.getElementById('refreshDashboard').addEventListener('click', startDashboard);
 startDashboard();

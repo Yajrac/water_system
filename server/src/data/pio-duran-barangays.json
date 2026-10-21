@@ -1,0 +1,174 @@
+{
+  "municipality": "Pio Duran",
+  "province": "Albay",
+  "source": "https://psa.gov.ph/classification/psgc/barangays/0500513000",
+  "sourceAsOf": "2025-07-31",
+  "verifiedOn": "2026-10-18",
+  "barangays": [
+    {
+      "code": "0500513001",
+      "name": "Agol",
+      "displayName": "Barangay Agol"
+    },
+    {
+      "code": "0500513002",
+      "name": "Alabangpuro",
+      "displayName": "Barangay Alabangpuro"
+    },
+    {
+      "code": "0500513003",
+      "name": "Basicao Coastal",
+      "displayName": "Barangay Basicao Coastal"
+    },
+    {
+      "code": "0500513004",
+      "name": "Basicao Interior",
+      "displayName": "Barangay Basicao Interior"
+    },
+    {
+      "code": "0500513005",
+      "name": "Banawan",
+      "displayName": "Barangay Banawan"
+    },
+    {
+      "code": "0500513006",
+      "name": "Binodegahan",
+      "displayName": "Barangay Binodegahan"
+    },
+    {
+      "code": "0500513007",
+      "name": "Buenavista",
+      "displayName": "Barangay Buenavista"
+    },
+    {
+      "code": "0500513008",
+      "name": "Buyo",
+      "displayName": "Barangay Buyo"
+    },
+    {
+      "code": "0500513009",
+      "name": "Caratagan",
+      "displayName": "Barangay Caratagan"
+    },
+    {
+      "code": "0500513010",
+      "name": "Cuyaoyao",
+      "displayName": "Barangay Cuyaoyao"
+    },
+    {
+      "code": "0500513011",
+      "name": "Flores",
+      "displayName": "Barangay Flores"
+    },
+    {
+      "code": "0500513012",
+      "name": "Lawinon",
+      "displayName": "Barangay Lawinon"
+    },
+    {
+      "code": "0500513013",
+      "name": "Macasitas",
+      "displayName": "Barangay Macasitas"
+    },
+    {
+      "code": "0500513014",
+      "name": "Malapay",
+      "displayName": "Barangay Malapay"
+    },
+    {
+      "code": "0500513015",
+      "name": "Malidong",
+      "displayName": "Barangay Malidong"
+    },
+    {
+      "code": "0500513016",
+      "name": "Mamlad",
+      "displayName": "Barangay Mamlad"
+    },
+    {
+      "code": "0500513017",
+      "name": "Marigondon",
+      "displayName": "Barangay Marigondon"
+    },
+    {
+      "code": "0500513018",
+      "name": "Matanglad",
+      "displayName": "Barangay Matanglad"
+    },
+    {
+      "code": "0500513019",
+      "name": "Nablangbulod",
+      "displayName": "Barangay Nablangbulod"
+    },
+    {
+      "code": "0500513020",
+      "name": "Oringon",
+      "displayName": "Barangay Oringon"
+    },
+    {
+      "code": "0500513021",
+      "name": "Palapas",
+      "displayName": "Barangay Palapas"
+    },
+    {
+      "code": "0500513022",
+      "name": "Panganiran",
+      "displayName": "Barangay Panganiran"
+    },
+    {
+      "code": "0500513023",
+      "name": "Barangay I",
+      "displayName": "Barangay 1"
+    },
+    {
+      "code": "0500513024",
+      "name": "Barangay II",
+      "displayName": "Barangay 2"
+    },
+    {
+      "code": "0500513025",
+      "name": "Barangay III",
+      "displayName": "Barangay 3"
+    },
+    {
+      "code": "0500513026",
+      "name": "Barangay IV",
+      "displayName": "Barangay 4"
+    },
+    {
+      "code": "0500513027",
+      "name": "Barangay V",
+      "displayName": "Barangay 5"
+    },
+    {
+      "code": "0500513028",
+      "name": "Rawis",
+      "displayName": "Barangay Rawis"
+    },
+    {
+      "code": "0500513029",
+      "name": "Salvacion",
+      "displayName": "Barangay Salvacion"
+    },
+    {
+      "code": "0500513030",
+      "name": "Santo Cristo",
+      "displayName": "Barangay Santo Cristo"
+    },
+    {
+      "code": "0500513031",
+      "name": "Sukip",
+      "displayName": "Barangay Sukip"
+    },
+    {
+      "code": "0500513032",
+      "name": "Tibabo",
+      "displayName": "Barangay Tibabo"
+    },
+    {
+      "code": "0500513033",
+      "name": "La Medalla",
+      "displayName": "Barangay La Medalla"
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+import { Router } from 'express';
+import { authenticate } from '../middleware/authenticate.js';
+import { requireRole } from '../middleware/require-role.js';
+import { listPayments, showReceipt, recordPayment } from '../controllers/payment.controller.js';
+const router = Router();
+router.use(authenticate, requireRole('admin'));
+router.get('/', listPayments);
+router.get('/:id', showReceipt);
+router.post('/', recordPayment);
+export default router;

@@ -1,7 +1,8 @@
-const customerRecords = WaterStore.load();
+const customerRecords = { customers: [], bills: [] };
+let customerFormLoading = true;
 const customerForm = document.getElementById('customerForm');
 customerForm.elements.barangay.replaceChildren(new Option('Select barangay', ''));
-WaterStore.barangays.forEach((name) => customerForm.elements.barangay.add(new Option(name, name)));
+customerForm.inert = true;
 const registerCustomerButton = document.getElementById('registerCustomer');
 const printApplicationButton = document.getElementById('printApplication');
 let editingCustomerId = null;
@@ -17,7 +18,7 @@ customerForm.elements.dateApplied.addEventListener('change', () => {
     updateRegistrationButtons();
   }
 });
-let draftSubmitterNumber = '';
+let credentialSeed = '';
 const passwordPreview = document.getElementById('customerPassword');
 const passwordToggle = document.getElementById('toggleCustomerPassword');
 let usernameEdited = false;
@@ -35,19 +36,6 @@ passwordToggle.addEventListener('click', () => {
   passwordToggle.setAttribute('aria-pressed', String(visible));
   document.getElementById('customerPasswordSlash').style.display = visible ? 'block' : 'none';
 });
-function newSubmitterNumber() {
-  let number;
-  do {
-    const suffix = crypto.randomUUID().replaceAll('-', '').slice(0, 6).toUpperCase();
-    number = 'PWSS-' + WaterStore.today().replaceAll('-', '') + '-' + suffix;
-  } while (customerRecords.customers.some((customer) => customer.submitterNumber === number));
-  return number;
-}
-function syncContractDate() {
-  const existing = customerRecords.customers.find((item) => item.id === editingCustomerId);
-  customerForm.elements.contractDate.value = existing?.contractDate || WaterStore.today();
-}
-customerForm.elements.contractReceived.addEventListener('change', syncContractDate);
 const contactField = customerForm.elements.contact;
 const applicantNameField = customerForm.elements.name;
 function generateCustomerCredentials() {
@@ -79,14 +67,15 @@ function generateCustomerCredentials() {
     username = stem + '.' + suffix++;
   }
   if (!usernameEdited) customerForm.elements.username.value = existing?.username || username;
-  // Preview only. Actual customer credentials need server-side provisioning.
+  // Existing passwords stay unchanged unless staff explicitly enter a replacement.
+  if (existing?.userId && !passwordEdited) {
+    passwordPreview.value = '';
+    return;
+  }
   const firstName = base.split('.')[0] || 'Customer';
   if (!passwordEdited)
     passwordPreview.value =
-      firstName.charAt(0).toUpperCase() +
-      firstName.slice(1) +
-      '@' +
-      draftSubmitterNumber.split('-').pop();
+      firstName.charAt(0).toUpperCase() + firstName.slice(1) + '@PWSS' + credentialSeed;
 }
 const applicantCharacters = /^[\p{L}\p{M} .,'-]*$/u;
 function syncApplicantName() {
@@ -104,7 +93,18 @@ function syncApplicantName() {
     if (!event.isComposing && event.data && !applicantCharacters.test(event.data))
       event.preventDefault();
   });
-  field.addEventListener('input', () => {
+  field.addEventListener('input', (event) => {
+    if (event?.isComposing) return;
+    const capitalized = field.value.replace(
+      /(^|[\s\-'’])(\p{L})/gu,
+      (_, prefix, letter) => prefix + letter.toUpperCase(),
+    );
+    if (field.value !== capitalized) {
+      const start = field.selectionStart;
+      const end = field.selectionEnd;
+      field.value = capitalized;
+      if (start !== null && start !== undefined) field.setSelectionRange(start, end);
+    }
     field.setCustomValidity(
       applicantCharacters.test(field.value) ? '' : 'Use letters and name punctuation only.',
     );
@@ -112,13 +112,8 @@ function syncApplicantName() {
   });
 });
 customerForm.elements.extensionName.addEventListener('change', syncApplicantName);
-const registrationFields = [
-  'certificateReceived',
-  'contractReceived',
-  'dateApproved',
-  'approvedBy',
-];
-const installationFields = ['acknowledgementReceived', 'dateInstalled', 'meterNumber'];
+const registrationFields = ['dateApproved', 'approvedBy'];
+const installationFields = ['dateInstalled', 'meterNumber'];
 const conditionalLabels = [...registrationFields, ...installationFields].map((name) => {
   const label = customerForm.elements[name].closest('label');
   const node = Array.from(label.childNodes).find(
@@ -145,16 +140,16 @@ customerForm.querySelectorAll('label').forEach((label) => {
   }
 });
 contactField.addEventListener('beforeinput', (event) => {
-  if (event.data && /\D/.test(event.data)) event.preventDefault();
+  if (event.data && /[^+\d]/.test(event.data)) event.preventDefault();
 });
 contactField.addEventListener('input', () => {
-  if (/^\d{0,10}$/.test(contactField.value)) lastContactValue = contactField.value;
+  if (/^\+?\d{0,12}$/.test(contactField.value)) lastContactValue = contactField.value;
   else contactField.value = lastContactValue;
 });
 contactField.addEventListener('paste', (event) => {
   event.preventDefault();
   const raw = event.clipboardData.getData('text').trim();
-  const value = raw.replace(/^(\+63|0)/, '');
+  const value = raw.replace(/^(\+?63|0)/, '');
   if (!/^9\d{9}$/.test(value))
     return AdminUI.message(
       'Paste a valid Philippine mobile number, such as 09123456789 or +639123456789.',
@@ -169,8 +164,9 @@ function openCustomer(customer) {
   approvalDateEdited = false;
   usernameEdited = false;
   passwordEdited = false;
-  draftSubmitterNumber = customer?.submitterNumber || newSubmitterNumber();
-  document.getElementById('submitterNumber').textContent = draftSubmitterNumber;
+  credentialSeed = crypto.randomUUID().replaceAll('-', '');
+  document.getElementById('submitterNumber').textContent =
+    customer?.submitterNumber || 'Assigned on save';
   passwordPreview.value = '';
   passwordPreview.type = 'password';
   passwordToggle.setAttribute('aria-label', 'Show password');
@@ -196,7 +192,7 @@ function openCustomer(customer) {
       });
   }
   if (customer) {
-    customerForm.elements.contact.value = (customer.contact || '').replace(/^(\+63|0)/, '');
+    customerForm.elements.contact.value = (customer.contact || '').replace(/^(\+?63|0)/, '');
   }
   lastContactValue = contactField.value;
   if (customer && !customer.firstName && !customer.lastName) {
@@ -210,6 +206,8 @@ function openCustomer(customer) {
     customerForm.elements.firstName.value = parts.join(' ');
   }
   syncApplicantName();
+  customerForm.elements.approvedBy.value = customer?.approvedBy || AdminAuth.user?.username || '';
+  customerForm.elements.approvedBy.readOnly = true;
   const purok = customer?.address?.match(/^Purok\s*([1-7])(?:\b|,)/i);
   customerForm.elements.address.value = purok ? 'Purok ' + purok[1] : '';
   customerForm.elements.street.value =
@@ -220,6 +218,7 @@ function openCustomer(customer) {
   customerForm.elements.dateApplied.max = WaterStore.today();
   customerForm.elements.dateApproved.max = WaterStore.today();
   customerForm.elements.dateInstalled.max = WaterStore.today();
+  for (const name of CustomerValidation.dates) customerForm.elements[name].max = WaterStore.today();
   if (!customer) {
     customerForm.elements.dateApplied.value = WaterStore.today();
     customerForm.elements.dateApproved.value = customerForm.elements.dateApplied.value;
@@ -227,29 +226,19 @@ function openCustomer(customer) {
   }
   // Meter readings are changed through billing after the first bill is generated.
   customerForm.elements.reading.disabled = Boolean(
-    customer && customerRecords.bills.some((bill) => bill.customerId === customer.id),
+    customer && (customer.hasBills || customer.hasMeterEntries),
   );
   updateApplicationDateDisplays();
   updateInstallationTotal();
-  syncContractDate();
   updateRegistrationButtons();
 }
 
 function registrationReady() {
   const fields = customerForm.elements;
-  if (
-    !fields.certificateReceived.checked ||
-    !fields.contractReceived.checked ||
-    !fields.dateApproved.value ||
-    !fields.approvedBy.value.trim()
-  )
-    return false;
+  if (!fields.dateApproved.value || !fields.approvedBy.value.trim()) return false;
   if (fields.serviceStatus.value === 'Pending') return false;
   if (fields.serviceStatus.value === 'Installed') {
-    return (
-      fields.acknowledgementReceived.checked &&
-      Boolean(fields.dateInstalled.value && fields.meterNumber.value.trim())
-    );
+    return Boolean(fields.dateInstalled.value && fields.meterNumber.value.trim());
   }
   return true;
 }
@@ -266,20 +255,15 @@ function updateRegistrationButtons() {
   registerCustomerButton.textContent = alreadyRegistered
     ? 'Save registered customer'
     : 'Register customer';
-  registerCustomerButton.disabled = !registrationReady();
+  registerCustomerButton.disabled = customerFormLoading || savingCustomer || !registrationReady();
 }
 
 customerForm.addEventListener('submit', async (event) => {
   event.preventDefault();
-  if (savingCustomer) return;
+  if (savingCustomer || customerFormLoading) return;
   if (!customerForm.checkValidity()) return customerForm.reportValidity();
   if (!registrationReady())
     return AdminUI.message('Complete the required verification before registering this customer.');
-  // Refresh the saved records before assigning numbers.
-  Object.assign(customerRecords, WaterStore.load());
-  const reviewSnapshot = JSON.stringify(customerRecords);
-  const reviewDate = WaterStore.today();
-  syncContractDate();
   generateCustomerCredentials();
   const input = CustomerValidation.read(customerForm);
   const validationError = CustomerValidation.error(
@@ -290,9 +274,9 @@ customerForm.addEventListener('submit', async (event) => {
   if (validationError) return AdminUI.message(validationError);
   if (
     passwordPreview.value &&
-    (passwordPreview.value.length < 8 || passwordPreview.value.length > 128)
+    (passwordPreview.value.length < 12 || passwordPreview.value.length > 128)
   )
-    return AdminUI.message('Password preview must contain 8–128 characters.');
+    return AdminUI.message('Password must contain 12–128 characters.');
   if (
     input.username &&
     customerRecords.customers.some(
@@ -305,48 +289,16 @@ customerForm.addEventListener('submit', async (event) => {
   const customer = {
     ...customerRecords.customers.find((item) => item.id === editingCustomerId),
     ...input,
-    id: editingCustomerId || WaterStore.id(),
+    id: editingCustomerId || null,
   };
   const savedCustomer = customerRecords.customers.find((item) => item.id === editingCustomerId);
-  if (
-    customerRecords.customers.some(
-      (item) => item.id !== customer.id && item.submitterNumber === draftSubmitterNumber,
-    )
-  )
-    draftSubmitterNumber = newSubmitterNumber();
-  customer.submitterNumber = savedCustomer?.submitterNumber || draftSubmitterNumber;
-  if (editingCustomerId && !savedCustomer)
-    return AdminUI.message('Customer no longer exists. Return to the customer list.');
-  if (
-    savedCustomer &&
-    customerRecords.bills.some((bill) => bill.customerId === savedCustomer.id) &&
-    customer.reading !== savedCustomer.reading
-  ) {
-    return AdminUI.message(
-      'This meter reading has billing records. Update readings through Meter Entry.',
-    );
-  }
   customer.contact = '+63' + customer.contact;
   customer.registrationStatus = 'Registered';
   customer.installationTotal = installationTotal();
-  if (
-    !Number.isFinite(customer.installationTotal) ||
-    customer.installationTotal > Number.MAX_SAFE_INTEGER / 100
-  )
-    return AdminUI.message('The installation estimate is too large. Check quantities and charges.');
-  customer.account =
-    savedCustomer?.account || WaterStore.nextReference(customerRecords, 'PWSS', 'account');
-  customer.applicationNumber =
-    savedCustomer?.applicationNumber ||
-    WaterStore.nextReference(customerRecords, 'APP', 'applicationNumber');
-  if (
-    customerRecords.customers.some(
-      (item) =>
-        item.id !== customer.id && item.account.toLowerCase() === customer.account.toLowerCase(),
-    )
-  ) {
-    return AdminUI.message('That account number is already registered.');
-  }
+  customer.account = savedCustomer?.account || 'Assigned on save';
+  customer.applicationNumber = savedCustomer?.applicationNumber || 'Assigned on save';
+  customer.submitterNumber = savedCustomer?.submitterNumber || 'Assigned on save';
+  let persisted;
   savingCustomer = true;
   registerCustomerButton.disabled = true;
   try {
@@ -357,24 +309,25 @@ customerForm.addEventListener('submit', async (event) => {
       customerRegistrationSummary(customer),
     );
     if (!accepted) return;
-    if (JSON.stringify(WaterStore.load()) !== reviewSnapshot || WaterStore.today() !== reviewDate)
-      return AdminUI.message(
-        'Records or dates changed. Review the application again before saving.',
-      );
-    const index = customerRecords.customers.findIndex((item) => item.id === editingCustomerId);
-    if (index === -1) customerRecords.customers.push(customer);
-    else customerRecords.customers[index] = customer;
-    WaterStore.save(customerRecords);
-  } catch {
-    return AdminUI.message('Customer could not be saved. Please try again.');
+    persisted = await CustomerAPI.save(customer, passwordPreview.value, editingCustomerId);
+    customerRecords.customers = [persisted];
+  } catch (error) {
+    return AdminUI.message(error.message);
   } finally {
     savingCustomer = false;
     updateRegistrationButtons();
   }
   await showNotice(
-    'Customer saved successfully',
-    customer.name + ' has been registered.\nAccount number: ' + customer.account,
+    savedCustomer ? 'Customer updated successfully' : 'Customer saved successfully',
+    customer.name +
+      (savedCustomer ? ' has been updated.' : ' has been registered.') +
+      '\nAccount number: ' +
+      persisted.account,
   );
+  if (savedCustomer) {
+    location.href = 'customers.html';
+    return;
+  }
   openCustomer(null);
   customerForm.querySelectorAll('input, select, textarea').forEach((field) => {
     field.setCustomValidity('');
@@ -405,7 +358,6 @@ customerForm.addEventListener('input', updateRegistrationButtons);
 customerForm.addEventListener('change', updateRegistrationButtons);
 printApplicationButton.addEventListener('click', () => {
   if (!customerForm.checkValidity()) return customerForm.reportValidity();
-  syncContractDate();
   const details = CustomerValidation.read(customerForm);
   const error = CustomerValidation.error(
     details,
@@ -432,15 +384,33 @@ document.getElementById('cancelCustomer').addEventListener('click', () => {
   location.href = 'customers.html';
 });
 const requestedCustomerId = new URLSearchParams(location.search).get('id');
-const requestedCustomer = customerRecords.customers.find(
-  (customer) => customer.id === requestedCustomerId,
-);
-if (requestedCustomerId && !requestedCustomer) {
-  customerForm.hidden = true;
-  AdminUI.message('Customer not found. Return to the customer list to choose an existing record.');
-} else {
-  openCustomer(requestedCustomer || null);
+async function loadCustomerForm() {
+  customerFormLoading = true;
+  customerForm.inert = true;
+  AdminUI.message('Loading customer form...');
+  try {
+    const barangays = await CustomerAPI.loadBarangays();
+    const requested = requestedCustomerId ? await CustomerAPI.profile(requestedCustomerId) : null;
+    customerForm.elements.barangay.replaceChildren(new Option('Select barangay', ''));
+    barangays
+      .filter(
+        (item) =>
+          Number(item.is_active) === 1 || String(item.id) === requested?.customer.barangayId,
+      )
+      .forEach((item) => customerForm.elements.barangay.add(new Option(item.name, item.name)));
+    customerRecords.customers = requested ? [requested.customer] : [];
+    customerRecords.bills = requested?.bills || [];
+    customerFormLoading = false;
+    customerForm.inert = false;
+    openCustomer(requested?.customer || null);
+    AdminUI.message('');
+  } catch (error) {
+    AdminUI.message(error.message + ' Reload this page to try again.');
+  }
 }
+AdminAuth.ready.then((user) => {
+  if (user) loadCustomerForm();
+});
 
 function customerRegistrationSummary(customer) {
   const paper = document.createElement('section');
@@ -508,3 +478,14 @@ function updateApplicationDateDisplays() {
         : 'Not recorded';
   });
 }
+
+customerForm.elements.serviceStatus.addEventListener('change', () => {
+  if (
+    customerForm.elements.serviceStatus.value !== 'Pending' &&
+    !customerForm.elements.dateApproved.value
+  ) {
+    customerForm.elements.dateApproved.value = WaterStore.today();
+    updateApplicationDateDisplays();
+    updateRegistrationButtons();
+  }
+});

@@ -1,26 +1,46 @@
-function renderDashboard() {
-  const dashboardRecords = WaterStore.load();
+function renderDashboard(data) {
   const summary = document.getElementById('summary');
-  const outstanding = dashboardRecords.bills.reduce(
-    (total, bill) => total + WaterStore.balance(bill, dashboardRecords),
-    0,
-  );
-  const received = dashboardRecords.payments.reduce((total, payment) => total + payment.amount, 0);
+  summary.replaceChildren();
+  const s = data.summary;
   [
     [
-      'Registered customers',
-      dashboardRecords.customers.filter((customer) => WaterStore.isRegistered(customer)).length,
-      'Verified customer accounts',
+      'Total customers',
+      s.totalCustomers,
+      s.registeredCustomers + ' approved or installed',
       'people-fill',
     ],
     [
-      'Generated bills',
-      dashboardRecords.bills.length,
-      'Saved billing records',
-      'file-earmark-text-fill',
+      'Registered service areas',
+      s.barangays,
+      s.activeBarangays + ' active barangays',
+      'geo-alt-fill',
     ],
-    ['Outstanding balance', WaterStore.money(outstanding), 'Remaining unpaid amount', 'wallet2'],
-    ['Payments received', WaterStore.money(received), 'Total recorded payments', 'cash-coin'],
+    ['Generated bills', s.bills, 'All billing periods', 'file-earmark-text-fill'],
+    ['Unpaid bills', s.unpaidBills, s.overdue + ' overdue bills', 'hourglass-split'],
+    [
+      'Outstanding balance',
+      WaterStore.money(Number(s.outstanding)),
+      'Remaining unpaid amount',
+      'wallet2',
+    ],
+    [
+      'Collections today',
+      WaterStore.money(Number(s.todayCollections)),
+      'Philippine calendar day',
+      'cash-stack',
+    ],
+    [
+      'Collections this month',
+      WaterStore.money(Number(s.monthCollections)),
+      'Current Philippine month',
+      'calendar-check-fill',
+    ],
+    [
+      'Payments received',
+      WaterStore.money(Number(s.totalCollections)),
+      'Total recorded payments',
+      'cash-coin',
+    ],
   ].forEach(([label, value, description, iconName]) => {
     const item = document.createElement('div');
     item.className = 'record-card';

@@ -20,23 +20,10 @@ const CustomerValidation = {
     meterKind: 120,
     meterSize: 40,
     natureOfWork: 500,
-    ctcNumber: 120,
-    ctcPlace: 120,
-    representativeCtc: 120,
-    representativeCtcPlace: 120,
-    documentNotes: 1000,
   },
   amounts: ['installationFee', 'setbackRate', 'reinstallationFee', 'violationFee'],
   quantities: ['reading', 'setbackLength'],
-  dates: [
-    'dateApplied',
-    'dateApproved',
-    'dateInstalled',
-    'contractDate',
-    'acknowledgementDate',
-    'ctcDate',
-    'representativeCtcDate',
-  ],
+  dates: ['dateApplied', 'dateApproved', 'dateInstalled'],
   checks: ['certificateReceived', 'contractReceived', 'acknowledgementReceived'],
   read(form) {
     const customer = {};
@@ -54,6 +41,7 @@ const CustomerValidation = {
     textNames.forEach((name) => {
       customer[name] = form.elements[name].value.trim();
     });
+    customer.contact = customer.contact.replace(/^(?:\+?63|0)/, '');
     this.checks.forEach((name) => {
       customer[name] = form.elements[name].checked;
     });
@@ -83,8 +71,8 @@ const CustomerValidation = {
       return 'Complete the required fields marked *.';
     if (!/^[\p{L}\p{M} .,'-]+$/u.test(customer.name) || !/\p{L}/u.test(customer.name))
       return 'Applicant name must contain letters. Numbers and symbols are not allowed.';
-    if (!/^9\d{9}$/.test(customer.contact))
-      return 'Mobile number must contain exactly 10 digits starting with 9. The +63 prefix is already included.';
+    if (!/^(?:0|\+?63)?9\d{9}$/.test(customer.contact))
+      return 'Enter a valid mobile number starting with 09, 9, 63 or +63, such as 09123456789 or 9123456789.';
     if (!/^Purok [1-7]$/.test(customer.address)) return 'Select Purok 1 to Purok 7.';
     if (
       customer.natureOfWork &&
@@ -92,7 +80,7 @@ const CustomerValidation = {
       customer.natureOfWork !== existingNatureOfWork
     )
       return 'Select a valid nature of work from the dropdown.';
-    if (!WaterStore.barangays.includes(customer.barangay))
+    if (!CustomerAPI.barangays.some((item) => item.name === customer.barangay))
       return 'Choose a barangay from the registered service areas.';
     if (
       !['Residential', 'Commercial'].includes(customer.customerType) ||
@@ -109,10 +97,6 @@ const CustomerValidation = {
           limit +
           ' characters; HTML tags and control characters are not accepted.'
         );
-    }
-    for (const name of ['approvedBy']) {
-      if (customer[name] && !/^[\p{L}\p{M} .,'-]+$/u.test(customer[name]))
-        return 'Approver and installer names must contain letters, spaces or name punctuation.';
     }
     for (const name of this.dates) {
       if (

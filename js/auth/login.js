@@ -20,27 +20,63 @@ function keepLoginFieldVisible() {
     const top = loginViewport ? loginViewport.offsetTop : 0;
     const bounds = field.getBoundingClientRect();
     const bottom = top + visibleHeight - 24;
-    if (bounds.bottom > bottom) window.scrollBy({ top: bounds.bottom - bottom, behavior: 'instant' });
-    else if (bounds.top < top + 24) window.scrollBy({ top: bounds.top - top - 24, behavior: 'instant' });
+    if (bounds.bottom > bottom)
+      window.scrollBy({ top: bounds.bottom - bottom, behavior: 'instant' });
+    else if (bounds.top < top + 24)
+      window.scrollBy({ top: bounds.top - top - 24, behavior: 'instant' });
   });
 }
 loginForm.addEventListener('focusin', keepLoginFieldVisible);
 loginForm.addEventListener('focusout', () => setTimeout(keepLoginFieldVisible, 0));
 window.addEventListener('resize', keepLoginFieldVisible);
 if (loginViewport) loginViewport.addEventListener('resize', keepLoginFieldVisible);
-if (AdminAuth.loggedIn()) location.replace(AdminAuth.destination());
-
-loginForm.addEventListener('submit', (event) => {
-  event.preventDefault();
-  const username = loginForm.elements.username.value.trim();
-  const password = loginForm.elements.password.value;
-  if (!AdminAuth.login(username, password)) {
-    loginMessage.textContent = 'Incorrect username or password. Please try again.';
-    loginMessage.focus();
+const loginSubmit = loginForm.querySelector('[type="submit"]');
+let loginBusy = true;
+loginSubmit.disabled = true;
+loginSubmit.textContent = 'Checking session...';
+AdminAuth.ready.then((user) => {
+  if (user) {
+    location.replace(AdminAuth.destination());
     return;
   }
-  location.replace(AdminAuth.destination());
+  const reason = new URLSearchParams(location.search).get('reason');
+  loginMessage.textContent =
+    AdminAuth.sessionError ||
+    (reason === 'expired'
+      ? 'Your session has expired. Please sign in again.'
+      : reason === 'unavailable'
+        ? 'Cannot verify your session. Check the server connection and sign in again.'
+        : '');
+  loginBusy = false;
+  loginSubmit.disabled = false;
+  loginSubmit.textContent = 'Sign in';
 });
+
+loginForm.addEventListener('submit', async (event) => {
+  event.preventDefault();
+  if (loginBusy) return;
+  loginBusy = true;
+  loginSubmit.disabled = true;
+  loginSubmit.textContent = 'Signing in...';
+  loginForm.setAttribute('aria-busy', 'true');
+  loginMessage.textContent = '';
+  try {
+    const username = loginForm.elements.username.value.trim();
+    const password = loginForm.elements.password.value;
+    await AdminAuth.login(username, password);
+    loginForm.elements.password.value = '';
+    location.replace(AdminAuth.destination());
+  } catch (error) {
+    loginMessage.textContent = error.message;
+    loginMessage.focus();
+  } finally {
+    loginBusy = false;
+    loginSubmit.disabled = false;
+    loginSubmit.textContent = 'Sign in';
+    loginForm.removeAttribute('aria-busy');
+  }
+});
+
 document.getElementById('showPassword').addEventListener('click', (event) => {
   const input = loginForm.elements.password;
   const show = input.type === 'password';

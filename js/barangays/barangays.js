@@ -1,91 +1,127 @@
 const registrySearch = document.getElementById('barangaySearch');
 const registryPager = createPagination('barangayPagination', showBarangays);
-function registryAction(parent, title, path, callback, href) {
+let registryEntries = [];
+let registryLoading = false;
+let registryFailure = '';
+let registryLoadVersion = 0;
+let deletingBarangay = false;
+
+function registryAction(parent, title, iconName, action) {
   const button = document.createElement('button');
   button.type = 'button';
-  button.addEventListener('click', href
-    ? () => openBarangayModal(new URL(href, location.href).searchParams.get('code'))
-    : callback);
-  button.className = 'btn barangay-action' + (href ? ' action-edit' : '');
+  button.className = 'btn barangay-action action-' + (iconName === 'trash' ? 'delete' : 'edit');
   button.title = title;
   button.setAttribute('aria-label', title);
+  button.disabled = deletingBarangay;
   const icon = document.createElement('i');
-  icon.className = 'bi bi-' + (href ? 'pencil-square' : 'trash');
+  icon.className = 'bi bi-' + iconName;
   icon.setAttribute('aria-hidden', 'true');
   button.appendChild(icon);
+  button.addEventListener('click', action);
   parent.appendChild(button);
 }
+
 function showBarangays() {
-  const records = WaterStore.load();
-  const registry = WaterStore.barangayRegistry(records);
   const query = registrySearch.value.trim().toLowerCase();
-  const matches = registry.filter((item) =>
-    [item.name, item.officialName, item.municipality, item.province]
+  const matches = registryEntries.filter((entry) =>
+    [entry.name, entry.code, entry.municipality, entry.province]
       .join(' ')
       .toLowerCase()
       .includes(query),
   );
   const body = document.getElementById('barangayRows');
   body.replaceChildren();
+  body.setAttribute('aria-busy', String(registryLoading));
   registryPager.update(matches.length);
+  document.getElementById('barangayCount').textContent = registryLoading
+    ? 'Loading barangays...'
+    : registryFailure
+      ? 'Could not load barangays'
+      : registryEntries.length + ' registered barangays';
+  if (registryLoading || registryFailure) {
+    AdminUI.empty(body, 5, registryLoading ? 'Loading barangays...' : registryFailure);
+    document.getElementById('retryBarangayList').hidden = !registryFailure;
+    return;
+  }
+  document.getElementById('retryBarangayList').hidden = true;
   registryPager.items(matches).forEach((entry) => {
     const row = body.insertRow();
-    [
-      entry.name,
-      entry.municipality,
-      entry.province,
-      BarangayRegistry.customerCount(records, entry.name),
-    ].forEach((value, index) =>
+    [entry.name, entry.municipality, entry.province, entry.customers].forEach((value, index) =>
       AdminUI.cell(row, value, ['Barangay', 'Municipality', 'Province', 'Customers'][index]),
     );
-    const badge = document.createElement('span');
-    badge.className = 'payment-status status-paid registry-status';
-    badge.textContent = 'Registered';
-    row.cells[0].appendChild(badge);
-    const actions = AdminUI.cell(row, '', 'Actions');
     const group = document.createElement('div');
     group.className = 'barangay-actions';
-    actions.appendChild(group);
-    registryAction(
-      group,
-      'Edit ' + entry.name,
-      'M15 5l4 4M4 20l5-1L20 8a3 3 0 0 0-4-4L5 15z',
-      null,
-      'barangay-form.html?code=' + encodeURIComponent(entry.code),
-    );
-    registryAction(
-      group,
-      'Delete ' + entry.name,
-      'M3 6h18M9 6V3h6v3M6 6l1 15h10l1-15M10 10v7M14 10v7',
-      async () => {
-        if (BarangayRegistry.customerCount(WaterStore.load(), entry.name))
-          return showNotice(
-            'Barangay in use',
-            'This barangay has customer records and cannot be deleted.',
-          );
-        const accepted = await confirmAction(
-          'Delete barangay?',
-          entry.name + ' will be removed from the service registry and new-customer choices.',
-          'Delete barangay',
-        );
-        if (!accepted) return;
-        try {
-          const latest = WaterStore.load();
-          BarangayRegistry.remove(latest, entry.code);
-          WaterStore.save(latest);
-          showBarangays();
-          AdminUI.message('Barangay removed.');
-        } catch (error) {
-          AdminUI.message(error.message);
-        }
-      },
-    );
+    AdminUI.cell(row, '', 'Actions').appendChild(group);
+    registryAction(group, 'Delete ' + entry.name, 'trash', () => removeRegisteredBarangay(entry));
   });
   AdminUI.empty(body, 5, 'No registered barangays match your search.');
-  document.getElementById('barangayCount').textContent = registry.length + ' registered barangays';
 }
+
+async function loadBarangays() {
+  const version = ++registryLoadVersion;
+  registryLoading = true;
+  registryFailure = '';
+  showBarangays();
+  try {
+    const entries = await BarangayAPI.list();
+    if (version !== registryLoadVersion) return;
+    registryEntries = entries;
+  } catch (error) {
+    if (version !== registryLoadVersion) return;
+    registryEntries = [];
+    registryFailure = error.message;
+  } finally {
+    if (version === registryLoadVersion) {
+      registryLoading = false;
+      showBarangays();
+    }
+  }
+}
+
+async function removeRegisteredBarangay(entry) {
+  if (deletingBarangay) return;
+  if (entry.customers)
+    return showNotice(
+      'Barangay in use',
+      'This barangay has customer records and cannot be deleted.',
+    );
+  deletingBarangay = true;
+  document.querySelectorAll('#barangayRows .barangay-action').forEach((button) => {
+    button.disabled = true;
+  });
+  try {
+    if (
+      !(await confirmAction(
+        'Delete barangay?',
+        entry.name + ' will be removed from the service registry.',
+        'Delete barangay',
+      ))
+    )
+      return;
+    await BarangayAPI.remove(entry.id);
+    // Keep the current table visible until the delete succeeds; no loading-row flash.
+    registryEntries = registryEntries.filter((item) => item.id !== entry.id);
+    showBarangays();
+    await new Promise((resolve) => setTimeout(resolve, 200));
+    await showNotice(
+      'Barangay deleted successfully',
+      entry.name + ' was removed from the registry.',
+    );
+  } catch (error) {
+    await showNotice('Barangay not deleted', error.message);
+  } finally {
+    deletingBarangay = false;
+    document.querySelectorAll('#barangayRows .barangay-action').forEach((button) => {
+      button.disabled = false;
+    });
+  }
+}
+
 registrySearch.addEventListener('input', () => {
   registryPager.page = 1;
   showBarangays();
 });
-showBarangays();
+document.getElementById('retryBarangayList').addEventListener('click', loadBarangays);
+AdminAuth.ready.then((user) => {
+  if (user) loadBarangays();
+});

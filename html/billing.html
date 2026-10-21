@@ -2,6 +2,8 @@
 <html lang="en" data-page="billing" class="theme-teal">
   <head>
     <link rel="icon" type="image/jpeg" href="../assets/images/water_system_logo.jpg" />
+    <script src="../js/shared/api-config.js"></script>
+    <script src="../js/shared/api.js"></script>
     <script src="../js/auth/auth.js"></script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -239,14 +241,15 @@
                   >Current reading (m&sup3;)<input
                     name="current"
                     readonly
-                    aria-label="Calculated current reading"
-                  /></label
+                    aria-label="Calculated current reading" /></label
                 ><label
-                  >Connection charge<select name="connection" disabled>
-                    <option>None</option>
-                    <option>New connection</option>
-                    <option>Reconnection</option>
-                  </select></label
+                  >Connection / reconnection charge<input
+                    name="connection"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value="0"
+                    disabled /></label
                 ><label
                   >Late fee<input
                     name="late"
@@ -300,10 +303,21 @@
           >
             <form id="ledgerSetupForm" class="admin-form">
               <header class="entry-modal-heading wide">
-                <h2 id="ledgerSetupTitle"><i class="modal-heading-icon bi bi-sliders" aria-hidden="true"></i>Billing setup</h2>
-                <button type="button" class="btn" id="closeLedgerSetup" aria-label="Close billing setup"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
+                <h2 id="ledgerSetupTitle">
+                  <i class="modal-heading-icon bi bi-sliders" aria-hidden="true"></i>Billing setup
+                </h2>
+                <button
+                  type="button"
+                  class="btn"
+                  id="closeLedgerSetup"
+                  aria-label="Close billing setup"
+                >
+                  <i class="bi bi-x-lg" aria-hidden="true"></i>
+                </button>
               </header>
-              <p class="entry-modal-description wide">Set your service area, due date and water rate.</p>
+              <p class="entry-modal-description wide">
+                Set your service area, due date and water rate.
+              </p>
               <label class="wide"
                 >Target barangay <span class="setup-required">*</span
                 ><select id="ledgerSetupBarangay" required>
@@ -336,6 +350,7 @@
     <script src="../js/shared/pagination.js"></script>
     <script src="../js/shared/confirmation.js"></script>
     <script src="../js/billing/billing-confirmation.js"></script>
+    <script src="../js/billing/meter-entry-api.js"></script>
     <script src="../js/billing/billing-ledger.js"></script>
   </body>
 </html>

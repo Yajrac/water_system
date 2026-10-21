@@ -16,10 +16,31 @@ A plain HTML, CSS, and JavaScript admin website for managing water supply custom
 
 ## Run locally
 
-Open the project using your editor's local web server or Live Server, then open the root `index.html`. No installation or build step is required. A local server is needed for JSON fetching.
+Start MySQL in XAMPP. In CMD, start the backend:
 
-Preview login: **admin** / **Admin123!**
+```cmd
+cd server
+npm run dev
+```
+
+Open the project with Live Server (port 5500), then open the root `index.html`.
+Use the admin account created with `npm run admin:create`. The old preview password
+does not work anymore. See [server setup](server/README.md) if configuring a new machine.
+
+The frontend requires no build step. Keep the backend and Live Server running.
+Opening HTML directly with `file://` does not support API login. If using another
+frontend port, update `CORS_ORIGINS` in `server/.env` and restart the backend.
 
 ## Current scope
 
-This is a local prototype. Records are stored in the browser's localStorage, and login uses a frontend session check. A backend, database, and server authentication are required before real deployment. Notifications are saved as drafts only. Forgot Password, Settings record downloads, and Report CSV export are placeholders.
+Admin login uses the Express/MariaDB API, with per-tab access tokens, server session
+verification, logout and expired-session handling. The Barangay registry uses the
+API for listing, adding and deleting, with database customer counts.
+Customer Management uses database search/pagination, profiles, transactional
+registration/editing, Excel import/export, activation history and hashed consumer credentials.
+Existing browser sample customers are not imported automatically. Use the updated
+Excel template if importing actual existing customer records.
+Billing, payments, dashboard and other frontend business pages still use
+localStorage while integration proceeds.
+The consumer app has not yet been connected. Password reset and actual notification
+delivery are not implemented. Reports support preview, print and Excel export.

@@ -22,6 +22,123 @@ dialog.confirmation-dialog {
 dialog.confirmation-dialog.has-preview {
   width: min(850px, calc(100% - 28px));
 }
+
+dialog.confirmation-dialog.delete-dialog {
+  width: min(400px, calc(100% - 32px));
+  padding: 30px 26px 26px;
+  text-align: center;
+}
+
+dialog.confirmation-dialog.delete-dialog > h2 {
+  flex-direction: column;
+  justify-content: center;
+  gap: 16px;
+  padding: 0;
+  margin: 0 0 12px;
+  border: 0;
+  font-size: 1.3rem;
+  font-weight: 800;
+}
+
+dialog.delete-dialog .modal-heading-icon {
+  width: 56px;
+  height: 56px;
+  flex: 0 0 56px;
+  border-radius: 50%;
+  color: #f43f5e;
+  background: #fff0f3;
+  font-size: 26px;
+}
+
+dialog.confirmation-dialog.delete-dialog > p {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.65;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+
+dialog.delete-dialog .confirmation-actions {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 24px;
+  padding: 0;
+  border: 0;
+}
+
+dialog.delete-dialog .confirmation-actions .btn {
+  flex: 1;
+  min-width: 120px;
+  border-radius: 24px;
+}
+
+dialog.delete-dialog .confirmation-actions .btn-primary {
+  color: #ffffff;
+  background: #f43f5e;
+  border-color: #f43f5e;
+}
+
+dialog.delete-dialog .confirmation-actions .btn-primary:hover {
+  color: #ffffff;
+  background: #df2446;
+  border-color: #df2446;
+}
+
+[data-theme='dark'] dialog.delete-dialog .modal-heading-icon {
+  color: #ff8c9f;
+  background: #45212d;
+}
+
+dialog.confirmation-dialog.success-dialog {
+  width: min(400px, calc(100% - 32px));
+  padding: 32px 26px 26px;
+  text-align: center;
+}
+
+dialog.confirmation-dialog.success-dialog > h2 {
+  flex-direction: column;
+  justify-content: center;
+  gap: 18px;
+  margin: 0 0 12px;
+  padding: 0;
+  border: 0;
+  font-size: 1.65rem;
+  font-weight: 800;
+}
+
+.success-modal-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  flex: 0 0 64px;
+  border-radius: 50%;
+  color: #ffffff;
+  background: #0cbd29;
+  font-size: 34px;
+  line-height: 1;
+}
+
+dialog.confirmation-dialog.success-dialog > p {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+
+dialog.success-dialog .confirmation-actions {
+  justify-content: center;
+  margin-top: 24px;
+  padding: 0;
+  border: 0;
+}
+
+dialog.success-dialog .confirmation-actions .btn {
+  min-width: 120px;
+}
 dialog.confirmation-dialog > h2,
 .customer-import-heading h2 {
   display: flex;

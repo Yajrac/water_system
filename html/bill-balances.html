@@ -2,6 +2,8 @@
 <html lang="en" data-page="payment-history" class="theme-teal">
   <head>
     <link rel="icon" type="image/jpeg" href="../assets/images/water_system_logo.jpg" />
+    <script src="../js/shared/api-config.js"></script>
+    <script src="../js/shared/api.js"></script>
     <script src="../js/auth/auth.js"></script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -20,7 +22,11 @@
     <link rel="stylesheet" href="../css/shared/modals.css" />
     <link rel="stylesheet" href="../css/shared/responsive-cards.css" />
     <link rel="stylesheet" href="../css/shared/form-controls.css" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.2/font/bootstrap-icons.min.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.2/font/bootstrap-icons.min.css"
+    />
+    <link rel="stylesheet" href="../css/shared/compact-tables.css" />
   </head>
   <body>
     <div class="sidebar-overlay" id="overlay"></div>
@@ -85,7 +91,8 @@
           </li>
           <li>
             <a href="feedback.html" class="sidebar-menu-item"
-              ><i class="bi bi-chat-left-text" aria-hidden="true"></i><span>Customer Feedback</span></a
+              ><i class="bi bi-chat-left-text" aria-hidden="true"></i
+              ><span>Customer Feedback</span></a
             >
           </li>
           <li>
@@ -201,6 +208,11 @@
                   <tbody id="balanceRows"></tbody>
                 </table>
               </div>
+              <nav
+                class="record-pagination"
+                id="balancePagination"
+                aria-label="Bill balance pages"
+              ></nav>
             </div>
           </section>
         </main>
@@ -210,6 +222,7 @@
     <script src="../js/shared/store.js"></script>
     <script src="../js/shared/validation.js"></script>
     <script src="../js/shared/shared.js"></script>
+    <script src="../js/shared/pagination.js"></script>
     <script src="../js/payments/bill-balances.js"></script>
   </body>
 </html>

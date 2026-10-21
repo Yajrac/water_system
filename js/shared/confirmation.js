@@ -18,6 +18,8 @@ function confirmAction(title, message, confirmLabel, preview = null) {
     const dialog = document.createElement('dialog');
     dialog.id = 'actionConfirmation';
     dialog.className = 'confirmation-dialog';
+    const isDelete = /\b(delete|remove)\b/i.test(confirmLabel);
+    if (isDelete) dialog.classList.add('delete-dialog');
     dialog.setAttribute('aria-labelledby', 'confirmationTitle');
     dialog.setAttribute('aria-describedby', 'confirmationMessage');
     const heading = document.createElement('h2');
@@ -33,12 +35,12 @@ function confirmAction(title, message, confirmLabel, preview = null) {
     const cancel = document.createElement('button');
     cancel.className = 'btn';
     cancel.value = 'cancel';
-    cancel.textContent = 'Cancel';
+    cancel.textContent = isDelete ? 'No, keep it' : 'Cancel';
     cancel.autofocus = true;
     const confirm = document.createElement('button');
     confirm.className = 'btn btn-primary';
     confirm.value = 'confirm';
-    confirm.textContent = confirmLabel;
+    confirm.textContent = isDelete ? 'Yes, delete' : confirmLabel;
     form.append(cancel, confirm);
     form.addEventListener('submit', (event) => {
       if (event.submitter !== confirm || !preview) return;
@@ -76,12 +78,18 @@ function showNotice(title, message, preview = null) {
     const dialog = document.createElement('dialog');
     dialog.id = 'actionConfirmation';
     dialog.className = 'confirmation-dialog';
+    const isSuccess = !preview && /\bsuccess(?:fully)?\b/i.test(title);
+    if (isSuccess) dialog.classList.add('success-dialog');
     dialog.setAttribute('aria-labelledby', 'noticeTitle');
     dialog.setAttribute('aria-describedby', 'noticeMessage');
     const heading = document.createElement('h2');
     heading.id = 'noticeTitle';
-    heading.textContent = title;
-    heading.prepend(modalHeadingIcon(title));
+    heading.textContent = isSuccess ? 'Success' : title;
+    const icon = modalHeadingIcon(title);
+    if (isSuccess) {
+      icon.className = 'success-modal-icon bi bi-check-lg';
+    }
+    heading.prepend(icon);
     const description = document.createElement('p');
     description.id = 'noticeMessage';
     description.textContent = message;
@@ -91,7 +99,7 @@ function showNotice(title, message, preview = null) {
     const button = document.createElement('button');
     button.type = 'submit';
     button.className = 'btn btn-primary';
-    button.textContent = 'Got it';
+    button.textContent = isSuccess ? 'Okay' : 'Got it';
     button.autofocus = true;
     form.appendChild(button);
     dialog.append(heading, description, form);

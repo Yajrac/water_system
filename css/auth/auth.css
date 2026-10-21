@@ -185,9 +185,9 @@
 #loginMessage:not(:empty) {
   margin-top: 18px;
   padding: 12px;
-  background: var(--color-warning-bg);
+  background: var(--color-danger-bg);
   border-radius: 7px;
-  color: var(--color-ink);
+  color: var(--color-danger);
 }
 .reset-status {
   margin-top: 22px;

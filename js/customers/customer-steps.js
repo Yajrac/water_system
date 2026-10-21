@@ -59,10 +59,10 @@ function customerStepError(field) {
   if (field.name === 'name' && !/^[\p{L}\p{M} .,'-]+$/u.test(value))
     return 'Enter the applicant name using letters and name punctuation only.';
   if (field.name === 'name' && !/\p{L}/u.test(value)) return 'Enter the applicant name.';
-  if (field.name === 'contact' && !/^9\d{9}$/.test(value))
-    return 'Enter 10 digits starting with 9.';
+  if (field.name === 'contact' && !/^(?:0|\+?63)?9\d{9}$/.test(value))
+    return 'Enter a valid mobile number starting with 09, 9, 63 or +63.';
   if (field.name === 'address' && !/^Purok [1-7]$/.test(value)) return 'Select a valid purok.';
-  if (field.name === 'barangay' && !WaterStore.barangays.includes(value))
+  if (field.name === 'barangay' && !CustomerAPI.barangays.some((item) => item.name === value))
     return 'Select a registered barangay.';
   if (field.name === 'serviceStatus' && !['Approved', 'Installed'].includes(value))
     return 'Select Approved or Installed to register the customer.';
@@ -92,14 +92,6 @@ function customerStepError(field) {
     value < (fields.dateApproved.value || fields.dateApplied.value)
   )
     return 'Installation date cannot be before approval.';
-  if (['certificateReceived', 'contractReceived'].includes(field.name) && !field.checked)
-    return 'Verify this document before continuing.';
-  if (
-    field.name === 'acknowledgementReceived' &&
-    fields.serviceStatus.value === 'Installed' &&
-    !field.checked
-  )
-    return 'Verify the signed acknowledgement for installed service.';
   if (
     [...CustomerValidation.amounts, ...CustomerValidation.quantities].includes(field.name) &&
     value

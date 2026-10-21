@@ -8,6 +8,8 @@
       content="width=device-width, initial-scale=1, interactive-widget=resizes-content"
     />
     <title>Admin Login — Pio Duran Water Supply</title>
+    <script src="../js/shared/api-config.js"></script>
+    <script src="../js/shared/api.js"></script>
     <script src="../js/auth/auth.js"></script>
     <script src="../js/shared/theme.js"></script>
     <link rel="stylesheet" href="../css/shared/shared.css" />
@@ -19,9 +21,6 @@
     <link rel="stylesheet" href="../css/shared/form-controls.css" />
   </head>
   <body class="auth-page">
-    <button type="button" id="themeToggle" class="btn theme-toggle auth-theme" aria-pressed="false">
-      Dark mode
-    </button>
     <main class="auth-layout">
       <section class="auth-intro">
         <img src="../assets/images/water_system_logo.jpg" alt="PWSS logo" />
@@ -41,7 +40,7 @@
               name="username"
               autocomplete="username"
               required
-              maxlength="80"
+              maxlength="40"
               placeholder="Enter your username"
           /></label>
           <label

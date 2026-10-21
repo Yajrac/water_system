@@ -2,6 +2,8 @@
 <html lang="en" data-page="customers" class="theme-teal">
   <head>
     <link rel="icon" type="image/jpeg" href="../assets/images/water_system_logo.jpg" />
+    <script src="../js/shared/api-config.js"></script>
+    <script src="../js/shared/api.js"></script>
     <script src="../js/auth/auth.js"></script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -26,6 +28,7 @@
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.2/font/bootstrap-icons.min.css"
     />
+    <link rel="stylesheet" href="../css/shared/compact-tables.css" />
   </head>
   <body>
     <div class="sidebar-overlay" id="overlay"></div>
@@ -247,13 +250,13 @@
                   ><span id="meterNumberLabel"></span>
                 </div>
                 <div class="meter-info">
-                  <h2 id="meterTitle">Water meter</h2>
+                  <h2 id="meterTitle"><i class="bi bi-speedometer2" aria-hidden="true"></i> Water meter</h2>
                   <p id="meterCycle"></p>
                   <div class="meter-values">
-                    <div><span>Previous reading</span><strong id="meterPrevious"></strong></div>
-                    <div><span>Current reading</span><strong id="meterCurrent"></strong></div>
+                    <div><span><i class="bi bi-clock-history" aria-hidden="true"></i> Previous reading</span><strong id="meterPrevious"></strong></div>
+                    <div><span><i class="bi bi-speedometer2" aria-hidden="true"></i> Current reading</span><strong id="meterCurrent"></strong></div>
                     <div class="meter-consumption">
-                      <span>Water consumed for this month</span
+                      <span><i class="bi bi-droplet-fill" aria-hidden="true"></i> Water consumed for this month</span
                       ><strong id="meterConsumption"></strong>
                     </div>
                   </div>
@@ -325,6 +328,7 @@
             >
               <section class="panel">
                 <div class="panel-header"><h2>Documents and verification</h2></div>
+                <p id="documentSummary" class="customer-document-summary"></p>
                 <dl id="documentStatus" class="profile-details profile-documents"></dl>
               </section>
             </section>
@@ -334,6 +338,7 @@
     </div>
 
     <script src="../js/shared/store.js"></script>
+    <script src="../js/customers/customer-api.js"></script>
     <script src="../js/shared/shared.js"></script>
     <script src="../js/shared/confirmation.js"></script>
     <script src="../js/customers/customer-profile.js"></script>

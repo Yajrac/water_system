@@ -1,0 +1,37 @@
+/* Compact screen tables; printed reports and receipts keep their own spacing. */
+@media screen {
+  .main-content :is(table, table[class]) :is(th, td) {
+    padding: 8px 14px;
+    font-size: 0.84rem;
+    line-height: 1.4;
+    vertical-align: middle;
+  }
+}
+
+@media screen and (min-width: 601px) {
+  .main-content table .btn {
+    min-height: 32px;
+    padding: 5px 10px;
+    line-height: 1.2;
+  }
+  .main-content table .btn:is(.action-edit, .action-view, .action-delete, .action-receipt, .barangay-action, .receipt-icon-button, .bill-view-button) {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    min-height: 32px;
+    box-sizing: border-box;
+    padding: 5px;
+  }
+}
+
+@media screen and (max-width: 600px) {
+  .main-content table .btn {
+    min-height: 44px;
+  }
+  .main-content table .btn:is(.action-edit, .action-view, .action-delete, .action-receipt, .barangay-action, .receipt-icon-button, .bill-view-button) {
+    min-width: 44px;
+    min-height: 44px;
+  }
+}

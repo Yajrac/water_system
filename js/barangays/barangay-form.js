@@ -21,7 +21,7 @@ function renderBarangayOptions(query = '') {
     .sort((a, b) => a.name.localeCompare(b.name));
   matches.forEach((item) => {
     const used = registeredBarangays.some((entry) => entry.code === item.code);
-    const unavailable = used && item.code !== originalBarangayCode;
+    const unavailable = used;
     const option = document.createElement('li');
     option.id = 'barangay-option-' + item.code;
     option.setAttribute('role', 'option');
@@ -105,19 +105,25 @@ document.addEventListener('click', (event) => {
 });
 const saveBarangay = document.getElementById('saveBarangay');
 const retryBarangays = document.getElementById('retryBarangays');
-let originalBarangayCode = new URLSearchParams(location.search).get('code') || '';
+let choicesLoadVersion = 0;
 let barangayDirectory = [];
 let savingBarangay = false;
 async function loadBarangayChoices() {
+  const version = ++choicesLoadVersion;
   saveBarangay.disabled = true;
   barangayChoice.disabled = true;
   barangaySearchChoice.disabled = true;
   retryBarangays.hidden = true;
   document.getElementById('barangayDirectoryStatus').textContent = 'Loading Pio Duran barangays...';
   try {
-    const response = await fetch('../data/pio-duran-barangays.json');
+    const [response, registry] = await Promise.all([
+      fetch('../data/pio-duran-barangays.json'),
+      BarangayAPI.list(),
+    ]);
+    if (version !== choicesLoadVersion) return;
     if (!response.ok) throw new Error('The barangay directory could not be loaded.');
     const data = await response.json();
+    if (version !== choicesLoadVersion) return;
     if (
       data.municipality !== 'Pio Duran' ||
       data.province !== 'Albay' ||
@@ -129,25 +135,17 @@ async function loadBarangayChoices() {
     )
       throw new Error('The barangay directory is invalid.');
     barangayDirectory = data.barangays;
-    const registry = WaterStore.barangayRegistry(WaterStore.load());
     registeredBarangays = registry;
-    if (originalBarangayCode && !registry.some((item) => item.code === originalBarangayCode))
-      throw new Error('The barangay entry no longer exists. Return to the registry.');
-    barangayChoice.value = originalBarangayCode;
-    barangaySearchChoice.value =
-      barangayDirectory.find((item) => item.code === originalBarangayCode)?.displayName || '';
+    barangayChoice.value = '';
+    barangaySearchChoice.value = '';
     barangaySearchChoice.disabled = false;
     barangayChoice.disabled = false;
     saveBarangay.disabled = false;
     document.getElementById('barangayDirectoryStatus').textContent =
       'Official Pio Duran choices from the PSA PSGC directory.';
-    if (originalBarangayCode) {
-      if (!addBarangayDialog) document.getElementById('barangayFormTitle').textContent = 'Edit Barangay';
-      saveBarangay.textContent = 'Save changes';
-    }
   } catch (error) {
-    document.getElementById('barangayDirectoryStatus').textContent =
-      error.message + ' Use a local web preview if opening files directly.';
+    if (version !== choicesLoadVersion) return;
+    document.getElementById('barangayDirectoryStatus').textContent = error.message;
     retryBarangays.hidden = false;
   }
 }
@@ -157,31 +155,20 @@ barangayForm.addEventListener('submit', async (event) => {
   savingBarangay = true;
   saveBarangay.disabled = true;
   try {
-    const records = WaterStore.load();
-    const snapshot = JSON.stringify(records);
-    const entry = BarangayRegistry.save(
-      records,
-      barangayDirectory,
-      barangayChoice.value,
-      originalBarangayCode,
-    );
+    const entry = barangayDirectory.find((item) => item.code === barangayChoice.value);
+    if (!entry) throw new Error('Choose a barangay from the Pio Duran directory.');
     const accepted = await confirmAction(
-      originalBarangayCode ? 'Save barangay changes?' : 'Save barangay?',
-      'Barangay: ' + entry.name + '\nMunicipality: Pio Duran\nProvince: Albay',
-      originalBarangayCode ? 'Save changes' : 'Save barangay',
+      'Save barangay?',
+      'Barangay: ' + entry.displayName + '\nMunicipality: Pio Duran\nProvince: Albay',
+      'Save barangay',
     );
     if (!accepted) return;
-    if (JSON.stringify(WaterStore.load()) !== snapshot) {
-      throw new Error(
-        'Records changed while confirming. Please review the barangay and try again.',
-      );
-    }
-    WaterStore.save(records);
+    await BarangayAPI.save(entry);
     if (addBarangayDialog) {
       addBarangayDialog.close();
-      showBarangays();
+      await loadBarangays();
     }
-    await showNotice('Barangay saved successfully', entry.name + '\nPio Duran, Albay');
+    await showNotice('Barangay saved successfully', entry.displayName + '\nPio Duran, Albay');
     if (!addBarangayDialog) location.href = 'barangays.html';
   } catch (error) {
     if (addBarangayDialog) {
@@ -193,24 +180,35 @@ barangayForm.addEventListener('submit', async (event) => {
   }
 });
 retryBarangays.addEventListener('click', loadBarangayChoices);
-function openBarangayModal(code = '') {
+function openBarangayModal() {
   if (savingBarangay) return;
-  originalBarangayCode = code;
   barangayForm.reset();
   barangaySearchChoice.setCustomValidity('');
   closeBarangayOptions();
   const heading = document.getElementById('barangayFormTitle');
   const icon = document.createElement('i');
-  icon.className = 'modal-heading-icon bi bi-' + (code ? 'pencil-square' : 'geo-alt-fill');
+  icon.className = 'modal-heading-icon bi bi-geo-alt-fill';
   icon.setAttribute('aria-hidden', 'true');
-  heading.replaceChildren(icon, document.createTextNode(code ? 'Edit Barangay' : 'Add Barangay'));
-  saveBarangay.textContent = code ? 'Save changes' : 'Save barangay';
+  heading.replaceChildren(icon, document.createTextNode('Add Barangay'));
+  saveBarangay.textContent = 'Save barangay';
   addBarangayDialog.showModal();
   loadBarangayChoices();
 }
 if (addBarangayDialog) {
   document.getElementById('openAddBarangay').addEventListener('click', () => openBarangayModal());
   for (const id of ['closeAddBarangay', 'cancelAddBarangay']) {
-    document.getElementById(id).addEventListener('click', () => addBarangayDialog.close());
+    document.getElementById(id).addEventListener('click', () => {
+      if (!savingBarangay) {
+        choicesLoadVersion++;
+        addBarangayDialog.close();
+      }
+    });
   }
-} else loadBarangayChoices();
+  addBarangayDialog.addEventListener('cancel', (event) => {
+    if (savingBarangay) event.preventDefault();
+    else choicesLoadVersion++;
+  });
+} else
+  AdminAuth.ready.then((user) => {
+    if (user) loadBarangayChoices();
+  });

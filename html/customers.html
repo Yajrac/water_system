@@ -2,6 +2,8 @@
 <html lang="en" data-page="customers" class="theme-teal">
   <head>
     <link rel="icon" type="image/jpeg" href="../assets/images/water_system_logo.jpg" />
+    <script src="../js/shared/api-config.js"></script>
+    <script src="../js/shared/api.js"></script>
     <script src="../js/auth/auth.js"></script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -25,6 +27,7 @@
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.2/font/bootstrap-icons.min.css"
     />
+    <link rel="stylesheet" href="../css/shared/compact-tables.css" />
   </head>
   <body>
     <div class="sidebar-overlay" id="overlay"></div>
@@ -158,19 +161,20 @@
             <div class="customer-header-actions">
               <button
                 type="button"
-                class="btn customer-import-button"
+                class="btn customer-excel-button customer-export-button"
+                id="exportCustomers"
+              >
+                <i class="bi bi-file-earmark-excel" aria-hidden="true"></i>
+                <span>Export Excel</span>
+              </button>
+              <button
+                type="button"
+                class="btn customer-excel-button customer-import-button"
                 id="openCustomerImport"
                 aria-haspopup="dialog"
               >
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="1.8"
-                  aria-hidden="true"
-                >
-                  <path d="M12 16V3m-5 5 5-5 5 5M4 15v5a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5" /></svg
-                >Import existing customers
+                <i class="bi bi-upload" aria-hidden="true"></i>
+                <span>Bulk Upload</span>
               </button>
               <a
                 class="btn btn-primary customer-add-button"
@@ -216,7 +220,8 @@
                 <h2>Customer directory</h2>
                 <p>All your service records in one place.</p>
               </div>
-              <span id="customerCount" class="directory-count" aria-live="polite"></span>
+              <span id="customerCount" class="directory-count" aria-live="polite"></span
+              ><button type="button" class="btn" id="retryCustomers" hidden>Retry loading</button>
             </div>
             <div class="customer-directory-toolbar">
               <label class="payment-history-search"
@@ -280,6 +285,30 @@
             </div>
           </section>
           <dialog
+            id="customerExportDialog"
+            class="customer-import-dialog"
+            aria-labelledby="customerExportTitle"
+            aria-describedby="customerExportMessage"
+          >
+            <div class="customer-import-heading">
+              <h2 id="customerExportTitle">
+                <i class="modal-heading-icon bi bi-file-earmark-excel" aria-hidden="true"></i>Export
+                Customers
+              </h2>
+              <button type="button" class="btn" id="closeCustomerExport">
+                <i class="bi bi-x-lg" aria-hidden="true"></i> Close
+              </button>
+            </div>
+            <div class="admin-body">
+              <p id="customerExportMessage" role="status" aria-live="polite"></p>
+              <div class="customer-upload-footer import-submit">
+                <button type="button" class="btn btn-primary" id="confirmCustomerExport" disabled>
+                  <i class="bi bi-download" aria-hidden="true"></i> Export Excel
+                </button>
+              </div>
+            </div>
+          </dialog>
+          <dialog
             id="customerImportDialog"
             class="customer-import-dialog"
             aria-labelledby="customerImportTitle"
@@ -287,26 +316,40 @@
             <div class="customer-import-heading">
               <h2 id="customerImportTitle">
                 <i class="modal-heading-icon bi bi-file-earmark-arrow-up" aria-hidden="true"></i
-                >Import existing customers
+                >Bulk Upload Customers
               </h2>
               <button type="button" class="btn" id="closeCustomerImport">Close</button>
             </div>
             <div class="admin-body">
-              <p class="form-help">
-                Upload a CSV file up to 5 MB. Start with the template to use the correct columns.
-                Export Excel records as CSV first; duplicate accounts will be rejected.
-              </p>
-              <div class="admin-actions">
-                <button class="btn" id="downloadTemplate" type="button">
-                  Download CSV template
-                </button>
+              <p class="upload-intro">Add multiple customers using one Excel file.</p>
+              <div class="upload-guidelines">
+                <i class="bi bi-info-circle" aria-hidden="true"></i>
+                <div>
+                  <strong>Excel (.xlsx) · Up to 100 customers · Max 1 MB</strong>
+                  <p>
+                    Use the same columns as Export Excel. Records start as Pending. Duplicate
+                    accounts are not accepted; passwords are excluded. Missing official Pio Duran
+                    barangays will be registered automatically.
+                  </p>
+                </div>
               </div>
               <form id="importForm" class="admin-form">
-                <label
-                  >Choose your CSV file<input type="file" id="customerFile" accept=".csv" required
+                <p id="customerImportMessage" class="wide" role="alert" tabindex="-1"></p>
+                <progress
+                  id="customerImportProgress"
+                  class="wide"
+                  aria-label="Customer import progress"
+                  hidden
+                ></progress>
+                <label class="customer-upload-field"
+                  ><span
+                    ><i class="bi bi-file-earmark-excel" aria-hidden="true"></i> Excel file</span
+                  ><input type="file" id="customerFile" accept=".xlsx" required
                 /></label>
-                <div class="import-submit">
-                  <button class="btn btn-primary">Import customers</button>
+                <div class="import-submit customer-upload-footer">
+                  <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-cloud-arrow-up" aria-hidden="true"></i><span>Bulk Upload</span>
+                  </button>
                 </div>
               </form>
             </div>
@@ -316,10 +359,15 @@
     </div>
 
     <script src="../js/shared/store.js"></script>
+    <script src="../js/customers/customer-api.js"></script>
     <script src="../js/shared/validation.js"></script>
     <script src="../js/shared/shared.js"></script>
+    <script src="../js/shared/confirmation.js"></script>
     <script src="../js/shared/skeleton.js"></script>
-    <script src="../js/customers/sample-customers.js"></script>
+    <script src="../js/customers/customer-csv.js"></script>
+    <script src="../js/vendor/xlsx.full.min.js"></script>
+    <script src="../js/customers/customer-excel.js"></script>
+    <script src="../js/customers/customer-import-review.js"></script>
     <script src="../js/shared/pagination.js"></script>
     <script src="../js/customers/customers.js"></script>
   </body>

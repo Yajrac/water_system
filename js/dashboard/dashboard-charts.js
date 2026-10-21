@@ -1,13 +1,10 @@
-function renderDashboardCharts() {
-  // Six calendar months ending this month, using Philippine dates from the store.
-  const chartRecords = WaterStore.load();
-  const chartToday = WaterStore.today();
-  const monthKeys = Array.from({ length: 6 }, (_, index) => {
-    const date = new Date(
-      Date.UTC(Number(chartToday.slice(0, 4)), Number(chartToday.slice(5, 7)) - 6 + index, 1),
-    );
-    return date.toISOString().slice(0, 7);
-  });
+function renderDashboardCharts(data) {
+  for (const id of ['collectionsChart', 'statusChart', 'consumptionChart']) {
+    const container = document.getElementById(id);
+    container.chartResizeObserver?.disconnect();
+    container.replaceChildren();
+  }
+  const monthKeys = data.period.months;
   const monthLabel = (key) =>
     new Intl.DateTimeFormat('en', { month: 'short', year: '2-digit', timeZone: 'UTC' }).format(
       new Date(key + '-01T00:00:00Z'),
@@ -44,8 +41,11 @@ function renderDashboardCharts() {
   ) {
     const container = document.getElementById(id);
     const availableWidth = Math.max(0, container.clientWidth - 44);
-    const chartWidth = Math.max(560, 110 + values.length * 90,
-      id === 'consumptionChart' ? availableWidth : 0);
+    const chartWidth = Math.max(
+      560,
+      110 + values.length * 90,
+      id === 'consumptionChart' ? availableWidth : 0,
+    );
     const svg = chartNode('svg', {
       viewBox: '0 0 ' + chartWidth + ' 260',
       role: 'img',
@@ -148,11 +148,7 @@ function renderDashboardCharts() {
       container.chartResizeObserver.observe(container);
     }
   }
-  const collections = monthKeys.map((month) =>
-    chartRecords.payments
-      .filter((payment) => payment.date?.slice(0, 7) === month)
-      .reduce((sum, payment) => sum + payment.amount, 0),
-  );
+  const collections = data.monthlyCollections.map((row) => Number(row.amount));
   renderMonthlyChart(
     'collectionsChart',
     'Monthly collections — last six months',
@@ -160,15 +156,9 @@ function renderDashboardCharts() {
     (value) => WaterStore.money(value),
   );
   // Use the same six-month coverage and bar style as monthly collections.
-  const barangayVolumes = new Map();
-  chartRecords.bills
-    .filter((bill) => monthKeys.includes(bill.cycle))
-    .forEach((bill) => {
-      const customer = chartRecords.customers.find((item) => item.id === bill.customerId);
-      const barangay = bill.barangay || customer?.barangay || 'Unassigned';
-      const volume = Number.isFinite(bill.consumption) ? bill.consumption : 0;
-      barangayVolumes.set(barangay, (barangayVolumes.get(barangay) || 0) + volume);
-    });
+  const barangayVolumes = new Map(
+    data.barangayConsumption.map((row) => [row.barangay, Number(row.volume)]),
+  );
   const barangayNames = [...barangayVolumes.keys()].sort((a, b) =>
     a.localeCompare(b, undefined, { numeric: true }),
   );
@@ -183,8 +173,7 @@ function renderDashboardCharts() {
 
   const statusLabels = ['Paid', 'Unpaid', 'Overdue'];
   const counts = statusLabels.map(
-    (status) =>
-      chartRecords.bills.filter((bill) => WaterStore.status(bill, chartRecords) === status).length,
+    (status) => data.billStatuses.find((row) => row.status === status)?.count || 0,
   );
   const statusContainer = document.getElementById('statusChart');
   const pie = chartNode('svg', {
@@ -193,7 +182,7 @@ function renderDashboardCharts() {
     'aria-label': counts.map((count, index) => statusLabels[index] + ': ' + count).join(', '),
   });
   pie.appendChild(chartNode('title', {}, 'Bill status across all periods'));
-  if (!chartRecords.bills.length) {
+  if (!data.summary.bills) {
     pie.appendChild(chartNode('circle', { cx: 130, cy: 130, r: 108, class: 'chart-pie-empty' }));
     pie.appendChild(
       chartNode(
@@ -206,7 +195,7 @@ function renderDashboardCharts() {
   let angle = -Math.PI / 2;
   counts.forEach((count, index) => {
     if (!count) return;
-    const fraction = count / chartRecords.bills.length;
+    const fraction = count / data.summary.bills;
     const end = angle + fraction * Math.PI * 2;
     const point = (a) => [130 + 108 * Math.cos(a), 130 + 108 * Math.sin(a)];
     const startPoint = point(angle),
@@ -253,7 +242,7 @@ function renderDashboardCharts() {
   statusContainer.appendChild(pie);
   const billCount = document.createElement('p');
   billCount.className = 'chart-period-total';
-  billCount.textContent = chartRecords.bills.length + ' total bills · All periods';
+  billCount.textContent = data.summary.bills + ' total bills · All periods';
   statusContainer.appendChild(billCount);
   const legend = document.createElement('ul');
   legend.className = 'chart-legend';
@@ -266,9 +255,7 @@ function renderDashboardCharts() {
     count.textContent =
       counts[index] +
       ' bills · ' +
-      (chartRecords.bills.length
-        ? Math.round((counts[index] / chartRecords.bills.length) * 100)
-        : 0) +
+      (data.summary.bills ? Math.round((counts[index] / data.summary.bills) * 100) : 0) +
       '%';
     item.append(badge, count);
     legend.appendChild(item);

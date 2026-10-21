@@ -13,6 +13,6 @@ const Validation = {
   },
   phone(value) {
     // Philippine mobile numbers in local or international format.
-    return /^(09\d{9}|\+639\d{9})$/.test(value);
+    return /^(?:0|\+?63)?9\d{9}$/.test(value);
   },
 };

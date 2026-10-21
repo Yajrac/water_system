@@ -3,6 +3,7 @@ function reviewPaymentReceipt(payment, customer, bill, office, savePayment) {
   if (document.getElementById('receiptDialog')) return Promise.resolve(false);
   return new Promise((resolve) => {
     let saved = false;
+    let saving = false;
     const dialog = document.createElement('dialog');
     dialog.id = 'receiptDialog';
     dialog.className = 'receipt-dialog payment-receipt';
@@ -15,24 +16,45 @@ function reviewPaymentReceipt(payment, customer, bill, office, savePayment) {
     const confirm = dialog.querySelector('.receipt-save');
     const close = dialog.querySelector('.receipt-close');
     const print = dialog.querySelector('.receipt-print');
-    confirm.addEventListener('click', () => {
+    confirm.addEventListener('click', async () => {
+      if (saving || saved) return;
+      saving = true;
       confirm.disabled = true;
+      close.disabled = true;
+      dialog.querySelector('.receipt-feedback').textContent = 'Saving payment...';
       try {
-        savePayment();
+        const result = await savePayment();
+        if (result) {
+          payment = result.payment;
+          customer = result.customer;
+          office = result.office;
+          renderReceiptPaper(details, payment, customer, office);
+        }
         saved = true;
+        dialog.querySelector('.receipt-feedback').textContent = '';
         dialog.querySelector('.receipt-state').textContent = 'PAYMENT SAVED';
         confirm.hidden = true;
         print.hidden = false;
         close.textContent = 'Done';
         print.focus();
+        await showNotice('Payment saved successfully', 'Receipt: ' + payment.receipt);
       } catch (error) {
         dialog.querySelector('.receipt-feedback').textContent =
           error.message || 'Payment could not be saved. Please try again.';
         confirm.disabled = false;
+      } finally {
+        saving = false;
+        close.disabled = false;
       }
     });
-    close.addEventListener('click', () => dialog.close());
+    dialog.addEventListener('cancel', (event) => {
+      if (saving) event.preventDefault();
+    });
+    close.addEventListener('click', () => {
+      if (!saving) dialog.close();
+    });
     print.addEventListener('click', () => {
+      if (!saved) return;
       document.body.classList.add('printing-receipt');
       window.print();
     });
@@ -92,7 +114,7 @@ function appendReceiptAllocations(details, payment) {
 function renderReceiptPaper(container, payment, customer, office) {
   container.replaceChildren();
   container.className = 'receipt-paper';
-  const records = WaterStore.load();
+  const records = { bills: [] };
   function element(tag, className, text) {
     const node = document.createElement(tag);
     if (className) node.className = className;
@@ -219,6 +241,7 @@ function renderReceiptPaper(container, payment, customer, office) {
     element('p', '', 'Payment method: ' + payment.method),
     element('p', '', 'Remarks: ' + (payment.remarks || 'No remarks recorded.')),
   );
+  if (payment.reference) notes.appendChild(element('p', '', 'Transaction reference: ' + payment.reference));
   container.append(notes);
   const footer = element('footer', 'receipt-paper-footer');
   footer.append(

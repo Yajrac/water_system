@@ -1,108 +1,102 @@
-const paymentRecords = WaterStore.load();
 const paymentSearch = document.getElementById('paymentSearch');
 const paymentPager = createPagination('paymentPagination', showPayments);
 const receiptDialog = document.getElementById('receiptDialog');
-
-function showPayments() {
-  const search = paymentSearch.value.trim().toLowerCase();
-  const from = document.getElementById('paymentFrom').value;
-  const to = document.getElementById('paymentTo').value;
-  const method = document.getElementById('paymentMethod').value;
-  const invalidDates = from && to && from > to;
-  document.getElementById('paymentFilterHelp').textContent = invalidDates
-    ? 'From date must be on or before To date.'
-    : '';
-  const payments = paymentRecords.payments
-    .filter((payment) => {
-      const customer = paymentRecords.customers.find((item) => item.id === payment.customerId);
-      const text = [customer?.name, customer?.account, payment.receipt].join(' ').toLowerCase();
-      return (
-        !invalidDates &&
-        text.includes(search) &&
-        (!from || payment.date >= from) &&
-        (!to || payment.date <= to) &&
-        (!method || payment.method === method)
-      );
-    })
-    .slice()
-    .reverse();
+let receiptVersion = 0;
+let paymentVersion = 0,
+  paymentTimer;
+const historyCustomer = new URLSearchParams(location.search).get('customer') || '';
+async function showPayments() {
+  const version = ++paymentVersion;
   const body = document.getElementById('paymentRows');
   body.replaceChildren();
-  paymentPager.update(payments.length);
-  paymentPager.items(payments).forEach((payment) => {
-    const customer = paymentRecords.customers.find((item) => item.id === payment.customerId);
-    const bill = paymentRecords.bills.find((item) => item.id === payment.billId);
-    const cycle = payment.allocations
-      ? payment.allocations.map((item) => item.cycle).join(', ')
-      : bill?.cycle;
-    const row = body.insertRow();
-    AdminUI.cell(row, payment.receipt, 'Receipt');
-    AdminUI.customer(row, customer);
-    [
-      cycle || 'Not recorded',
-      WaterStore.money(payment.amount),
-      payment.method,
-      payment.date,
-    ].forEach((value, index) =>
-      AdminUI.cell(row, value, ['Cycle', 'Amount', 'Method', 'Date'][index]),
+  AdminUI.empty(body, 7, 'Loading payments...');
+  try {
+    const query = new URLSearchParams({
+      page: paymentPager.page,
+      limit: 10,
+      search: paymentSearch.value.trim(),
+      from: document.getElementById('paymentFrom').value,
+      to: document.getElementById('paymentTo').value,
+      method: document.getElementById('paymentMethod').value,
+      customerId: historyCustomer,
+    });
+    const data = await AdminAPI.request('/payments?' + query);
+    if (version !== paymentVersion) return;
+    document.getElementById('paymentFilterHelp').textContent = '';
+    paymentPager.page = data.pagination.page;
+    paymentPager.update(data.pagination.total);
+    body.replaceChildren();
+    for (const payment of data.payments) {
+      const row = body.insertRow();
+      AdminUI.cell(row, payment.receipt, 'Receipt');
+      AdminUI.customer(row, {
+        id: payment.customerId,
+        name: payment.name,
+        account: payment.account,
+      });
+      for (const [value, label] of [
+        [payment.cycle, 'Cycle'],
+        [WaterStore.money(Number(payment.amount)), 'Amount'],
+        [payment.method, 'Method'],
+        [payment.date, 'Date'],
+      ])
+        AdminUI.cell(row, value, label);
+      const actions = AdminUI.cell(row, '', 'View receipt');
+      AdminUI.button(actions, 'View receipt', () => showReceipt(payment));
+    }
+    AdminUI.empty(body, 7, 'No payments match your filters.');
+    document.getElementById('paymentSummary').textContent =
+      data.pagination.total + ' payment records';
+    document.getElementById('collectedToday').textContent = WaterStore.money(
+      Number(data.summary.today),
     );
-    const actions = AdminUI.cell(row, '', 'View report');
-    AdminUI.button(actions, 'View receipt', () => showReceipt(payment));
-    const receiptButton = actions.querySelector('button');
-    receiptButton.classList.add('action-receipt', 'receipt-icon-button');
-    receiptButton.setAttribute('aria-label', 'View receipt ' + payment.receipt);
-    receiptButton.title = 'View receipt';
-    receiptButton.innerHTML =
-      '<i class="bi bi-eye" aria-hidden="true"></i>';
+    document.getElementById('collectedTotal').textContent = WaterStore.money(
+      Number(data.summary.collected),
+    );
+    document.getElementById('receiptCount').textContent = data.pagination.total;
+  } catch (error) {
+    if (version !== paymentVersion) return;
+    body.replaceChildren();
+    AdminUI.empty(body, 7, error.message);
+    paymentPager.update(0);
+    document.getElementById('paymentFilterHelp').textContent = error.message;
+    document.getElementById('paymentSummary').textContent = 'Could not load payments';
+    for (const id of ['collectedToday', 'collectedTotal', 'receiptCount'])
+      document.getElementById(id).textContent = '-';
+  }
+}
+async function showReceipt(payment) {
+  const version = ++receiptVersion;
+  try {
+    const data = await PaymentAPI.receipt(payment.id);
+    if (version !== receiptVersion) return;
+    const heading = receiptDialog.querySelector('.receipt-heading');
+    if (heading) heading.hidden = true;
+    const help = receiptDialog.querySelector('.form-help');
+    if (help) help.hidden = true;
+    renderReceiptPaper(
+      document.getElementById('receiptDetails'),
+      data.payment,
+      data.customer,
+      data.office,
+    );
+    receiptDialog.showModal();
+  } catch (error) {
+    AdminUI.message(error.message);
+  }
+}
+for (const id of ['paymentSearch', 'paymentFrom', 'paymentTo', 'paymentMethod'])
+  document.getElementById(id).addEventListener(id === 'paymentSearch' ? 'input' : 'change', () => {
+    paymentPager.page = 1;
+    paymentVersion++;
+    clearTimeout(paymentTimer);
+    paymentTimer = setTimeout(showPayments, id === 'paymentSearch' ? 250 : 0);
   });
-  AdminUI.empty(
-    body,
-    7,
-    invalidDates
-      ? 'Correct the date range to view payments.'
-      : 'No payments match your search or filters.',
-  );
-  const total = payments.reduce((sum, payment) => sum + payment.amount, 0);
-  const todayTotal = payments
-    .filter((payment) => payment.date === WaterStore.today())
-    .reduce((sum, payment) => sum + payment.amount, 0);
-  document.getElementById('paymentSummary').textContent = payments.length + ' payment records';
-  document.getElementById('collectedToday').textContent = WaterStore.money(todayTotal);
-  document.getElementById('collectedTotal').textContent = WaterStore.money(total);
-  document.getElementById('receiptCount').textContent = payments.length;
-}
-
-function showReceipt(payment) {
-  const customer = paymentRecords.customers.find((item) => item.id === payment.customerId);
-  const heading = receiptDialog.querySelector('.receipt-heading');
-  if (heading) heading.hidden = true;
-  const help = receiptDialog.querySelector('.form-help');
-  if (help) help.hidden = true;
-  renderReceiptPaper(
-    document.getElementById('receiptDetails'),
-    payment,
-    customer,
-    paymentRecords.office,
-  );
-  receiptDialog.showModal();
-}
-function refreshPaymentFilters() {
+document.getElementById('clearPaymentFilters').addEventListener('click', () => {
+  for (const id of ['paymentSearch', 'paymentFrom', 'paymentTo', 'paymentMethod'])
+    document.getElementById(id).value = '';
   paymentPager.page = 1;
   showPayments();
-  // Searching is independent of the old selected-customer query.
-  updatePaymentLinks('');
-  if (location.search) history.replaceState(null, '', 'payment-history.html');
-}
-['paymentSearch', 'paymentFrom', 'paymentTo', 'paymentMethod'].forEach((id) => {
-  document
-    .getElementById(id)
-    .addEventListener(id === 'paymentSearch' ? 'input' : 'change', refreshPaymentFilters);
-});
-document.getElementById('clearPaymentFilters').addEventListener('click', () => {
-  ['paymentSearch', 'paymentFrom', 'paymentTo', 'paymentMethod'].forEach((id) => {
-    document.getElementById(id).value = '';
-  });
-  refreshPaymentFilters();
 });
 document.getElementById('closeReceipt').addEventListener('click', () => receiptDialog.close());
 document.getElementById('printReceipt').addEventListener('click', () => {
@@ -111,9 +105,7 @@ document.getElementById('printReceipt').addEventListener('click', () => {
 });
 window.addEventListener('afterprint', () => document.body.classList.remove('printing-receipt'));
 receiptDialog.addEventListener('close', () => document.body.classList.remove('printing-receipt'));
-const requestedCustomerId = new URLSearchParams(location.search).get('customer');
-const requestedCustomer = paymentRecords.customers.find(
-  (customer) => customer.id === requestedCustomerId,
-);
-if (requestedCustomer) paymentSearch.value = requestedCustomer.account;
-showPayments();
+
+AdminAuth.ready.then((user) => {
+  if (user) showPayments();
+});

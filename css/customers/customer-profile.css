@@ -113,6 +113,17 @@
 }
 .profile-summary .profile-icon {
   color: var(--color-primary-deep);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 36px;
+  width: 36px;
+  min-width: 36px;
+  height: 36px;
+  box-sizing: border-box;
+  padding: 0;
+  border-radius: 8px;
+  line-height: 1;
 }
 .profile-tab-panel[hidden] {
   display: none;
@@ -261,6 +272,10 @@
   color: var(--color-ink-muted);
   font-size: 0.72rem;
   margin-bottom: 8px;
+}
+.meter-info :is(h2, .meter-values span) > .bi {
+  color: #087de0;
+  margin-right: 5px;
 }
 .meter-values strong {
   font-size: 1.25rem;
