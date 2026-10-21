@@ -18,7 +18,6 @@
     <script src="../js/shared/theme.js"></script>
     <link rel="stylesheet" href="../css/shared/shared.css" />
     <link rel="stylesheet" href="../css/shared/admin.css" />
-    <link rel="stylesheet" href="../css/dashboard/dashboard-charts.css" />
     <link rel="stylesheet" href="../css/shared/back-button.css" />
     <link rel="stylesheet" href="../css/shared/modals.css" />
     <link rel="stylesheet" href="../css/shared/responsive-cards.css" />
@@ -154,37 +153,12 @@
               <h1>Dashboard Overview</h1>
               <p>Municipal water supply administration</p>
             </div>
+            <button type="button" id="refreshDashboard" class="btn btn-secondary">
+              <i class="bi bi-arrow-clockwise" aria-hidden="true"></i> Refresh
+            </button>
           </header>
           <p id="pageMessage" role="status" tabindex="-1"></p>
-          <section class="panel">
-            <div class="panel-header dashboard-records-heading">
-              <h2>Current records</h2>
-              <button type="button" id="refreshDashboard" class="btn btn-secondary">
-                <i class="bi bi-arrow-clockwise" aria-hidden="true"></i> Refresh
-              </button>
-            </div>
-            <div class="admin-body">
-              <div id="summary" class="admin-summary"></div>
-              <p>
-                Use Customer Management to register accounts, Billing to generate bills, and Payment
-                History to record payments.
-              </p>
-            </div>
-          </section>
-          <section class="dashboard-charts" aria-label="Billing and collection charts">
-            <section class="panel">
-              <div class="panel-header"><h2>Monthly collections</h2></div>
-              <div class="dashboard-chart" id="collectionsChart"></div>
-            </section>
-            <section class="panel">
-              <div class="panel-header"><h2>Bill status · All periods</h2></div>
-              <div class="dashboard-chart" id="statusChart"></div>
-            </section>
-            <section class="panel consumption-panel">
-              <div class="panel-header"><h2>Barangay consumption</h2></div>
-              <div class="dashboard-chart" id="consumptionChart"></div>
-            </section>
-          </section>
+          <section id="summary" class="admin-summary" aria-label="Dashboard totals"></section>
         </main>
       </div>
     </div>
@@ -195,7 +169,6 @@
     <script src="../js/shared/calendar.js"></script>
     <script src="../js/shared/skeleton.js"></script>
     <script src="../js/dashboard/dashboard.js"></script>
-    <script src="../js/dashboard/dashboard-charts.js"></script>
     <script src="../js/dashboard/dashboard-init.js"></script>
   </body>
 </html>

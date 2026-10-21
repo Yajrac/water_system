@@ -9,18 +9,16 @@ async function startDashboard() {
   const button = document.getElementById('refreshDashboard');
   button.disabled = true;
   AdminUI.message('');
-  const containers = ['summary', 'collectionsChart', 'statusChart', 'consumptionChart'];
+  const containers = ['summary'];
   const finish = containers.map((id) => {
     const container = document.getElementById(id);
-    container.chartResizeObserver?.disconnect();
     container.replaceChildren();
-    return Skeleton.start(container, id === 'summary' ? 'cards' : 'chart', 1);
+    return Skeleton.start(container, 'cards', 8);
   });
   try {
     const data = await AdminAPI.request('/dashboard');
     finish.forEach((stop) => stop());
     renderDashboard(data);
-    renderDashboardCharts(data);
   } catch (error) {
     finish.forEach((stop) => stop());
     containers.forEach((id) => document.getElementById(id).replaceChildren());
