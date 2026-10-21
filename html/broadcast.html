@@ -164,12 +164,12 @@
             ><button
               type="button"
               role="tab"
-              id="notificationDraftsTab"
-              aria-controls="notificationDrafts"
+              id="notificationHistoryTab"
+              aria-controls="notificationHistory"
               aria-selected="false"
               tabindex="-1"
             >
-              <i class="bi bi-file-earmark-text" aria-hidden="true"></i><span>Notification drafts</span>
+              <i class="bi bi-file-earmark-text" aria-hidden="true"></i><span>Notification history</span>
             </button>
           </div>
           <p id="pageMessage" role="status" tabindex="-1"></p>
@@ -183,8 +183,7 @@
             <div class="panel-header"><h2>Prepare notification</h2></div>
             <div class="admin-body">
               <p>
-                Messages are saved as drafts only. Sending to an app or SMS requires a delivery
-                service and an approved channel.
+                Publish messages directly to customer in-app notifications.
               </p>
               <form id="noticeForm" class="admin-form">
                 <label
@@ -207,19 +206,19 @@
                   >Message<textarea name="message" rows="4" required maxlength="2000"></textarea>
                 </label>
                 <p id="recipientCount" class="wide"></p>
-                <div class="wide"><button class="btn btn-primary">Save draft</button></div>
+                <div class="wide"><button type="submit" class="btn btn-primary"><i class="bi bi-send" aria-hidden="true"></i>Publish notification</button></div>
               </form>
             </div>
           </section>
           <section
             class="panel section-tab-panel"
-            id="notificationDrafts"
+            id="notificationHistory"
             role="tabpanel"
-            aria-labelledby="notificationDraftsTab"
+            aria-labelledby="notificationHistoryTab"
             tabindex="0"
             hidden
           >
-            <div class="panel-header"><h2>Notification drafts</h2></div>
+            <div class="panel-header"><h2>Notification history</h2></div>
             <div class="admin-body">
               <div class="table-scroll">
                 <table>

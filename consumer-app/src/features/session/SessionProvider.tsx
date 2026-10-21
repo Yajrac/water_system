@@ -7,6 +7,7 @@ type LoginResult = { user: ConsumerUser; accessToken: string };
 
 type Session = {
   signedIn: boolean;
+  accessToken: string | null;
   signIn: (username: string, password: string) => Promise<void>;
   signOut: () => void;
   mustChangePassword: boolean;
@@ -63,6 +64,7 @@ export function SessionProvider({ children }: PropsWithChildren) {
     <SessionContext.Provider
       value={{
         signedIn: !!login,
+        accessToken: login?.accessToken || null,
         signIn,
         signOut,
         notice,

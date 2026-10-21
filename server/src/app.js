@@ -11,6 +11,7 @@ import meterEntryRoutes from './routes/meter-entry.routes.js';
 import billRoutes from './routes/bill.routes.js';
 import paymentRoutes from './routes/payment.routes.js';
 import dashboardRoutes from './routes/dashboard.routes.js';
+import notificationRoutes from './routes/notification.routes.js';
 
 import { env } from './config/env.js';
 
@@ -49,6 +50,7 @@ app.use('/api/v1/meter-entries', meterEntryRoutes);
 app.use('/api/v1/bills', billRoutes);
 app.use('/api/v1/payments', paymentRoutes);
 app.use('/api/v1/dashboard', dashboardRoutes);
+app.use('/api/v1/notifications', notificationRoutes);
 app.use(notFound);
 app.use(errorHandler);
 

@@ -6,7 +6,7 @@ import mysql from 'mysql2/promise';
 const tables = [
   'payments', 'bills', 'meter_entries', 'water_meters',
   'application_documents', 'application_estimates', 'customer_applications',
-  'connection_events', 'feedback_messages', 'feedback_threads', 'customers',
+  'announcement_recipients', 'connection_events', 'feedback_messages', 'feedback_threads', 'customers',
 ];
 
 let connection;

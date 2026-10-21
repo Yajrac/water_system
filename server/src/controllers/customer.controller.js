@@ -34,3 +34,7 @@ export async function duplicate(req, res) {
   res.set('Cache-Control', 'no-store');
   res.json({ success: true, data: await service.checkCustomerDuplicate(req.body) });
 }
+
+export async function connections(req,res) {
+  res.json({success:true,data:await service.getConnectionRecords(req.query)});
+}

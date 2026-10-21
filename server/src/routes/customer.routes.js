@@ -10,6 +10,7 @@ router.post('/', controller.create);
 router.post('/check-duplicate', controller.duplicate);
 router.post('/import', controller.importRecords);
 router.post('/import/preview', controller.previewImport);
+router.get('/connections', controller.connections);
 router.get('/:id', controller.profile);
 router.put('/:id', controller.update);
 router.patch('/:id/status', controller.status);

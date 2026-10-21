@@ -1,86 +1,64 @@
-const noticeRecords = WaterStore.load();
 const noticeForm = document.getElementById('noticeForm');
 const audienceSelect = document.getElementById('noticeAudience');
 const targetSelect = document.getElementById('noticeTarget');
-
+let noticeCustomers = [], noticeAreas = [], noticeSaving = false, noticeReady = false;
 function selectedRecipients() {
-  const registered = noticeRecords.customers.filter((customer) =>
-    WaterStore.isRegistered(customer),
-  );
-  if (audienceSelect.value === 'all') return registered;
-  if (audienceSelect.value === 'barangay')
-    return registered.filter((customer) => customer.barangay === targetSelect.value);
-  return registered.filter((customer) => customer.id === targetSelect.value);
+  if (audienceSelect.value === 'all') return noticeCustomers;
+  return noticeCustomers.filter((customer) => String(audienceSelect.value === 'barangay'
+    ? customer.barangayId : customer.id) === targetSelect.value);
 }
 function showRecipientCount() {
-  document.getElementById('recipientCount').textContent =
-    selectedRecipients().length + ' customers selected';
+  document.getElementById('recipientCount').textContent = selectedRecipients().length + ' customers selected';
 }
 function changeAudience() {
   const audience = audienceSelect.value;
   document.getElementById('noticeTargetLabel').hidden = audience === 'all';
   targetSelect.required = audience !== 'all';
   targetSelect.replaceChildren();
-  if (audience === 'barangay') {
-    WaterStore.barangays.forEach((barangay) => targetSelect.add(new Option(barangay, barangay)));
-  } else if (audience === 'customer')
-    AdminUI.options(
-      targetSelect,
-      noticeRecords.customers.filter((customer) => WaterStore.isRegistered(customer)),
-    );
+  if (audience !== 'all') targetSelect.add(new Option('Select recipient', ''));
+  if (audience === 'barangay') noticeAreas.forEach((area) => targetSelect.add(new Option(area.name, String(area.id))));
+  if (audience === 'customer') noticeCustomers.forEach((customer) => targetSelect.add(new Option(customer.account + ' - ' + customer.name, String(customer.id))));
   showRecipientCount();
 }
-function showNotices() {
+async function showNotices() {
   const body = document.getElementById('noticeRows');
   body.replaceChildren();
-  noticeRecords.notices
-    .slice()
-    .reverse()
-    .forEach((notice) => {
-      const row = body.insertRow();
-      [
-        notice.date,
-        notice.type,
-        notice.audience,
-        notice.customerIds.length,
-        notice.message,
-        'Draft — not sent',
-      ].forEach((value, index) =>
-        AdminUI.cell(
-          row,
-          value,
-          ['Created', 'Type', 'Audience', 'Recipients', 'Message', 'Status'][index],
-        ),
-      );
-    });
-  AdminUI.empty(body, 6, 'No notification drafts yet.');
+  const notices = await AdminAPI.request('/notifications');
+  for (const notice of notices) {
+    const row = body.insertRow();
+    [notice.date,notice.type,notice.audience,notice.recipients,notice.message,notice.status]
+      .forEach((value,index)=>AdminUI.cell(row,value,['Created','Type','Audience','Recipients','Message','Status'][index]));
+  }
+  AdminUI.empty(body,6,'No notifications yet.');
 }
-noticeForm.addEventListener('submit', (event) => {
+noticeForm.addEventListener('submit', async (event) => {
   event.preventDefault();
-  const recipients = selectedRecipients();
-  const message = noticeForm.elements.message.value.trim();
-  if (!recipients.length || !message)
-    return AdminUI.message('Select at least one recipient and enter a message.');
-  let audience = 'All customers';
-  if (audienceSelect.value === 'barangay') audience = targetSelect.value;
-  if (audienceSelect.value === 'customer')
-    audience = recipients[0].account + ' — ' + recipients[0].name;
-  noticeRecords.notices.push({
-    id: WaterStore.id(),
-    date: WaterStore.today(),
-    type: noticeForm.elements.type.value,
-    audience,
-    customerIds: recipients.map((customer) => customer.id),
-    message,
-  });
-  WaterStore.save(noticeRecords);
-  noticeForm.reset();
-  changeAudience();
-  showNotices();
-  document.getElementById('notificationDraftsTab').click();
-  AdminUI.message('Draft saved. No SMS or app notification was sent.');
+  if (noticeSaving || !noticeReady) return;
+  if (!selectedRecipients().length) return AdminUI.message('Select at least one customer.');
+  const status = 'Published';
+  noticeSaving = true;
+  noticeForm.querySelector('button[type="submit"]').disabled = true;
+  try {
+    if (!(await confirmAction('Publish notification?',
+      selectedRecipients().length + ' recipients. ' + 'This message will appear in their app.',
+      'Publish'))) return;
+    const saved = await AdminAPI.request('/notifications',{method:'POST',body:{
+      type:noticeForm.elements.type.value,audience:audienceSelect.value,target:targetSelect.value,
+      message:noticeForm.elements.message.value.trim(),status,
+    }});
+    noticeForm.reset(); changeAudience(); await showNotices();
+    document.getElementById('notificationHistoryTab').click();
+    await showNotice('Notification published successfully', 'Published to ' + saved.recipients + ' customer in-app feeds.');
+  } catch(error) { AdminUI.message(error.message); }
+  finally { noticeSaving=false; noticeForm.querySelector('button[type="submit"]').disabled=false; }
 });
-audienceSelect.addEventListener('change', changeAudience);
-targetSelect.addEventListener('change', showRecipientCount);
-changeAudience();
-showNotices();
+audienceSelect.addEventListener('change',changeAudience);
+targetSelect.addEventListener('change',showRecipientCount);
+noticeForm.inert=true;
+AdminAuth.ready.then(async (user)=>{
+  if (!user) return;
+  try {
+    [noticeCustomers,noticeAreas]=await Promise.all([AdminAPI.request('/notifications/recipients'),AdminAPI.request('/barangays')]);
+    await showNotices(); changeAudience(); noticeReady=true; noticeForm.inert=false; AdminUI.message('');
+  } catch(error) { AdminUI.message(error.message + ' Reload to retry.'); }
+});

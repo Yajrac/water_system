@@ -331,12 +331,12 @@ export async function changeCustomerStatus(id, body, actorId) {
   customerId(id);
   if (
     !body ||
-    !['Active', 'Inactive'].includes(body.status) ||
+    !['Active', 'Inactive', 'Disconnected'].includes(body.status) ||
     typeof body.reason !== 'string' ||
     !body.reason.trim() ||
     body.reason.length > 500
   ) {
-    throw new AppError('Provide an Active/Inactive status and a reason.', 400);
+    throw new AppError('Provide an Active, Inactive or Disconnected status and a reason.', 400);
   }
   return transaction(async (connection) => {
     const existing = customerView(await model.findCustomer(id, connection, true));
@@ -345,6 +345,9 @@ export async function changeCustomerStatus(id, body, actorId) {
       throw new AppError('Customer status changed. Reload before trying again.', 409);
     if (body.status === 'Active' && (existing.serviceStatus !== 'Installed' || !existing.meterId)) {
       throw new AppError('Complete installation and meter details before activation.', 409);
+    }
+    if (body.status === 'Disconnected' && existing.connectionStatus !== 'Active') {
+      throw new AppError('Only an active service connection can be disconnected.', 409);
     }
     if (existing.connectionStatus !== body.status) {
       await model.writeRecord('customers', { connection_status: body.status }, connection, id);
@@ -393,4 +396,16 @@ export async function checkCustomerDuplicate(body) {
   if (!/^\+639\d{9}$/.test(details.contact)) throw new AppError('Provide a valid mobile number.', 400);
   if (body.excludeId) customerId(body.excludeId);
   return { exists: await duplicateCustomer(details, pool, body.excludeId) };
+}
+
+export async function getConnectionRecords(query) {
+  const state = query.state || 'open';
+  if (!['open','all','active','disconnected','inactive'].includes(state)) throw new AppError('Invalid connection filter.',400);
+  const filters = validateCustomerQuery({page:query.page,limit:query.limit,search:query.search});
+  const result = await model.listConnectionRecords(filters,state);
+  return {customers:result.rows.map(row=>{
+    const {disconnectedOn,disconnectionReason,outstanding,...customer} = row;
+    return {...customerView(customer),disconnectedOn:disconnectedOn || '',
+      disconnectionReason:disconnectionReason || '',outstanding:String(outstanding)};
+  }),pagination:result.pagination};
 }

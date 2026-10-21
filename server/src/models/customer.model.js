@@ -241,3 +241,35 @@ export async function logConnection(connection, id, actorId, previousStatus, new
     [id, actorId, previousStatus, newStatus, reason],
   );
 }
+
+export async function listConnectionRecords(filters,state) {
+  const conditions = [];
+  conditions.push("(c.connection_status IN ('Active','Inactive','Disconnected'))");
+  const values = [];
+  if (state === 'open') conditions.push("c.connection_status IN ('Inactive','Disconnected')");
+  else if (state !== 'all') {
+    conditions.push('c.connection_status=?');
+    values.push({active:'Active',disconnected:'Disconnected',inactive:'Inactive'}[state]);
+  }
+  if (filters.search) {
+    conditions.push("(CONCAT_WS(' ',c.first_name,c.middle_name,c.last_name) LIKE ? OR c.account_number LIKE ? OR c.submitter_number LIKE ?)");
+    values.push(...Array(3).fill('%'+filters.search+'%'));
+  }
+  const where = ' WHERE '+conditions.join(' AND ');
+  const connection = await pool.getConnection();
+  try {
+    await connection.beginTransaction();
+    const [[count]] = await connection.execute('SELECT COUNT(*) AS total '+joins+where,values);
+    const [rows] = await connection.execute(`SELECT ${projection},
+      DATE_FORMAT(CONVERT_TZ(ce.effective_at,'+00:00','+08:00'),'%Y-%m-%d') AS disconnectedOn,
+      ce.reason AS disconnectionReason,
+      COALESCE((SELECT SUM(GREATEST(0,bill.total_amount-COALESCE((SELECT SUM(p.amount)
+        FROM payments p WHERE p.bill_id=bill.id),0))) FROM bills bill WHERE bill.customer_id=c.id),0) AS outstanding
+      ${joins} LEFT JOIN connection_events ce ON ce.id=(SELECT MAX(ev.id) FROM connection_events ev
+        WHERE ev.customer_id=c.id AND ev.new_status='Disconnected')
+      ${where} ORDER BY c.last_name,c.first_name,c.id LIMIT ${filters.limit} OFFSET ${(filters.page-1)*filters.limit}`,values);
+    await connection.commit();
+    return {rows,pagination:{page:filters.page,limit:filters.limit,total:Number(count.total)}};
+  } catch(error) {await connection.rollback();throw error;}
+  finally {connection.release();}
+}

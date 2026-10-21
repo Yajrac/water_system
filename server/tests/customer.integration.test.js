@@ -146,6 +146,20 @@ test(
       assert.equal(await verifyPassword(user.password_hash, password), true);
       const login = await request('/auth/login', 'POST', { username: 'ana.reyes', password });
       assert.equal(login.status, 200);
+      assert.equal((await request('/notifications', 'GET', undefined, login.data.accessToken)).status, 403);
+      const noticeBody = { type:'Announcement', audience:'customer', target:customer.id,
+        message:'Test advisory for this customer',status:'Published' };
+      const published = await request('/notifications','POST',noticeBody);
+      assert.equal(published.status,201,JSON.stringify(published));
+      assert.equal(published.data.recipients,1);
+      await request('/notifications','POST',{...noticeBody,message:'Private draft',status:'Draft'});
+      const feed = await request('/notifications/mine','GET',undefined,login.data.accessToken);
+      assert.equal(feed.status,200,JSON.stringify(feed));
+      assert.ok(feed.data.some(item=>item.body===noticeBody.message));
+      assert.ok(!feed.data.some(item=>item.body==='Private draft'));
+      assert.ok(feed.data.some(item=>item.category==='Application'));
+      assert.equal((await request('/notifications','POST',{...noticeBody,target:'9999999'})).status,400);
+
       assert.equal(
         (await request('/customers', 'GET', undefined, login.data.accessToken)).status,
         403,
@@ -541,6 +555,41 @@ test(
       const [[customerCount]] = await control.query('SELECT COUNT(*) AS count FROM customers');
       assert.equal(stats.totalCustomers, Number(customerCount.count));
       assert.equal((await request('/dashboard', 'GET', undefined, '')).status, 401);
+      const [[owner]] = await control.execute('SELECT auth_version FROM users WHERE id=?',[customer.userId]);
+      const ownerToken = jwt.sign({role:'consumer',version:Number(owner.auth_version)},authConfig.secret,{
+        algorithm:'HS256',subject:String(customer.userId),expiresIn:'5m',issuer:authConfig.issuer,audience:authConfig.audience,
+      });
+      const ownerFeed = await request('/notifications/mine','GET',undefined,ownerToken);
+      assert.equal(ownerFeed.status,200,JSON.stringify(ownerFeed));
+      assert.ok(ownerFeed.data.some(item=>item.category==='Billing'));
+      assert.ok(ownerFeed.data.some(item=>item.category==='Payment'));
+      const otherFeed = await request('/notifications/mine','GET',undefined,nextLogin.data.accessToken);
+      assert.equal(otherFeed.status,200);
+      assert.ok(!otherFeed.data.some(item=>item.body==='Test advisory for this customer'));
+      assert.ok(!otherFeed.data.some(item=>item.category==='Payment'));
+      const connections = await request('/customers/connections?state=active');
+      assert.equal(connections.status,200,JSON.stringify(connections));
+      const installed = connections.data.customers.find(row=>row.id===customer.id);
+      assert.ok(installed);
+      const disconnected = await request('/customers/'+customer.id+'/status','PATCH',{
+        status:'Disconnected',reason:'Test service disconnection',revision:installed.revision,
+      });
+      assert.equal(disconnected.status,200,JSON.stringify(disconnected));
+      assert.equal(disconnected.data.connectionStatus,'Disconnected');
+      const openConnections = await request('/customers/connections?state=disconnected');
+      assert.equal(openConnections.data.pagination.total,1);
+      assert.equal(openConnections.data.customers[0].disconnectionReason,'Test service disconnection');
+      assert.equal(Number(openConnections.data.customers[0].outstanding),0);
+      const reconnect = {status:'Active',reason:'Service restored',revision:disconnected.data.revision};
+      assert.equal((await request('/customers/'+customer.id+'/status','PATCH',{
+        ...reconnect,revision:installed.revision,
+      })).status,409);
+      assert.equal((await request('/customers/'+customer.id+'/status','PATCH',reconnect)).status,200);
+      assert.equal((await request('/customers/connections?state=disconnected')).data.pagination.total,0);
+      const [[disconnectEvents]] = await control.execute("SELECT COUNT(*) AS total FROM connection_events WHERE customer_id=? AND new_status='Disconnected'",[customer.id]);
+      assert.equal(Number(disconnectEvents.total),1);
+
+
     } finally {
       if (server) await new Promise((resolve) => server.close(resolve));
       if (pool) await pool.end();

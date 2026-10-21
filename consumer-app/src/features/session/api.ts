@@ -3,18 +3,18 @@ const baseUrl = (
   process.env.EXPO_PUBLIC_API_URL || 'https://water-system-1.onrender.com/api/v1'
 ).replace(/\/$/, '');
 
-export async function consumerRequest<T>(path: string, body: unknown, token?: string): Promise<T> {
+export async function consumerRequest<T>(path: string, body: unknown, token?: string, method: 'GET' | 'POST' = 'POST'): Promise<T> {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 45000);
   try {
     const response = await fetch(baseUrl + path, {
-      method: 'POST',
+      method,
       headers: {
         'Content-Type': 'application/json',
         Accept: 'application/json',
         ...(token ? { Authorization: 'Bearer ' + token } : {}),
       },
-      body: JSON.stringify(body),
+      body: method === 'GET' ? undefined : JSON.stringify(body),
       signal: controller.signal,
     });
     const result = await response.json().catch(() => null);

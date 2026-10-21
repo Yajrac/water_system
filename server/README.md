@@ -360,3 +360,21 @@ first-login screen and a profile Change password action. Tokens are held in memo
 Set `EXPO_PUBLIC_API_URL` to override its default Render API URL; browser-based Expo
 previews also require their exact origin in API `CORS_ORIGINS`. Other consumer app
 screens still use prototype data; their billing/profile data APIs are separate work.
+
+
+Notifications: apply migration 018 before deploying the notifications routes. Admin
+`GET /api/v1/notifications`, `GET /api/v1/notifications/recipients`, and
+`POST /api/v1/notifications` support database drafts or Published advisories with a
+snapshot of the selected all/barangay/customer audience. Creating a notice and
+its recipient links/audit entry is transactional. Only Published, nonexpired
+advisories appear in `GET /api/v1/notifications/mine` for the authenticated linked
+consumer, alongside their own recent bills, payments and latest application statuses.
+The consumer Announcements screen loads this feed with a manual refresh. This is
+an in-app feed, without background push, SMS delivery or unread tracking. Other
+consumer screens may still use prototype data. Existing browser-only drafts are
+not imported automatically. Recipient snapshots apply to new notices; legacy
+announcements without recipient links remain hidden from the consumer feed.
+
+Local: `npm run db:migrate`. Aiven: run `node scripts/migrate-aiven.js "path/to/ca.pem"`
+before deploying migration-dependent code. The customer cleanup helper also
+removes announcement recipient links when clearing customer records.
