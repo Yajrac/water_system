@@ -9,27 +9,55 @@ const AdminAuth = {
   clear() {
     clearTimeout(this.expiryTimer);
     sessionStorage.removeItem(AdminAPI.tokenKey);
+    localStorage.removeItem(AdminAPI.tokenKey);
+    localStorage.removeItem('pwss-admin-refresh-token');
     sessionStorage.removeItem('pwss-admin-session');
     this.user = null;
   },
   scheduleExpiry(token) {
     clearTimeout(this.expiryTimer);
     try {
-      // Used only to schedule re-login; /auth/me verifies the token on the server.
       const part = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
       const expires = JSON.parse(atob(part)).exp * 1000;
       if (!Number.isFinite(expires)) return;
-      const delay = Math.max(0, Math.min(expires - Date.now(), 2147483647));
-      this.expiryTimer = setTimeout(() => {
+      const delay = Math.max(0, Math.min(expires - Date.now() - 60000, 2147483647));
+      this.expiryTimer = setTimeout(async () => {
         if (AdminAPI.getToken() !== token) return;
-        this.clear();
-        this.redirectToLogin('expired');
+        if (!localStorage.getItem('pwss-admin-refresh-token')) {
+          this.clear();
+          this.redirectToLogin('expired');
+          return;
+        }
+        try { await this.renewSession(); }
+        catch (error) {
+          if (error.status === 401) { this.clear(); this.redirectToLogin('expired'); }
+          else this.expiryTimer = setTimeout(() => this.scheduleExpiry(token), 30000);
+        }
       }, delay);
     } catch {
       // Authentication decisions still come from /auth/me and API 401 responses.
     }
   },
+  renewing: null,
+  async renewSession() {
+    if (this.renewing) return this.renewing;
+    const refreshToken = localStorage.getItem('pwss-admin-refresh-token');
+    if (!refreshToken) return;
+    this.renewing = (async () => {
+      const result = await AdminAPI.request('/auth/refresh', {
+        method: 'POST', body: { refreshToken }, authenticated: false,
+      });
+      if (localStorage.getItem('pwss-admin-refresh-token') !== refreshToken) return;
+      sessionStorage.removeItem(AdminAPI.tokenKey);
+      localStorage.setItem(AdminAPI.tokenKey, result.accessToken);
+      localStorage.setItem('pwss-admin-refresh-token', result.refreshToken);
+      this.user = result.user;
+      this.scheduleExpiry(result.accessToken);
+    })();
+    try { await this.renewing; } finally { this.renewing = null; }
+  },
   async verifySession() {
+    if (localStorage.getItem('pwss-admin-refresh-token')) await this.renewSession();
     const token = AdminAPI.getToken();
     if (!token) {
       this.user = null;
@@ -65,13 +93,20 @@ const AdminAuth = {
     if (typeof result.accessToken !== 'string' || !result.accessToken) {
       throw new AdminApiError('The server returned an unexpected login response.');
     }
-    sessionStorage.setItem(AdminAPI.tokenKey, result.accessToken);
+    this.clear();
+    localStorage.setItem(AdminAPI.tokenKey, result.accessToken);
+    if (result.refreshToken) localStorage.setItem('pwss-admin-refresh-token', result.refreshToken);
     this.user = result.user;
     this.scheduleExpiry(result.accessToken);
     return this.user;
   },
-  logout() {
+  async logout() {
+    const refreshToken = localStorage.getItem('pwss-admin-refresh-token');
     this.clear();
+    if (refreshToken) {
+      try { await AdminAPI.request('/auth/logout', { method: 'POST', body: { refreshToken }, authenticated: false }); }
+      catch { /* Local credentials stay cleared even if the server is unreachable. */ }
+    }
     location.replace('login.html');
   },
   destination() {
@@ -83,7 +118,6 @@ const AdminAuth = {
       'customer-application.html',
       'customer-profile.html',
       'barangays.html',
-      'barangay-form.html',
       'disconnected.html',
       'feedback.html',
       'billing.html',
@@ -146,3 +180,10 @@ document.addEventListener('visibilitychange', () => {
   if (!document.hidden && !isPublicAuthPage) requireAdminSession();
 });
 AdminAuth.ready = requireAdminSession();
+
+window.addEventListener('storage', (event) => {
+  if (event.key === 'pwss-admin-refresh-token' && !event.newValue) {
+    AdminAuth.clear();
+    AdminAuth.redirectToLogin();
+  }
+});

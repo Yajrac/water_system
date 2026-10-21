@@ -583,16 +583,16 @@
 }
 
 .ledger-completion:not(.is-completed) {
-  color: #805000;
-  background: #fff3d6;
-  border: 1px solid #e8c77d;
+  color: #b45309;
+  background: transparent;
+  border: 0;
+  padding: 0;
   font-weight: 700;
   opacity: 1;
 }
 [data-theme='dark'] .ledger-completion:not(.is-completed) {
-  color: #ffe1a1;
-  background: #473416;
-  border-color: #94743a;
+  color: #fbbf24;
+  background: transparent;
 }
 
 /* Icon font sizing follows the existing meter-entry layout. */

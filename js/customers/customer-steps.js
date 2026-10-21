@@ -59,8 +59,8 @@ function customerStepError(field) {
   if (field.name === 'name' && !/^[\p{L}\p{M} .,'-]+$/u.test(value))
     return 'Enter the applicant name using letters and name punctuation only.';
   if (field.name === 'name' && !/\p{L}/u.test(value)) return 'Enter the applicant name.';
-  if (field.name === 'contact' && !/^(?:0|\+?63)?9\d{9}$/.test(value))
-    return 'Enter a valid mobile number starting with 09, 9, 63 or +63.';
+  if (field.name === 'contact' && !/^0?9\d{9}$/.test(value))
+    return 'Enter a valid mobile number: 11 digits starting with 09 or 10 starting with 9.';
   if (field.name === 'address' && !/^Purok [1-7]$/.test(value)) return 'Select a valid purok.';
   if (field.name === 'barangay' && !CustomerAPI.barangays.some((item) => item.name === value))
     return 'Select a registered barangay.';
@@ -112,7 +112,8 @@ customerForm.addEventListener('change', (event) => {
   event.target.setCustomValidity?.('');
   event.target.removeAttribute('aria-invalid');
 });
-nextCustomerStep.addEventListener('click', () => {
+nextCustomerStep.addEventListener('click', async () => {
+  if (currentCustomerStep === 0 && !(await checkCustomerIdentity())) return;
   const invalid = Array.from(
     customerSteps[currentCustomerStep].querySelectorAll('input, select, textarea'),
   ).find((field) => {
@@ -132,6 +133,8 @@ customerForm.addEventListener(
   (event) => {
     const index = customerSteps.findIndex((section) => section.contains(event.target));
     if (index >= 0 && customerSteps[index].hidden) showCustomerStep(index, false);
+    event.target.setAttribute('aria-invalid', 'true');
+    AdminUI.message(event.target.validationMessage || 'Check the highlighted field before saving.');
   },
   true,
 );
@@ -146,3 +149,45 @@ customerForm.addEventListener('keydown', (event) => {
   }
 });
 showCustomerStep(0, false);
+
+let identityVersion = 0;
+let identityTimer;
+async function checkCustomerIdentity() {
+  const version = ++identityVersion;
+  const fields = customerForm.elements;
+  const message = document.getElementById('customerDuplicateMessage');
+  const body = Object.fromEntries(['firstName', 'middleName', 'lastName', 'extensionName', 'contact']
+    .map((key) => [key, fields[key].value.trim()]));
+  if (editingCustomerId) body.excludeId = editingCustomerId;
+  if (!body.firstName || !body.lastName || !/^0?9\d{9}$/.test(body.contact)) {
+    message.textContent = '';
+    nextCustomerStep.disabled = false;
+    return true;
+  }
+  nextCustomerStep.disabled = true;
+  message.textContent = 'Checking for an existing customer...';
+  try {
+    const result = await AdminAPI.request('/customers/check-duplicate', { method: 'POST', body });
+    if (version !== identityVersion) return false;
+    message.textContent = result.exists
+      ? 'This customer already exists with the same full name and mobile number.' : '';
+    nextCustomerStep.disabled = result.exists;
+    return !result.exists;
+  } catch (error) {
+    if (version !== identityVersion) return false;
+    message.textContent = 'Could not check customer: ' + error.message + ' Try Next again.';
+    nextCustomerStep.disabled = false;
+    return false;
+  }
+}
+customerForm.addEventListener('input', (event) => {
+  if (!['firstName', 'middleName', 'lastName', 'extensionName', 'contact'].includes(event.target.name)) return;
+  ++identityVersion;
+  clearTimeout(identityTimer);
+  nextCustomerStep.disabled = false;
+  document.getElementById('customerDuplicateMessage').textContent = '';
+  identityTimer = setTimeout(checkCustomerIdentity, 400);
+});
+customerForm.addEventListener('change', (event) => {
+  if (event.target.name === 'extensionName') checkCustomerIdentity();
+});

@@ -9,7 +9,7 @@ let deletingBarangay = false;
 function registryAction(parent, title, iconName, action) {
   const button = document.createElement('button');
   button.type = 'button';
-  button.className = 'btn barangay-action action-' + (iconName === 'trash' ? 'delete' : 'edit');
+  button.className = 'btn barangay-action action-' + 'delete';
   button.title = title;
   button.setAttribute('aria-label', title);
   button.disabled = deletingBarangay;
@@ -52,7 +52,7 @@ function showBarangays() {
     const group = document.createElement('div');
     group.className = 'barangay-actions';
     AdminUI.cell(row, '', 'Actions').appendChild(group);
-    registryAction(group, 'Delete ' + entry.name, 'trash', () => removeRegisteredBarangay(entry));
+    registryAction(group, 'Unregister ' + entry.name, 'box-arrow-right', () => removeRegisteredBarangay(entry));
   });
   AdminUI.empty(body, 5, 'No registered barangays match your search.');
 }
@@ -82,8 +82,8 @@ async function removeRegisteredBarangay(entry) {
   if (deletingBarangay) return;
   if (entry.customers)
     return showNotice(
-      'Barangay in use',
-      'This barangay has customer records and cannot be deleted.',
+      'Cannot unregister barangay',
+      'This service area still has registered customers.',
     );
   deletingBarangay = true;
   document.querySelectorAll('#barangayRows .barangay-action').forEach((button) => {
@@ -92,9 +92,9 @@ async function removeRegisteredBarangay(entry) {
   try {
     if (
       !(await confirmAction(
-        'Delete barangay?',
-        entry.name + ' will be removed from the service registry.',
-        'Delete barangay',
+        'Unregister barangay?',
+        entry.name + ' will be unregistered and removed from service area selections. You can register it again later.',
+        'Unregister barangay',
       ))
     )
       return;
@@ -104,11 +104,11 @@ async function removeRegisteredBarangay(entry) {
     showBarangays();
     await new Promise((resolve) => setTimeout(resolve, 200));
     await showNotice(
-      'Barangay deleted successfully',
+      'Barangay unregistered successfully',
       entry.name + ' was removed from the registry.',
     );
   } catch (error) {
-    await showNotice('Barangay not deleted', error.message);
+    await showNotice('Cannot unregister barangay', error.message);
   } finally {
     deletingBarangay = false;
     document.querySelectorAll('#barangayRows .barangay-action').forEach((button) => {

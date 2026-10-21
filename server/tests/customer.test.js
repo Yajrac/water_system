@@ -23,6 +23,25 @@ const input = {
   contractDate: today(),
 };
 
+test('bulk import approves verified existing consumers while normal applications remain Pending', () => {
+  const body = {
+    ...input,
+    serviceStatus: 'Pending',
+    certificateReceived: false,
+    contractReceived: false,
+  };
+  const imported = validateCustomer({ ...body, account: 'OLD-001' }, { importing: true });
+  assert.equal(imported.serviceStatus, 'Approved');
+  assert.equal(imported.dateApproved, today());
+  assert.equal(imported.certificateReceived, true);
+  assert.equal(imported.contractReceived, true);
+  assert.equal(imported.acknowledgementReceived, true);
+  const normal = validateCustomer(body);
+  assert.equal(normal.serviceStatus, 'Pending');
+  assert.equal(normal.dateApproved, '');
+  assert.equal(normal.certificateReceived, false);
+});
+
 test('customer validation normalizes contact and server-controlled application dates', () => {
   for (const contact of ['09123456789', '9123456789', '639123456789', '+639123456789'])
     assert.equal(validateCustomer({ ...input, contact }).contact, '+639123456789');
@@ -51,6 +70,20 @@ test('customer validation rejects overposting, invalid names, dates, unsafe IDs 
     assert.throws(() => validateCustomer(body), { statusCode: 400 });
   }
   assert.throws(() => customerId('18446744073709551616'), { statusCode: 400 });
+});
+
+test('consumer chosen passwords accept 8 to 128 characters', () => {
+  for (const password of ['password123', 'abcdefgh', 'x'.repeat(128)]) {
+    assert.equal(
+      validateCustomer({ ...input, username: 'ana.reyes', password }).password,
+      password,
+    );
+  }
+  for (const password of ['1234567', 'x'.repeat(129)]) {
+    assert.throws(() => validateCustomer({ ...input, username: 'ana.reyes', password }), {
+      statusCode: 400,
+    });
+  }
 });
 
 test('existing consumer password can be left blank and edited records require revision', () => {

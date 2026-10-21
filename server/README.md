@@ -327,3 +327,36 @@ Barangay names come from the official directory. Barangay editing is removed fro
 The queries share one transaction snapshot. Payment totals are grouped per bill before calculating balances; paid bills and partial payments are counted once. Due dates use the Philippine calendar day, and UTC payment timestamps are converted to Philippine dates for collection groups. Monetary values remain decimal strings in the API. Missing months and areas without billed consumption return zero.
 
 The admin dashboard loads this endpoint after session verification and offers Refresh with loading and retry feedback. It no longer loads sample customers or reads financial records from browser storage. No migration is required.
+
+### Verified existing-consumer import and temporary passwords
+
+Apply `017_add_temporary_consumer_password.sql` before deploying this version. For local
+XAMPP use `npm run db:migrate` from `server`. For the existing Aiven database run
+`node scripts/migrate-aiven.js "C:\Users\user\Downloads\ca.pem"` and enter the Aiven
+host/port/user/password when prompted. This checks existing migration history and
+applies only pending migrations. Do not re-import the SQL backup.
+
+New bulk uploads are for office-verified existing consumers: applications are Approved
+with document checks complete, not Installed or active until installation is verified.
+Each accepted row gets a unique name-based username, an account login, and a submitter
+number whose Argon2 hash is used as the temporary password. The plaintext password is
+not stored in users or exported to Excel. The submitter number remains an office-visible
+identifier, so it is only an initial credential and must be replaced at first login.
+The customer table shows a red Temporary password indicator while the flag is set.
+Rejected rows create no credentials. Normal Add Consumer status/password rules remain
+unchanged. Previously imported customers are not automatically modified or reset.
+
+`POST /api/v1/auth/login` accepts `username` containing a username or consumer account
+number. Ambiguous identifiers fail authentication. Login and `/auth/me` return
+`mustChangePassword`. Flagged accounts can access only `/auth/me` and
+`POST /auth/change-password`, with `{ currentPassword, newPassword }`. The latter verifies
+the current password, rejects reuse, hashes the new value, clears the flag and increments
+the account token version in the same transaction as its audit event. Sign in again after
+changing password; prior access tokens are invalid. Admin password replacements also
+invalidate previous consumer access tokens.
+
+The consumer app now uses the API for login and password changes, with a required
+first-login screen and a profile Change password action. Tokens are held in memory.
+Set `EXPO_PUBLIC_API_URL` to override its default Render API URL; browser-based Expo
+previews also require their exact origin in API `CORS_ORIGINS`. Other consumer app
+screens still use prototype data; their billing/profile data APIs are separate work.

@@ -9,6 +9,32 @@ const formSource = await source('js/customers/customer-form.js');
 const apiSource = await source('js/customers/customer-api.js');
 const csvSource = await source('js/customers/customer-csv.js');
 
+test('mobile typing accepts only 09 or 9 and rejects country code entry', async () => {
+  const context = vm.createContext({});
+  vm.runInContext(await source('js/customers/customer-validation.js'), context);
+  const validation = vm.runInContext('CustomerValidation', context);
+  for (const complete of ['09123456789', '9123456789']) {
+    for (let end = 0; end <= complete.length; end++) {
+      assert.equal(validation.mobileDraft(complete.slice(0, end)), true, complete.slice(0, end));
+    }
+    assert.equal(validation.mobileDraft(complete + '0'), false, complete);
+  }
+  for (const invalid of [
+    '091234567890',
+    '91234567890',
+    '6391234567890',
+    '+6391234567890',
+    '9+123',
+    '63abc',
+    '63',
+    '+63',
+    '639123456789',
+    '+639123456789',
+  ]) {
+    assert.equal(validation.mobileDraft(invalid), false, invalid);
+  }
+});
+
 test('customer and receipt pages load shared dialog helpers before their callers', async () => {
   for (const [page, script] of [
     ['customers.html', 'customers/customers.js'],
@@ -65,7 +91,7 @@ test('Next accepts both mobile formats and checks database barangays rather than
     WaterStore: { barangays: ['Unregistered Barangay'] },
   });
   vm.runInContext(steps.slice(start, end), context);
-  for (const value of ['09123456789', '9123456789', '639123456789', '+639123456789'])
+  for (const value of ['09123456789', '9123456789'])
     assert.equal(context.customerStepError({ name: 'contact', value }), '');
   assert.match(context.customerStepError({ name: 'contact', value: '08123456789' }), /mobile/);
   assert.equal(context.customerStepError({ name: 'barangay', value: 'Registered Barangay' }), '');
@@ -331,11 +357,22 @@ test('customer list renders the server page without slicing it a second time and
     barangay: 'Barangay Agol',
     reading: 0,
     active: true,
+    mustChangePassword: index === 0,
   }));
+  const cells = [];
   const context = vm.createContext({
     document: { getElementById: get, createElement: element },
     createPagination: () => pager,
-    AdminUI: { customer() {}, cell: () => element(), empty() {}, message() {} },
+    AdminUI: {
+      customer() {},
+      cell: () => {
+        const cell = element();
+        cells.push(cell);
+        return cell;
+      },
+      empty() {},
+      message() {},
+    },
     CustomerAPI: {
       loadBarangays: async () => [],
       list: async () => {
@@ -356,6 +393,11 @@ test('customer list renders the server page without slicing it a second time and
   vm.runInContext(await source('js/customers/customers.js'), context);
   await new Promise((resolve) => setImmediate(resolve));
   assert.equal(body.rows.length, 3);
+  const flags = cells
+    .flatMap((cell) => cell.children)
+    .filter((child) => child.className === 'customer-temporary-password');
+  assert.equal(flags.length, 1);
+  assert.equal(flags[0].children[1].textContent, 'Temporary password');
   assert.equal(pager.total, 13);
   assert.equal(get('totalCustomers').textContent, 13);
   failure = true;

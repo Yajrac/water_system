@@ -21,7 +21,22 @@ async function writeApplication(
   actorId,
   existing = null,
   preparedHash = null,
+  imported = false,
 ) {
+  const suffix = randomBytes(6).toString('hex').toUpperCase();
+  const submitterNumber = 'PWSS-' + today().replaceAll('-', '') + '-' + suffix;
+  if (imported) {
+    const stem =
+      [details.firstName, details.lastName]
+        .join('.')
+        .normalize('NFKD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .replace(/[^a-z0-9.]/g, '')
+        .slice(0, 24) || 'consumer';
+    details.username = stem + '.' + suffix.toLowerCase();
+    preparedHash = await hashPassword(submitterNumber);
+  }
   const barangay = await model.lockBarangay(details.barangayId, connection);
   if (
     !barangay ||
@@ -29,6 +44,8 @@ async function writeApplication(
   ) {
     throw new AppError('Select an active registered barangay.', 400);
   }
+  if (!imported && await duplicateCustomer(details, connection, existing?.id))
+    throw new AppError('This customer already exists with the same full name and mobile number.', 409);
   let userId = existing?.userId || null;
   if (userId) {
     const [[user]] = await connection.execute('SELECT role FROM users WHERE id = ? FOR UPDATE', [
@@ -42,10 +59,21 @@ async function writeApplication(
       connection,
       userId,
     );
+    if (preparedHash) {
+      await connection.execute('UPDATE users SET auth_version = auth_version + 1 WHERE id = ?', [
+        userId,
+      ]);
+    }
   } else if (details.username) {
     userId = await model.writeRecord(
       'users',
-      { username: details.username, password_hash: preparedHash, role: 'consumer', is_active: 1 },
+      {
+        username: details.username,
+        password_hash: preparedHash,
+        role: 'consumer',
+        is_active: 1,
+        must_change_password: imported ? 1 : 0,
+      },
       connection,
     );
   }
@@ -64,9 +92,10 @@ async function writeApplication(
       409,
     );
   }
-  const suffix = randomBytes(6).toString('hex').toUpperCase();
   const connectionStatus =
-    existing?.connectionStatus || (details.serviceStatus === 'Installed' ? 'Active' : 'Inactive');
+    details.serviceStatus === 'Installed' && (!existing || existing.serviceStatus !== 'Installed')
+      ? 'Active'
+      : existing?.connectionStatus || 'Inactive';
   const id = await model.writeRecord(
     'customers',
     {
@@ -75,7 +104,7 @@ async function writeApplication(
       ...(!existing
         ? {
             account_number: details.account || 'PWSS-' + today().slice(0, 4) + '-' + suffix,
-            submitter_number: 'PWSS-' + today().replaceAll('-', '') + '-' + suffix,
+            submitter_number: submitterNumber,
           }
         : {}),
       first_name: details.firstName,
@@ -192,8 +221,15 @@ async function transaction(work) {
     return result;
   } catch (error) {
     await connection.rollback();
-    if (error.code === 'ER_DUP_ENTRY')
-      throw new AppError('Username, account reference or meter number is already registered.', 409);
+    if (error.code === 'ER_DUP_ENTRY') {
+      const key = error.sqlMessage || error.message || '';
+      const message = key.includes('uq_users_username')
+        ? 'This username is already registered. Choose another username; an existing login account may remain even after its customer record was removed.'
+        : key.includes('uq_water_meters_number')
+          ? 'This meter number is already registered to another customer.'
+          : 'This account or application reference is already registered.';
+      throw new AppError(message, 409);
+    }
     if (error.code === 'ER_LOCK_DEADLOCK' || error.code === 'ER_LOCK_WAIT_TIMEOUT') {
       throw new AppError('Another request changed these records. Reload and try again.', 409);
     }
@@ -280,7 +316,7 @@ export async function importCustomers(body, actorId) {
     const customers = [];
     for (const details of entries) {
       if (details.barangayName) details.barangayId = areas.ids.get(details.barangayName);
-      customers.push(await writeApplication(connection, details, actorId));
+      customers.push(await writeApplication(connection, details, actorId, null, null, true));
     }
     return {
       count: customers.length,
@@ -330,4 +366,31 @@ export async function changeCustomerStatus(id, body, actorId) {
     }
     return customerView(await model.findCustomer(id, connection));
   });
+}
+
+async function duplicateCustomer(details, connection = pool, excludedId = null) {
+  const [rows] = await connection.execute(
+    `SELECT id FROM customers WHERE first_name = ? AND COALESCE(middle_name, '') = ?
+     AND last_name = ? AND COALESCE(extension_name, '') = ? AND contact_number = ?
+     AND id <> ? LIMIT 1`,
+    [details.firstName, details.middleName || '', details.lastName,
+      details.extensionName || '', details.contact, excludedId || '0'],
+  );
+  return rows.length > 0;
+}
+
+export async function checkCustomerDuplicate(body) {
+  if (!body || typeof body !== 'object') throw new AppError('Provide customer name and mobile number.', 400);
+  const details = {};
+  for (const key of ['firstName', 'middleName', 'lastName', 'extensionName']) {
+    if (typeof (body[key] ?? '') !== 'string' || (body[key] || '').length > 60)
+      throw new AppError('Provide a valid customer name.', 400);
+    details[key] = (body[key] || '').trim();
+  }
+  if (!details.firstName || !details.lastName || typeof body.contact !== 'string')
+    throw new AppError('Provide customer name and mobile number.', 400);
+  details.contact = '+63' + body.contact.replace(/^(\+?63|0)/, '');
+  if (!/^\+639\d{9}$/.test(details.contact)) throw new AppError('Provide a valid mobile number.', 400);
+  if (body.excludeId) customerId(body.excludeId);
+  return { exists: await duplicateCustomer(details, pool, body.excludeId) };
 }

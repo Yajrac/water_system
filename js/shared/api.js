@@ -9,7 +9,7 @@ class AdminApiError extends Error {
 const AdminAPI = {
   tokenKey: 'pwss-admin-access-token',
   getToken() {
-    return sessionStorage.getItem(this.tokenKey);
+    return localStorage.getItem(this.tokenKey) || sessionStorage.getItem(this.tokenKey);
   },
   async request(path, { method = 'GET', body, authenticated = true } = {}) {
     if (location.protocol === 'file:') {
@@ -17,6 +17,15 @@ const AdminAPI = {
     }
     if (!path.startsWith('/') || path.startsWith('//')) {
       throw new Error('API paths must start with a single slash.');
+    }
+    if (authenticated && typeof AdminAuth !== 'undefined' && localStorage.getItem('pwss-admin-refresh-token')) {
+      const current = this.getToken();
+      let renew = !current;
+      try {
+        const part = current.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+        renew = JSON.parse(atob(part)).exp * 1000 <= Date.now() + 60000;
+      } catch { renew = true; }
+      if (renew) await AdminAuth.renewSession();
     }
     const token = authenticated ? this.getToken() : null;
     const headers = { Accept: 'application/json' };

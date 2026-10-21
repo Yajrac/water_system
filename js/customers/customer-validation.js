@@ -1,5 +1,8 @@
 // Explicit rules are checked again on save, independent of HTML input attributes.
 const CustomerValidation = {
+  mobileDraft(value) {
+    return /^(?:|0(?:9\d{0,9})?|9\d{0,9})$/.test(value);
+  },
   workTypes: ['New connection', 'Reconnection', 'Meter replacement', 'Service repair'],
   extensions: ['', 'Jr.', 'Sr.', 'II', 'III', 'IV', 'V'],
   fullName(customer) {
@@ -41,7 +44,7 @@ const CustomerValidation = {
     textNames.forEach((name) => {
       customer[name] = form.elements[name].value.trim();
     });
-    customer.contact = customer.contact.replace(/^(?:\+?63|0)/, '');
+    customer.contact = customer.contact.replace(/^0/, '');
     this.checks.forEach((name) => {
       customer[name] = form.elements[name].checked;
     });
@@ -71,8 +74,8 @@ const CustomerValidation = {
       return 'Complete the required fields marked *.';
     if (!/^[\p{L}\p{M} .,'-]+$/u.test(customer.name) || !/\p{L}/u.test(customer.name))
       return 'Applicant name must contain letters. Numbers and symbols are not allowed.';
-    if (!/^(?:0|\+?63)?9\d{9}$/.test(customer.contact))
-      return 'Enter a valid mobile number starting with 09, 9, 63 or +63, such as 09123456789 or 9123456789.';
+    if (!/^0?9\d{9}$/.test(customer.contact))
+      return 'Enter 11 digits starting with 09 or 10 digits starting with 9.';
     if (!/^Purok [1-7]$/.test(customer.address)) return 'Select Purok 1 to Purok 7.';
     if (
       customer.natureOfWork &&

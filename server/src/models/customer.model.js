@@ -21,7 +21,7 @@ const projection = `
   c.extension_name AS extensionName, c.gender, c.contact_number AS contact,
   c.purok AS address, c.street, c.customer_type AS customerType,
   c.connection_status AS connectionStatus, b.name AS barangay,
-  u.username,
+  u.username, u.must_change_password AS mustChangePassword,
   SHA2(CONCAT_WS('|', u.password_hash, u.role, u.is_active), 256) AS _credentialRevision,
   a.id AS applicationId, a.application_number AS applicationNumber,
   a.nature_of_work AS natureOfWork, a.status AS serviceStatus,
@@ -172,7 +172,7 @@ const writable = {
     'date_installed',
     'is_active',
   ],
-  users: ['username', 'password_hash', 'role', 'is_active'],
+  users: ['username', 'password_hash', 'role', 'is_active', 'must_change_password'],
 };
 export async function writeRecord(table, record, connection, id = null) {
   const columns = Object.keys(record);

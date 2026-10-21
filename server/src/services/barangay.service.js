@@ -45,19 +45,19 @@ export function createBarangayService({
         if (!barangay) throw new AppError('Barangay not found.', 404);
         if (await model.isBarangayInUse(id, connection)) {
           throw new AppError(
-            'This barangay is linked to existing records and cannot be deleted.',
+            'Cannot unregister barangay. This service area is linked to customer or other existing records.',
             409,
           );
         }
         await model.deleteBarangay(id, connection);
-        await recordActivity(connection, actorId, 'barangay.deleted', barangay);
+        await recordActivity(connection, actorId, 'barangay.unregistered', barangay);
         await connection.commit();
         return { id: String(barangay.id) };
       } catch (error) {
         await connection.rollback();
         if (error.code === 'ER_ROW_IS_REFERENCED_2') {
           throw new AppError(
-            'This barangay is linked to existing records and cannot be deleted.',
+            'Cannot unregister barangay. This service area is linked to customer or other existing records.',
             409,
           );
         }

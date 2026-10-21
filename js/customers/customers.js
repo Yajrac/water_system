@@ -10,7 +10,8 @@ function renderCustomerRows(customers) {
   customers.forEach((customer) => {
     const row = body.insertRow();
     const displayName = customer.lastName
-      ? [customer.lastName, customer.extensionName].filter(Boolean).join(' ') + ', ' +
+      ? [customer.lastName, customer.extensionName].filter(Boolean).join(' ') +
+        ', ' +
         [customer.firstName, customer.middleName].filter(Boolean).join(' ')
       : customer.name;
     AdminUI.customer(row, { ...customer, name: displayName });
@@ -24,7 +25,23 @@ function renderCustomerRows(customers) {
       status.textContent = 'Pending';
       status.className = 'customer-status is-pending';
     }
-    AdminUI.cell(row, '', 'Status').appendChild(status);
+    if (customer.serviceStatus === 'Approved' && !customer.active) {
+      status.textContent = 'Approved';
+      status.className = 'customer-status is-registered';
+    }
+    const statusCell = AdminUI.cell(row, '', 'Status');
+    statusCell.appendChild(status);
+    if (customer.mustChangePassword) {
+      const flag = document.createElement('span');
+      flag.className = 'customer-temporary-password';
+      const icon = document.createElement('i');
+      icon.className = 'bi bi-flag-fill';
+      icon.setAttribute('aria-hidden', 'true');
+      const label = document.createElement('span');
+      label.textContent = 'Temporary password';
+      flag.append(icon, label);
+      statusCell.appendChild(flag);
+    }
     const actions = document.createElement('div');
     actions.className = 'customer-row-actions';
     for (const [label, page, icon, className] of [
@@ -249,7 +266,7 @@ document.getElementById('importForm').addEventListener('submit', async (event) =
         ready +
           ' ready · ' +
           preview.rejectedCount +
-          ' rejected. Only ready rows will be saved.' +
+          ' rejected. Only ready rows will be saved. Confirm these are verified existing consumers: applications will be Approved with completed document checks. The submitter number will be the temporary password, requiring a change at first login.' +
           (newAreas.length
             ? ' Registering: ' + newAreas.join(', ') + '.'
             : ' All barangays are already registered.'),

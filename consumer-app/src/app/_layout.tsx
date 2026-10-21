@@ -3,11 +3,13 @@ import { StatusBar } from 'expo-status-bar';
 import { Icon, type IconName } from '@/components/consumer/Icon';
 import { SessionProvider, useSession } from '@/features/session/SessionProvider';
 import LoginScreen from '@/features/session/LoginScreen';
+import ChangePasswordScreen from '@/features/session/ChangePasswordScreen';
 import { colors } from '@/theme/tokens';
 
 function ConsumerNavigation() {
-  const { signedIn } = useSession();
+  const { signedIn, mustChangePassword, changingPassword } = useSession();
   if (!signedIn) return <LoginScreen />;
+  if (mustChangePassword || changingPassword) return <ChangePasswordScreen />;
   return (
     <Tabs
       screenOptions={{

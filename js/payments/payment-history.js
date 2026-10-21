@@ -42,7 +42,17 @@ async function showPayments() {
       ])
         AdminUI.cell(row, value, label);
       const actions = AdminUI.cell(row, '', 'View receipt');
-      AdminUI.button(actions, 'View receipt', () => showReceipt(payment));
+      const view = document.createElement('button');
+      view.type = 'button';
+      view.className = 'btn action-view receipt-icon-button';
+      view.title = 'View receipt';
+      view.setAttribute('aria-label', 'View receipt');
+      const icon = document.createElement('i');
+      icon.className = 'bi bi-eye';
+      icon.setAttribute('aria-hidden', 'true');
+      view.appendChild(icon);
+      view.addEventListener('click', () => showReceipt(payment));
+      actions.appendChild(view);
     }
     AdminUI.empty(body, 7, 'No payments match your filters.');
     document.getElementById('paymentSummary').textContent =

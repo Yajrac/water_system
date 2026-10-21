@@ -179,7 +179,8 @@
     } finally {
       if (version === loadVersion) {
         loading = false;
-        render();
+        if (customers.length && !generating) selectCustomer(customers[0].id);
+        else render();
       }
     }
   }

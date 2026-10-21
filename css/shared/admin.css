@@ -1153,7 +1153,25 @@
 .pager-controls {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
+}
+html body :is(.pager-controls .btn, .step-navigation-button, .customer-step-navigation .btn) {
+  min-height: 30px;
+  min-width: 0;
+  height: auto;
+  padding: 5px 10px;
+  gap: 6px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  line-height: 1.3;
+}
+html body :is(.pager-controls .btn, .step-navigation-button, .customer-step-navigation .btn) :is(i, svg) {
+  width: 14px;
+  height: 14px;
+  font-size: 14px;
+}
+.pager-controls > span {
+  font-size: 0.75rem;
 }
 .pager-controls .btn:disabled {
   opacity: 0.4;
@@ -2570,26 +2588,26 @@ html[data-theme='dark'] body table .btn:is(.action-delete, :has(.bi-trash), :has
   border-color: #a94356;
 }
 
-/* View actions use purple to distinguish them from blue edit actions. */
+/* View actions use teal to distinguish them from blue edit actions. */
 html body table .btn:is(.action-view, .action-receipt, :has(> .bi-eye)) {
-  color: #7c3aed;
-  background: #f3eaff;
-  border-color: #d9bfff;
+  color: #0f766e;
+  background: #e6f7f5;
+  border-color: #99d8d1;
 }
 html body table .btn:is(.action-view, .action-receipt, :has(> .bi-eye)):hover {
-  color: #6d28d9;
-  background: #ead9ff;
-  border-color: #b58aec;
+  color: #115e59;
+  background: #ccfbf1;
+  border-color: #5ebdb1;
 }
 html[data-theme='dark'] body table .btn:is(.action-view, .action-receipt, :has(> .bi-eye)) {
-  color: #d2afff;
-  background: #302046;
-  border-color: #8055ad;
+  color: #99f6e4;
+  background: #123b39;
+  border-color: #317b74;
 }
 html[data-theme='dark'] body table .btn:is(.action-view, .action-receipt, :has(> .bi-eye)):hover {
-  color: #e6d3ff;
-  background: #432b60;
-  border-color: #b58aec;
+  color: #ccfbf1;
+  background: #19504b;
+  border-color: #5ebdb1;
 }
 
 /* Shared color for pagination and form navigation. */

@@ -15,7 +15,8 @@ import { useSession } from './SessionProvider';
 import { colors } from '@/theme/tokens';
 
 export default function LoginScreen() {
-  const { signIn } = useSession();
+  const { signIn, notice } = useSession();
+  const [busy, setBusy] = useState(false);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [visible, setVisible] = useState(false);
@@ -33,16 +34,18 @@ export default function LoginScreen() {
             <Text style={styles.title}>Your water account, all in one place.</Text>
             <Text style={text.muted}>View your bills, track consumption and stay connected.</Text>
             <Input
-              label="Username"
+              label="Username or account number"
               value={username}
               onChangeText={setUsername}
               autoCapitalize="none"
               autoCorrect={false}
-              placeholder="Enter your username"
+              placeholder="Enter username or account number"
+              editable={!busy}
             />
             <Input
               label="Password"
               value={password}
+              editable={!busy}
               onChangeText={setPassword}
               secureTextEntry={!visible}
               placeholder="Enter your password"
@@ -53,15 +56,34 @@ export default function LoginScreen() {
                 active: visible,
               }}
             />
+            {notice ? (
+              <Text accessibilityRole="alert" style={{ color: '#187246' }}>
+                {notice}
+              </Text>
+            ) : null}
             {error ? (
               <Text accessibilityRole="alert" style={{ color: '#b63a49' }}>
                 {error}
               </Text>
             ) : null}
             <Button
-              label="Sign in"
-              onPress={() => {
-                if (!signIn(username, password)) setError('Check your username and password.');
+              label={busy ? 'Signing in...' : 'Sign in'}
+              disabled={busy || !username.trim() || !password}
+              onPress={async () => {
+                if (busy) return;
+                setBusy(true);
+                setError('');
+                try {
+                  await signIn(username, password);
+                } catch (failure) {
+                  setError(
+                    failure instanceof Error
+                      ? failure.message
+                      : 'Cannot sign in. Please try again.',
+                  );
+                } finally {
+                  setBusy(false);
+                }
               }}
             />
           </View>

@@ -26,6 +26,7 @@ export function customerView(row) {
     'acknowledgementReceived',
     'hasBills',
     'hasMeterEntries',
+    'mustChangePassword',
   ]) {
     customer[key] = Number(row[key]) === 1;
   }

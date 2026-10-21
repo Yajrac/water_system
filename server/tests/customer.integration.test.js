@@ -116,8 +116,26 @@ test(
       const added = await request('/customers', 'POST', body);
       assert.equal(added.status, 201, JSON.stringify(added));
       const customer = added.data;
+      for (const contact of ['09123456789', '9123456789', '+639123456789']) {
+        const checked = await request('/customers/check-duplicate', 'POST', { ...body, contact });
+        assert.equal(checked.status, 200);
+        assert.equal(checked.data.exists, true);
+      }
+      assert.equal((await request('/customers/check-duplicate', 'POST', {
+        ...body, excludeId: customer.id,
+      })).data.exists, false);
+      assert.equal((await request('/customers/check-duplicate', 'POST', {
+        ...body, contact: '09999999999',
+      })).data.exists, false);
+      const duplicate = await request('/customers', 'POST', {
+        ...body, username: 'different.username', meterNumber: 'DIFFERENT-METER',
+      });
+      assert.equal(duplicate.status, 409);
+      assert.match(duplicate.message, /customer already exists/i);
+
       assert.equal(customer.reading, 400);
       assert.equal(customer.active, true);
+      assert.equal(customer.mustChangePassword, false);
       assert.equal(customer.password, undefined);
       assert.equal(customer.password_hash, undefined);
       assert.equal(customer._credentialRevision, undefined);
@@ -183,11 +201,102 @@ test(
       );
       const [[afterFailure]] = await control.query('SELECT COUNT(*) AS total FROM customers');
       assert.equal(Number(afterFailure.total), 1);
+      const [[usersAfterFailure]] = await control.query('SELECT COUNT(*) AS total FROM users');
+      assert.equal(Number(usersAfterFailure.total), 2);
       assert.equal(
         (await request('/customers/import', 'POST', { customers: [importRow] })).status,
         201,
       );
-      assert.equal((await request('/customers?status=pending')).data.pagination.total, 1);
+      assert.equal((await request('/customers?status=pending')).data.pagination.total, 0);
+      const imported = (await request('/customers?search=LEGACY-001')).data.customers[0];
+      assert.equal(imported.serviceStatus, 'Approved');
+      assert.equal(imported.active, false);
+      assert.equal(imported.mustChangePassword, true);
+      assert.equal(imported.certificateReceived, true);
+      assert.equal(imported.contractReceived, true);
+      assert.equal(imported.acknowledgementReceived, true);
+      assert.ok(imported.username);
+      const [[importUser]] = await control.execute('SELECT password_hash FROM users WHERE id = ?', [
+        imported.userId,
+      ]);
+      assert.notEqual(importUser.password_hash, imported.submitterNumber);
+      assert.equal(await verifyPassword(importUser.password_hash, imported.submitterNumber), true);
+      const firstLogin = await request('/auth/login', 'POST', {
+        username: imported.account,
+        password: imported.submitterNumber,
+      });
+      assert.equal(firstLogin.status, 200, JSON.stringify(firstLogin));
+      assert.equal(firstLogin.data.user.mustChangePassword, true);
+      const temporaryToken = firstLogin.data.accessToken;
+      assert.equal(
+        (await request('/auth/me', 'GET', undefined, temporaryToken)).data.user.mustChangePassword,
+        true,
+      );
+      const restricted = await request('/customers', 'GET', undefined, temporaryToken);
+      assert.equal(restricted.status, 403);
+      assert.match(restricted.message, /temporary password/);
+      assert.equal(
+        (
+          await request(
+            '/auth/change-password',
+            'POST',
+            { currentPassword: imported.submitterNumber, newPassword: imported.submitterNumber },
+            temporaryToken,
+          )
+        ).status,
+        400,
+      );
+      assert.equal(
+        (
+          await request(
+            '/auth/change-password',
+            'POST',
+            { currentPassword: 'wrong-password', newPassword: 'password123' },
+            temporaryToken,
+          )
+        ).status,
+        400,
+      );
+      const changeBody = { currentPassword: imported.submitterNumber, newPassword: 'password123' };
+      await control.query(
+        "CREATE TRIGGER fail_password_audit BEFORE INSERT ON activity_logs FOR EACH ROW BEGIN IF NEW.action = 'consumer.password_changed' THEN SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'injected failure'; END IF; END",
+      );
+      assert.equal(
+        (await request('/auth/change-password', 'POST', changeBody, temporaryToken)).status,
+        500,
+      );
+      assert.equal(
+        (await request('/auth/me', 'GET', undefined, temporaryToken)).data.user.mustChangePassword,
+        true,
+      );
+      assert.equal(
+        (await request('/customers/' + imported.id)).data.customer.mustChangePassword,
+        true,
+      );
+      await control.query('DROP TRIGGER fail_password_audit');
+      assert.equal(
+        (await request('/auth/change-password', 'POST', changeBody, temporaryToken)).status,
+        200,
+      );
+      assert.equal((await request('/auth/me', 'GET', undefined, temporaryToken)).status, 401);
+      const nextLogin = await request('/auth/login', 'POST', {
+        username: imported.username,
+        password: 'password123',
+      });
+      assert.equal(nextLogin.status, 200, JSON.stringify(nextLogin));
+      assert.equal(nextLogin.data.user.mustChangePassword, false);
+      assert.equal(
+        (await request('/customers/' + imported.id)).data.customer.mustChangePassword,
+        false,
+      );
+      const [[changedUser]] = await control.execute(
+        'SELECT password_hash FROM users WHERE id = ?',
+        [imported.userId],
+      );
+      assert.equal(
+        await verifyPassword(changedUser.password_hash, imported.submitterNumber),
+        false,
+      );
       assert.equal(Number((await request('/barangays')).data[0].customer_count), 2);
       // Save through the actual meter API, then verify persisted readings and conflicts.
       const activated = await request('/customers/' + customer.id + '/status', 'PATCH', {
@@ -204,7 +313,7 @@ test(
         consumption: '100',
       };
       assert.equal(
-        (await request('/meter-entries', 'PUT', entryBody, login.data.accessToken)).status,
+        (await request('/meter-entries', 'PUT', entryBody, nextLogin.data.accessToken)).status,
         403,
       );
       const meterSaved = await request('/meter-entries', 'PUT', entryBody);
@@ -301,7 +410,10 @@ test(
         method: 'Cash',
         requestKey: randomBytes(16).toString('hex'),
       };
-      assert.equal((await request('/payments', 'POST', pay, login.data.accessToken)).status, 403);
+      assert.equal(
+        (await request('/payments', 'POST', pay, nextLogin.data.accessToken)).status,
+        403,
+      );
       assert.equal((await request('/payments', 'POST', { ...pay, amount: '14.01' })).status, 400);
       await control.query(`CREATE TRIGGER fail_payment_audit BEFORE INSERT ON activity_logs FOR EACH ROW
         BEGIN IF NEW.action = 'payment.recorded' THEN SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Injected payment audit failure'; END IF; END`);

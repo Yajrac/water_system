@@ -171,7 +171,7 @@
           <p id="pageMessage" role="status" tabindex="-1"></p>
           <section class="panel customer-page-form">
             <div class="admin-body">
-              <form id="customerForm">
+              <form id="customerForm" novalidate>
                 <div class="customer-step-header">
                   <ol
                     class="customer-step-track"
@@ -248,11 +248,11 @@
                           name="contact"
                           type="tel"
                           required
-                          maxlength="13"
+                          maxlength="11"
                           inputmode="numeric"
-                          pattern="(0|\+?63)?9[0-9]{9}"
+                          pattern="0?9[0-9]{9}"
                           autocomplete="tel-national"
-                          aria-label="Philippine mobile number starting with 09, 9, 63 or +63"
+                          aria-label="Philippine mobile number starting with 09 or 9"
                           placeholder="9123456789" /></span
                       ></label
                     ><label
@@ -334,7 +334,12 @@
                       >Approved by<input name="approvedBy" type="text" maxlength="120" /></label
                     ><label>Date installed<input name="dateInstalled" type="date" /></label
                     ><label
-                      >Meter number<input name="meterNumber" type="text" maxlength="120" /></label
+                      >Meter number<span class="meter-number-control">
+                        <input name="meterNumber" type="text" maxlength="120" />
+                        <button type="button" class="btn" id="generateMeterNumber">
+                          <i class="bi bi-magic" aria-hidden="true"></i>Generate
+                        </button>
+                      </span></label
                     ><label
                       >Initial / current meter reading (m³) <span class="required-marker">*</span
                       ><input
@@ -443,7 +448,7 @@
                         type="text"
                         minlength="3"
                         maxlength="40"
-                        pattern="[A-Za-z0-9._-]{3,40}"
+                        pattern="[A-Za-z0-9._\-]{3,40}"
                         autocomplete="off"
                         spellcheck="false"
                       />
@@ -452,7 +457,7 @@
                     <div class="customer-password-field">
                       <label for="customerPassword">Password</label
                       ><small
-                        >12?128 characters. Leave blank when editing to keep the current
+                        >8&ndash;128 characters. Leave blank when editing to keep the current
                         password.</small
                       >
                       <div class="customer-password-control">
@@ -460,7 +465,7 @@
                           id="customerPassword"
                           type="password"
                           autocomplete="new-password"
-                          minlength="12"
+                          minlength="8"
                           maxlength="128"
                         />
                         <button
@@ -485,6 +490,7 @@
                     </div>
                   </div>
                 </fieldset>
+                <p id="customerDuplicateMessage" role="status" style="color: #c62828;"></p>
                 <div class="customer-step-navigation">
                   <button
                     type="button"

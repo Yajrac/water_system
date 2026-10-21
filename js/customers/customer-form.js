@@ -5,6 +5,18 @@ customerForm.elements.barangay.replaceChildren(new Option('Select barangay', '')
 customerForm.inert = true;
 const registerCustomerButton = document.getElementById('registerCustomer');
 const printApplicationButton = document.getElementById('printApplication');
+document.getElementById('generateMeterNumber').addEventListener('click', async () => {
+  const field = customerForm.elements.meterNumber;
+  if (field.value.trim() && !(await confirmAction(
+    'Replace meter number?',
+    'Generate a new suggested meter number to replace the current value?',
+    'Generate number',
+  ))) return;
+  field.value = 'MTR-' + crypto.randomUUID().replaceAll('-', '').slice(0, 12).toUpperCase();
+  field.setCustomValidity('');
+  field.removeAttribute('aria-invalid');
+  updateRegistrationButtons();
+});
 let editingCustomerId = null;
 let savingCustomer = false;
 let approvalDateEdited = false;
@@ -55,7 +67,7 @@ function generateCustomerCredentials() {
     .replace(/\s+/g, '.')
     .slice(0, 32);
   const stem = base.length >= 3 ? base : 'customer';
-  let username = stem;
+  let username = stem + '.' + credentialSeed.slice(0, 4).toLowerCase();
   let suffix = 2;
   while (
     customerRecords.customers.some(
@@ -64,7 +76,7 @@ function generateCustomerCredentials() {
         (item.username || '').toLowerCase() === username.toLowerCase(),
     )
   ) {
-    username = stem + '.' + suffix++;
+    username = stem + '.' + credentialSeed.slice(0, 4).toLowerCase() + suffix++;
   }
   if (!usernameEdited) customerForm.elements.username.value = existing?.username || username;
   // Existing passwords stay unchanged unless staff explicitly enter a replacement.
@@ -72,10 +84,7 @@ function generateCustomerCredentials() {
     passwordPreview.value = '';
     return;
   }
-  const firstName = base.split('.')[0] || 'Customer';
-  if (!passwordEdited)
-    passwordPreview.value =
-      firstName.charAt(0).toUpperCase() + firstName.slice(1) + '@PWSS' + credentialSeed;
+  if (!passwordEdited) passwordPreview.value = credentialSeed;
 }
 const applicantCharacters = /^[\p{L}\p{M} .,'-]*$/u;
 function syncApplicantName() {
@@ -140,22 +149,28 @@ customerForm.querySelectorAll('label').forEach((label) => {
   }
 });
 contactField.addEventListener('beforeinput', (event) => {
-  if (event.data && /[^+\d]/.test(event.data)) event.preventDefault();
+  if (!event.data) return;
+  const start = contactField.selectionStart ?? contactField.value.length;
+  const end = contactField.selectionEnd ?? start;
+  const next = contactField.value.slice(0, start) + event.data + contactField.value.slice(end);
+  if (!CustomerValidation.mobileDraft(next)) event.preventDefault();
 });
 contactField.addEventListener('input', () => {
-  if (/^\+?\d{0,12}$/.test(contactField.value)) lastContactValue = contactField.value;
+  if (CustomerValidation.mobileDraft(contactField.value)) lastContactValue = contactField.value;
   else contactField.value = lastContactValue;
+  contactField.maxLength = contactField.value.startsWith('9') ? 10 : 11;
 });
 contactField.addEventListener('paste', (event) => {
   event.preventDefault();
   const raw = event.clipboardData.getData('text').trim();
-  const value = raw.replace(/^(\+?63|0)/, '');
-  if (!/^9\d{9}$/.test(value))
+  const value = raw;
+  if (!/^0?9\d{9}$/.test(value))
     return AdminUI.message(
-      'Paste a valid Philippine mobile number, such as 09123456789 or +639123456789.',
+      'Paste 11 digits starting with 09 or 10 digits starting with 9.',
     );
   contactField.value = value;
   lastContactValue = value;
+  contactField.maxLength = value.startsWith('9') ? 10 : 11;
 });
 
 function openCustomer(customer) {
@@ -164,7 +179,14 @@ function openCustomer(customer) {
   approvalDateEdited = false;
   usernameEdited = false;
   passwordEdited = false;
-  credentialSeed = crypto.randomUUID().replaceAll('-', '');
+  // Twelve random characters; encode UUID randomness without customer-name prefixes.
+  const randomHex = crypto.randomUUID().replaceAll('-', '')
+    .split('').filter((_, index) => index !== 12 && index !== 16).join('');
+  const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789';
+  credentialSeed = Array.from({ length: 12 }, (_, index) => {
+    const chunk = Number.parseInt(randomHex.slice(index * 2, index * 2 + 2), 16);
+    return alphabet[chunk % alphabet.length];
+  }).join('');
   document.getElementById('submitterNumber').textContent =
     customer?.submitterNumber || 'Assigned on save';
   passwordPreview.value = '';
@@ -195,6 +217,7 @@ function openCustomer(customer) {
     customerForm.elements.contact.value = (customer.contact || '').replace(/^(\+?63|0)/, '');
   }
   lastContactValue = contactField.value;
+  contactField.maxLength = contactField.value.startsWith('9') ? 10 : 11;
   if (customer && !customer.firstName && !customer.lastName) {
     // Legacy records keep all name words; staff can adjust compound surnames when editing.
     const parts = customer.name.trim().split(/\s+/);
@@ -255,15 +278,34 @@ function updateRegistrationButtons() {
   registerCustomerButton.textContent = alreadyRegistered
     ? 'Save registered customer'
     : 'Register customer';
-  registerCustomerButton.disabled = customerFormLoading || savingCustomer || !registrationReady();
+  registerCustomerButton.disabled = customerFormLoading || savingCustomer;
 }
 
 customerForm.addEventListener('submit', async (event) => {
   event.preventDefault();
   if (savingCustomer || customerFormLoading) return;
-  if (!customerForm.checkValidity()) return customerForm.reportValidity();
-  if (!registrationReady())
-    return AdminUI.message('Complete the required verification before registering this customer.');
+  const invalidField = Array.from(customerForm.elements).find(
+    (field) => field.willValidate && !field.validity.valid,
+  );
+  if (invalidField) {
+    const section = invalidField.closest('.customer-section');
+    const index = customerSteps.indexOf(section);
+    if (index >= 0) showCustomerStep(index, false);
+    AdminUI.message(invalidField.validationMessage || 'Check the highlighted field.');
+    invalidField.focus();
+    invalidField.reportValidity();
+    return;
+  }
+  if (!registrationReady()) {
+    const fields = customerForm.elements;
+    const missing = !fields.approvedBy.value.trim()
+      ? 'Enter the approver name in the Installation step.'
+      : fields.serviceStatus.value === 'Pending'
+        ? 'Select Approved or Installed in the Installation step.'
+        : 'Complete the approval date and, for Installed service, the installation date and meter number.';
+    showCustomerStep(1, false);
+    return AdminUI.message(missing);
+  }
   generateCustomerCredentials();
   const input = CustomerValidation.read(customerForm);
   const validationError = CustomerValidation.error(
@@ -274,9 +316,9 @@ customerForm.addEventListener('submit', async (event) => {
   if (validationError) return AdminUI.message(validationError);
   if (
     passwordPreview.value &&
-    (passwordPreview.value.length < 12 || passwordPreview.value.length > 128)
+    (passwordPreview.value.length < 8 || passwordPreview.value.length > 128)
   )
-    return AdminUI.message('Password must contain 12–128 characters.');
+    return AdminUI.message('Password must contain 8–128 characters.');
   if (
     input.username &&
     customerRecords.customers.some(
@@ -384,6 +426,9 @@ document.getElementById('cancelCustomer').addEventListener('click', () => {
   location.href = 'customers.html';
 });
 const requestedCustomerId = new URLSearchParams(location.search).get('id');
+if (typeof window !== 'undefined') window.addEventListener('unhandledrejection', (event) => {
+  AdminUI.message('Customer operation failed: ' + (event.reason?.message || 'Please reload and try again.'));
+});
 async function loadCustomerForm() {
   customerFormLoading = true;
   customerForm.inert = true;

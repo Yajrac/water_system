@@ -1,10 +1,57 @@
 /* Compact screen tables; printed reports and receipts keep their own spacing. */
 @media screen {
+  html body .generated-bills-filters label {
+    font-size: 0.78rem;
+    gap: 5px;
+  }
+  html body .generated-bills-filters :is(#billSearch, #billCycle, #billDueDate, #billStatus) {
+    min-height: 36px;
+    height: 36px;
+    padding: 6px 10px;
+    font-size: 0.8rem;
+    border-radius: 6px;
+  }
+  html body .generated-bills-filters .date-control {
+    min-height: 36px;
+    height: 36px;
+    border-radius: 6px;
+  }
+  html body .generated-bills-filters .date-picker-button {
+    min-height: 34px;
+    height: 34px;
+    width: 36px;
+    padding: 6px;
+  }
+  html body .generated-bills-filters .date-control #billDueDate {
+    height: 34px;
+    min-height: 34px;
+    border-radius: 0;
+  }
+  html body .generated-bills-filters small {
+    font-size: 0.7rem;
+    line-height: 1.4;
+  }
   .main-content :is(table, table[class]) :is(th, td) {
     padding: 8px 14px;
     font-size: 0.84rem;
     line-height: 1.4;
     vertical-align: middle;
+  }
+  .main-content :is(table, table[class]) th {
+    padding: 7px 9px;
+    font-size: 0.72rem;
+    line-height: 1.3;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+    overflow-wrap: normal;
+    word-break: normal;
+  }
+  .main-content table.generated-bills-table {
+    table-layout: auto;
+  }
+  .main-content table.generated-bills-table td {
+    padding: 7px 9px;
+    font-size: 0.8rem;
   }
 }
 
@@ -18,11 +65,18 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 32px;
-    height: 32px;
-    min-height: 32px;
+    width: 28px;
+    min-width: 28px;
+    height: 28px;
+    min-height: 28px;
     box-sizing: border-box;
-    padding: 5px;
+    padding: 3px;
+    border-radius: 6px;
+    font-size: 14px;
+  }
+  .main-content table .btn:is(.action-edit, .action-view, .action-delete, .action-receipt, .barangay-action, .receipt-icon-button, .bill-view-button) i {
+    font-size: 14px;
+    line-height: 1;
   }
 }
 

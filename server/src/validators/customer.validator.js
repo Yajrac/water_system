@@ -123,7 +123,7 @@ export function validateCustomer(body, { existing = null, importing = false } = 
     if (!allowed.includes(value)) throw new AppError('Select a valid ' + key + '.', 400);
     result[key] = value;
   }
-  if (importing) result.serviceStatus = 'Pending';
+  if (importing) result.serviceStatus = 'Approved';
   if (importing && body.barangayName !== undefined) {
     if (body.barangayId !== undefined)
       throw new AppError('Provide either barangay ID or name for each import row.', 400);
@@ -159,7 +159,7 @@ export function validateCustomer(body, { existing = null, importing = false } = 
   for (const key of checks) {
     if (body[key] !== undefined && typeof body[key] !== 'boolean')
       throw new AppError('Invalid document checklist.', 400);
-    result[key] = Boolean(body[key]);
+    result[key] = importing ? true : Boolean(body[key]);
   }
   if (result.dateInstalled && result.dateInstalled < (result.dateApproved || result.dateApplied)) {
     throw new AppError('Installation date cannot precede application or approval.', 400);
@@ -179,9 +179,9 @@ export function validateCustomer(body, { existing = null, importing = false } = 
   result.password = body.password ?? '';
   if (
     typeof result.password !== 'string' ||
-    (result.password && (result.password.length < 12 || result.password.length > 128))
+    (result.password && (result.password.length < 8 || result.password.length > 128))
   ) {
-    throw new AppError('Consumer password must contain 12–128 characters.', 400);
+    throw new AppError('Consumer password must contain 8–128 characters.', 400);
   }
   if (result.username && !/^[A-Za-z0-9._-]{3,40}$/.test(result.username)) {
     throw new AppError(

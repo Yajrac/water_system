@@ -29,3 +29,8 @@ export async function status(req, res) {
     data: await service.changeCustomerStatus(req.params.id, req.body, req.user.id),
   });
 }
+
+export async function duplicate(req, res) {
+  res.set('Cache-Control', 'no-store');
+  res.json({ success: true, data: await service.checkCustomerDuplicate(req.body) });
+}

@@ -35,7 +35,7 @@ const BarangayRegistry = {
     const entry = registry.find((item) => item.code === code);
     if (!entry) throw new Error('This registry entry no longer exists.');
     if (this.customerCount(records, entry.name))
-      throw new Error('This barangay has customer records and cannot be deleted.');
+      throw new Error('Cannot unregister barangay. This service area still has registered customers.');
     records.barangays = registry.filter((item) => item.code !== code);
   },
 };

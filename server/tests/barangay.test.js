@@ -142,7 +142,7 @@ test('delete commits with its audit event; missing or linked rows are protected'
     'connect',
     'begin',
     'delete',
-    'barangay.deleted',
+    'barangay.unregistered',
     'commit',
     'release',
   ]);

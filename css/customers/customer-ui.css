@@ -1073,6 +1073,20 @@
   }
 }
 
+.meter-number-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.meter-number-control input {
+  flex: 1;
+  min-width: 0;
+}
+.meter-number-control .btn {
+  flex-shrink: 0;
+  padding: 6px 10px;
+  font-size: 0.75rem;
+}
 .customer-step-navigation .btn {
   display: inline-flex;
   align-items: center;
@@ -1177,6 +1191,15 @@
   height: 19px;
   flex-shrink: 0;
   color: var(--color-primary);
+}
+.customer-temporary-password {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 5px;
+  color: #c62828;
+  font-size: 0.75rem;
+  font-weight: 600;
 }
 .application-date-display time {
   color: var(--color-ink);

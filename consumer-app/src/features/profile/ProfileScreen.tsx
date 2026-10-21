@@ -7,7 +7,7 @@ import { useState } from 'react';
 import { colors } from '@/theme/tokens';
 
 export default function ProfileScreen() {
-  const { signOut } = useSession();
+  const { signOut, openChangePassword } = useSession();
   const [confirm, setConfirm] = useState(false);
   return (
     <Screen title="My profile">
@@ -26,6 +26,7 @@ export default function ProfileScreen() {
         <Detail label="Meter number" value={customer.meter} />
       </Card>
       <Text style={text.muted}>Contact the PWSS office to update your registered details.</Text>
+      <Button label="Change password" onPress={openChangePassword} />
       <Button label="Log out" secondary onPress={() => setConfirm(true)} />
       <Sheet title="Log out?" visible={confirm} onClose={() => setConfirm(false)}>
         <Text style={text.body}>Are you sure you want to log out of your account?</Text>

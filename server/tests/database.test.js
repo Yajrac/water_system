@@ -10,7 +10,8 @@ import { initialTables, inspectBaseline } from '../src/database/schema.js';
 import { runDatabaseCommand } from '../src/database/runner.js';
 import { databaseOptions } from '../src/config/database.js';
 
-const files = await readMigrations();
+const allFiles = await readMigrations();
+const files = allFiles.slice(0, 16);
 const tables = initialTables(files);
 
 // Metadata double reproducing the MariaDB result shapes used by baseline.
@@ -315,4 +316,10 @@ test('configuration rejects missing variables and invalid ports', async () => {
   const options = await databaseOptions({ DB_HOST: 'localhost', DB_NAME: 'test', DB_USER: 'test' });
   assert.equal(options.port, 3306);
   assert.equal(options.multipleStatements, undefined);
+});
+
+test('temporary-password migration follows the original baseline', () => {
+  assert.equal(allFiles[16].name, '017_add_temporary_consumer_password.sql');
+  assert.match(allFiles[16].sql, /ADD COLUMN must_change_password/);
+  assert.match(allFiles[16].sql, /ADD COLUMN auth_version/);
 });

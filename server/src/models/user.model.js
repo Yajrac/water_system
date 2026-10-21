@@ -1,6 +1,6 @@
 import { pool } from '../database/pool.js';
 
-export async function findUserByUsername(username) {
+export async function findUserByLogin(username) {
   const [rows] = await pool.execute(
     `
       SELECT
@@ -8,14 +8,27 @@ export async function findUserByUsername(username) {
         username,
         password_hash,
         role,
-        is_active
+        is_active,
+        must_change_password,
+        auth_version
       FROM users
-      WHERE username = ?
-      LIMIT 1
+      WHERE username = ? OR (role = 'consumer' AND id IN (
+        SELECT user_id FROM customers WHERE account_number = ? AND user_id IS NOT NULL
+      ))
+      LIMIT 2
     `,
-    [username],
+    [username, username],
   );
 
+  // Ambiguous identifiers never authenticate an unintended account.
+  return rows.length === 1 ? rows[0] : null;
+}
+
+export async function findUserByUsername(username) {
+  const [rows] = await pool.execute(
+    'SELECT id, username, role FROM users WHERE username = ? LIMIT 1',
+    [username],
+  );
   return rows[0] || null;
 }
 
@@ -55,7 +68,9 @@ export async function findUserById(id) {
         id,
         username,
         role,
-        is_active
+        is_active,
+        must_change_password,
+        auth_version
       FROM users
       WHERE id = ?
       LIMIT 1

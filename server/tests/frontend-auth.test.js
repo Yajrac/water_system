@@ -17,7 +17,7 @@ test('API config uses Render and allows switching local preview back to the loca
     [true, 'water.example.com', 'https://water-system-1.onrender.com/api/v1'],
   ]) {
     const context = vm.createContext({ location: { hostname } });
-    vm.runInContext(sources[0].replace('const useLocalAdminApi = false;', 'const useLocalAdminApi = ' + local + ';'), context);
+    vm.runInContext(sources[0].replace(/const useLocalAdminApi = (?:true|false);/, 'const useLocalAdminApi = ' + local + ';'), context);
     assert.equal(vm.runInContext('AdminApiConfig.baseUrl', context), expected);
   }
 });
@@ -36,6 +36,11 @@ function browser({ page = 'login.html', search = '', stored = {}, respond } = {}
       pathname: '/html/' + page,
       search,
       replace: (value) => redirects.push(value),
+    },
+    localStorage: {
+      getItem: (key) => storage.get(key) || null,
+      setItem: (key, value) => storage.set(key, value),
+      removeItem: (key) => storage.delete(key),
     },
     sessionStorage: {
       getItem: (key) => storage.get(key) || null,
@@ -225,4 +230,25 @@ test('every auth-protected HTML page loads config and API helper before authenti
     checked++;
   }
   assert.ok(checked >= 18);
+});
+
+
+test('saved admin session renews on reload and before expiry without redirecting', async () => {
+  const app = browser({
+    page: 'reports.html',
+    stored: { [key]: token, 'pwss-admin-refresh-token': 'session-credential' },
+    respond: (url) => ({ body: { success: true, data: url.endsWith('/auth/refresh')
+      ? { user, accessToken: token, refreshToken: 'session-credential' } : { user } } }),
+  });
+  await app.auth.ready;
+  assert.equal(app.auth.user.role, 'admin');
+  assert.equal(app.redirects.length, 0);
+  assert.ok(app.requests.some(({ url }) => url.endsWith('/auth/refresh')));
+  const expiry = [...app.timers.values()][0];
+  await expiry.callback();
+  assert.equal(app.storage.get(key), token);
+  assert.equal(app.redirects.length, 0);
+  await app.auth.logout();
+  assert.equal(app.storage.has('pwss-admin-refresh-token'), false);
+  assert.ok(app.requests.some(({ url }) => url.endsWith('/auth/logout')));
 });

@@ -7,6 +7,7 @@ const router = Router();
 router.use(authenticate, requireRole('admin'));
 router.get('/', controller.list);
 router.post('/', controller.create);
+router.post('/check-duplicate', controller.duplicate);
 router.post('/import', controller.importRecords);
 router.post('/import/preview', controller.previewImport);
 router.get('/:id', controller.profile);
