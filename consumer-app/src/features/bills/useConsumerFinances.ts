@@ -70,7 +70,6 @@ export function useConsumerFinances(billsPage = 1, paymentsPage = 1) {
       if (current === version.current) setData(result);
     } catch (failure) {
       if (current === version.current) {
-        setData(null);
         setError(failure instanceof Error ? failure.message : 'Could not load account records.');
       }
     } finally {

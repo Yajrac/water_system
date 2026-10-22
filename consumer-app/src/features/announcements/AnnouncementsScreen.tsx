@@ -1,3 +1,4 @@
+import { LoadingCards, RefreshControl } from '@/components/consumer/LoadingState';
 import { useState, useCallback } from 'react';
 import { useFocusEffect } from 'expo-router';
 import { Text, Pressable } from 'react-native';
@@ -24,11 +25,8 @@ export default function AnnouncementsScreen() {
   }
   return (
     <Screen title="Notifications">
-      <Button
-        label={busy ? 'Refreshing...' : 'Refresh notifications'}
-        disabled={busy}
-        onPress={() => void refresh()}
-      />
+      <RefreshControl busy={busy} onRefresh={() => void refresh()} />
+      {busy && !items.length && <LoadingCards />}
       {!!error && <Text style={text.muted}>{error}</Text>}
       {!busy && !error && !items.length && <Text style={text.muted}>No notifications yet.</Text>}
       {items.map((item) => (

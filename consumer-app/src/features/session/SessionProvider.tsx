@@ -1,11 +1,16 @@
-import { createContext, useContext, useRef, useState, type PropsWithChildren } from 'react';
+import { createContext, useContext, useRef, useState, useEffect, useCallback, type PropsWithChildren } from 'react';
 
-import { consumerRequest } from './api';
+import { ConsumerApiError, consumerRequest, setSessionResolver } from './api';
+import { readSession, saveSession } from './session-storage';
+import { AppState } from 'react-native';
 
 type ConsumerUser = { id: string; username: string; role: string; mustChangePassword: boolean };
-type LoginResult = { user: ConsumerUser; accessToken: string };
+type LoginResult = { user: ConsumerUser; accessToken: string; refreshToken: string };
 
 type Session = {
+  restoring: boolean;
+  restoreError: string;
+  retryRestore: () => void;
   signedIn: boolean;
   accessToken: string | null;
   signIn: (username: string, password: string) => Promise<void>;
@@ -21,29 +26,98 @@ type Session = {
 const SessionContext = createContext<Session | null>(null);
 
 export function SessionProvider({ children }: PropsWithChildren) {
-  // Tokens remain in memory only; passwords are never persisted.
+  // Only the renewal credential is stored; passwords and access tokens stay in memory.
   const [login, setLogin] = useState<LoginResult | null>(null);
   const [changingPassword, setChangingPassword] = useState(false);
   const [notice, setNotice] = useState('');
   const generation = useRef(0);
 
+  const current = useRef<LoginResult | null>(null);
+  const refreshedAt = useRef(0);
+  const renewal = useRef<Promise<string | null> | null>(null);
+  const [restoring, setRestoring] = useState(true);
+  const [restoreError, setRestoreError] = useState('');
+
+  const signOut = useCallback(() => {
+    const token = current.current?.refreshToken;
+    generation.current++;
+    current.current = null;
+    refreshedAt.current = 0;
+    setLogin(null);
+    setChangingPassword(false);
+    setRestoring(false);
+    setRestoreError('');
+    void saveSession(null).catch(() => setNotice('Could not clear saved session. Please try logging out again.'));
+    if (token) void consumerRequest('/auth/logout', { refreshToken: token }).catch(() => {});
+  }, []);
+
+  const renew = useCallback(async (force = false): Promise<string | null> => {
+    if (!force && current.current && Date.now() - refreshedAt.current < 10 * 60 * 1000)
+      return current.current.accessToken;
+    if (renewal.current) return renewal.current;
+    const attempt = generation.current;
+    const operation = (async () => {
+      try {
+        const token = current.current?.refreshToken || await readSession();
+        if (!token || attempt !== generation.current) return null;
+        const result = await consumerRequest<LoginResult>('/auth/refresh', { refreshToken: token });
+        if (result.user.role !== 'consumer') throw new ConsumerApiError('Use a consumer account.', 401);
+        if (attempt !== generation.current) return null;
+        await saveSession(result.refreshToken);
+        if (attempt !== generation.current) return null;
+        current.current = result;
+        refreshedAt.current = Date.now();
+        setLogin(result);
+        setRestoreError('');
+        return result.accessToken;
+      } catch (error) {
+        if (attempt === generation.current && error instanceof ConsumerApiError && [401,403].includes(error.status)) {
+          signOut();
+          setNotice('Your session ended. Please sign in again.');
+        }
+        throw error;
+      }
+    })();
+    renewal.current = operation;
+    try { return await operation; }
+    finally { if (renewal.current === operation) renewal.current = null; }
+  }, [signOut]);
+
+  const restore = useCallback(async () => {
+    setRestoring(true);
+    setRestoreError('');
+    try { await renew(true); }
+    catch (error) {
+      if (!(error instanceof ConsumerApiError && [401,403].includes(error.status)))
+        setRestoreError(error instanceof Error ? error.message : 'Could not restore session.');
+    } finally { setRestoring(false); }
+  }, [renew]);
+
+  useEffect(() => {
+    setSessionResolver(force => renew(force));
+    const initial = setTimeout(() => void restore(), 0);
+    const timer = setInterval(() => {
+      if (current.current && AppState.currentState === 'active') void renew().catch(() => {});
+    }, 60000);
+    const listener = AppState.addEventListener('change', state => {
+      if (state === 'active' && current.current) void renew().catch(() => {});
+    });
+    return () => { clearTimeout(initial); clearInterval(timer); listener.remove(); setSessionResolver(null); };
+  }, [renew, restore]);
+
   async function signIn(username: string, password: string) {
     const attempt = ++generation.current;
-    const result = await consumerRequest<LoginResult>('/auth/login', {
-      username: username.trim(),
-      password,
-    });
+    const result = await consumerRequest<LoginResult>('/auth/login', { username: username.trim(), password });
     if (result.user.role !== 'consumer') throw new Error('Use a consumer account to sign in.');
     if (generation.current === attempt) {
+      if (!result.refreshToken) throw new Error('Please update the server before signing in.');
+      await saveSession(result.refreshToken);
+      if (generation.current !== attempt) return;
+      current.current = result;
+      refreshedAt.current = Date.now();
       setNotice('');
       setLogin(result);
     }
-  }
-
-  function signOut() {
-    generation.current++;
-    setLogin(null);
-    setChangingPassword(false);
   }
 
   async function changePassword(currentPassword: string, newPassword: string) {
@@ -52,7 +126,7 @@ export function SessionProvider({ children }: PropsWithChildren) {
     await consumerRequest(
       '/auth/change-password',
       { currentPassword, newPassword },
-      login.accessToken,
+      (await renew()) || login.accessToken,
     );
     if (generation.current === attempt) {
       signOut();
@@ -63,6 +137,9 @@ export function SessionProvider({ children }: PropsWithChildren) {
   return (
     <SessionContext.Provider
       value={{
+        restoring,
+        restoreError,
+        retryRestore: () => void restore(),
         signedIn: !!login,
         accessToken: login?.accessToken || null,
         signIn,

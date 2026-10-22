@@ -50,7 +50,7 @@ export async function loginUser(username, password) {
 
   return {
     accessToken,
-    ...(user.role === 'admin' ? { refreshToken: signSession(user) } : {}),
+    refreshToken: signSession(user),
     tokenType: 'Bearer',
     user: {
       id: user.id,
@@ -62,7 +62,7 @@ export async function loginUser(username, password) {
 }
 
 function signSession(user) {
-  return jwt.sign({ purpose: 'admin-session', version: Number(user.auth_version || 0) }, authConfig.secret, {
+  return jwt.sign({ purpose: user.role + '-session', version: Number(user.auth_version || 0) }, authConfig.secret, {
     algorithm: 'HS256', subject: String(user.id), expiresIn: '30d',
     issuer: authConfig.issuer, audience: authConfig.audience,
   });
@@ -77,10 +77,10 @@ export async function renewAdminSession(token) {
   } catch {
     throw new AppError('Session expired. Please sign in again.', 401);
   }
-  if (claims.purpose !== 'admin-session' || !/^[1-9]\d{0,19}$/.test(claims.sub || ''))
+  if (!['admin-session', 'consumer-session'].includes(claims.purpose) || !/^[1-9]\d{0,19}$/.test(claims.sub || ''))
     throw new AppError('Invalid session.', 401);
   const user = await findUserById(claims.sub);
-  if (!user || user.role !== 'admin' || Number(user.is_active) !== 1 ||
+  if (!user || !['admin', 'consumer'].includes(user.role) || claims.purpose !== user.role + '-session' || Number(user.is_active) !== 1 ||
       claims.version !== Number(user.auth_version || 0))
     throw new AppError('Session ended. Please sign in again.', 401);
   return {

@@ -4,11 +4,11 @@ import { useCallback, useRef, useState } from 'react';
 import { useSession } from '../session/SessionProvider';
 import { consumerRequest } from '../session/api';
 import { useConsumerFinances } from '../bills/useConsumerFinances';
-import { Pressable, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, Text, View } from 'react-native';
 import { Avatar } from '@/components/consumer/Avatar';
 import { Icon, type IconName } from '@/components/consumer/Icon';
 import { Badge, Button, Card, CardTitle, Screen, text } from '@/components/consumer/ui';
-import { money } from '@/theme/tokens';
+import { colors, money } from '@/theme/tokens';
 import { styles } from './home.styles';
 
 export default function HomeScreen() {
@@ -60,28 +60,66 @@ export default function HomeScreen() {
   if (!data)
     return (
       <Screen title="Home">
-        <Text style={text.muted}>
-          {busy ? 'Loading your account...' : error || 'Account records are unavailable.'}
-        </Text>
-        <Button
-          label={busy ? 'Loading...' : 'Retry'}
-          disabled={busy}
-          onPress={() => void reload()}
-        />
+        {busy ? (
+          <View accessible accessibilityLabel="Loading your account" accessibilityState={{ busy: true }} style={styles.skeletonLayout}>
+            <View importantForAccessibility="no-hide-descendants" accessibilityElementsHidden style={styles.skeletonLayout}>
+              <View style={styles.welcome}>
+                <View style={styles.skeletonWelcome}>
+                  <View style={[styles.skeletonLine, styles.skeletonShort]} />
+                  <View style={styles.skeletonLine} />
+                  <View style={[styles.skeletonLine, styles.skeletonShort]} />
+                </View>
+                <View style={styles.skeletonAvatar} />
+              </View>
+              <View style={styles.skeletonBalance}>
+                <View style={[styles.skeletonLine, styles.skeletonShort]} />
+                <View style={styles.skeletonAmount} />
+                <View style={styles.skeletonLine} />
+              </View>
+              <View style={styles.quickLinks}>
+                <View style={styles.skeletonQuickLink} />
+                <View style={styles.skeletonQuickLink} />
+              </View>
+              {[0, 1].map(item => (
+                <Card key={item}>
+                  <View style={[styles.skeletonLine, styles.skeletonShort]} />
+                  <View style={styles.skeletonAmount} />
+                  <View style={styles.skeletonLine} />
+                  <View style={styles.skeletonLine} />
+                </Card>
+              ))}
+            </View>
+          </View>
+        ) : (
+          <>
+            <Text accessibilityRole="alert" style={text.muted}>
+              {error || 'Account records are unavailable.'}
+            </Text>
+            <Button label="Retry" onPress={() => void reload()} />
+          </>
+        )}
       </Screen>
     );
   return (
     <Screen title="Home">
-      <Button
-        label={busy ? 'Refreshing...' : 'Refresh account'}
-        secondary
-        disabled={busy}
-        onPress={() => {
-          void reload();
-          void reloadProfile();
-          void loadAdvisory();
-        }}
-      />
+      <View style={styles.refreshRow}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Refresh account"
+          accessibilityState={{ disabled: busy, busy }}
+          disabled={busy}
+          style={styles.refreshButton}
+          onPress={() => {
+            void reload();
+            void reloadProfile();
+            void loadAdvisory();
+          }}
+        >
+          {busy && <ActivityIndicator size="small" color={colors.primary} />}
+          <Text style={styles.refreshText}>{busy ? 'Refreshing...' : 'Refresh'}</Text>
+        </Pressable>
+      </View>
+      {!!error && <Text accessibilityRole="alert" style={text.muted}>{error}</Text>}
       {!!profileError && <Text style={text.muted}>{profileError}</Text>}
       <View style={styles.welcome}>
         <View style={{ flex: 1 }}>
@@ -102,30 +140,14 @@ export default function HomeScreen() {
       <View style={styles.balanceCard}>
         <View style={styles.row}>
           <View>
-            <Text style={styles.lightLabel}>OUTSTANDING BALANCE</Text>
+            <Text style={styles.lightLabel}>REMAINING BALANCE</Text>
             <Text style={styles.balance}>{money(balance)}</Text>
           </View>
           <View style={styles.heroIcon}>
             <Icon name="water" color="#ffffff" size={36} />
           </View>
         </View>
-        <View style={styles.heroDivider} />
-        <View style={styles.row}>
-          <View>
-            <Text style={styles.lightLabel}>{latest?.month || 'No bills yet'}</Text>
-            <Text style={styles.due}>
-              {latest ? 'Due ' + latest.due : 'Your bill will appear here once generated.'}
-            </Text>
-          </View>
-          <Pressable
-            accessibilityRole="button"
-            onPress={() => router.push('/bills')}
-            style={styles.viewBill}
-          >
-            <Text style={styles.viewBillText}>View bill</Text>
-            <Icon name="bills" color="#ffffff" size={18} />
-          </Pressable>
-        </View>
+        <Text style={styles.due}>Total unpaid balance across all bills.</Text>
       </View>
       <View style={styles.quickLinks}>
         {quickLinks.map((link) => (

@@ -1,3 +1,4 @@
+import { LoadingCards, RefreshControl } from '@/components/consumer/LoadingState';
 import { Text, View, StyleSheet } from 'react-native';
 import { Avatar } from '@/components/consumer/Avatar';
 import { Button, Card, Detail, Screen, Sheet, text } from '@/components/consumer/ui';
@@ -13,7 +14,8 @@ export default function ProfileScreen() {
   return (
     <Screen title="My profile">
       {!!error && <Text style={text.muted}>{error}</Text>}
-      <Button label={busy ? 'Loading profile...' : 'Refresh profile'} disabled={busy} onPress={() => void reload()} />
+      <RefreshControl busy={busy} onRefresh={() => void reload()} />
+      {busy && !customer && <LoadingCards count={1} />}
       {customer && <Card>
         <View style={styles.identity}>
           <Avatar size={76} active={customer.status === 'Active'} />

@@ -7,11 +7,11 @@ export function useConsumerProfile() {
   const { accessToken } = useSession();
   const [profile,setProfile]=useState<ConsumerProfile|null>(null);
   const [error,setError]=useState('');
-  const [busy,setBusy]=useState(false);
+  const [busy,setBusy]=useState(true);
   const version=useRef(0);
   const reload=useCallback(async()=>{
     const current=++version.current;
-    if(!accessToken){setProfile(null);return;}
+    if(!accessToken){setProfile(null);setBusy(false);return;}
     setBusy(true);setError('');
     try{const value=await consumerRequest<ConsumerProfile>('/consumer/profile',undefined,accessToken,'GET');
       if(current===version.current)setProfile(value);

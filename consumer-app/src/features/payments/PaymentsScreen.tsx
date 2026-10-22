@@ -1,3 +1,4 @@
+import { LoadingCards, RefreshControl } from '@/components/consumer/LoadingState';
 import { RecordCard } from '@/components/consumer/RecordCard';
 import { useState } from 'react';
 import { Text } from 'react-native';
@@ -14,11 +15,8 @@ export default function PaymentsScreen() {
   const [selected, setSelected] = useState<ConsumerPayment | null>(null);
   return (
     <Screen title="Payment history">
-      <Button
-        label={busy ? 'Loading...' : 'Refresh payments'}
-        disabled={busy}
-        onPress={() => void reload()}
-      />
+      <RefreshControl busy={busy} onRefresh={() => void reload()} />
+      {busy && !data && <LoadingCards />}
       {!!error && (
         <Text accessibilityRole="alert" style={text.muted}>
           {error}

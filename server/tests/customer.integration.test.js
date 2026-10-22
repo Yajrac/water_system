@@ -241,6 +241,12 @@ test(
       });
       assert.equal(firstLogin.status, 200, JSON.stringify(firstLogin));
       assert.equal(firstLogin.data.user.mustChangePassword, true);
+      assert.ok(firstLogin.data.refreshToken);
+      const renewedConsumer = await request('/auth/refresh', 'POST', {refreshToken:firstLogin.data.refreshToken});
+      assert.equal(renewedConsumer.status,200);
+      assert.equal(renewedConsumer.data.user.role,'consumer');
+      assert.equal(renewedConsumer.data.user.mustChangePassword,true);
+      assert.equal((await request('/consumer/profile','GET',undefined,firstLogin.data.refreshToken)).status,401);
       const temporaryToken = firstLogin.data.accessToken;
       assert.equal(
         (await request('/auth/me', 'GET', undefined, temporaryToken)).data.user.mustChangePassword,
@@ -299,6 +305,12 @@ test(
       });
       assert.equal(nextLogin.status, 200, JSON.stringify(nextLogin));
       assert.equal(nextLogin.data.user.mustChangePassword, false);
+      assert.equal((await request('/auth/refresh','POST',{refreshToken:firstLogin.data.refreshToken})).status,401);
+      const blockedPasswordChange = await request('/auth/change-password', 'POST', {
+        currentPassword: 'password123', newPassword: 'anotherPassword123',
+      }, nextLogin.data.accessToken);
+      assert.equal(blockedPasswordChange.status, 429);
+      assert.equal((await request('/auth/me', 'GET', undefined, nextLogin.data.accessToken)).status, 200);
       assert.equal(
         (await request('/customers/' + imported.id)).data.customer.mustChangePassword,
         false,
@@ -774,6 +786,9 @@ test(
         const restoredLogin = await request('/auth/login','POST',{username:restoredInput.username,password:restoredInput.submitterNumber});
         assert.equal(restoredLogin.status,200,JSON.stringify(restoredLogin));
         assert.equal(restoredLogin.data.user.mustChangePassword,true);
+        assert.equal((await request('/auth/logout','POST',{refreshToken:restoredLogin.data.refreshToken})).status,200);
+        assert.equal((await request('/auth/refresh','POST',{refreshToken:restoredLogin.data.refreshToken})).status,401);
+        assert.equal((await request('/auth/me','GET',undefined,restoredLogin.data.accessToken)).status,401);
         const duplicatePreview = await request('/customers/import/preview','POST',{customers:[restoredInput]});
         assert.equal(duplicatePreview.data.count,0);
         assert.equal(duplicatePreview.data.rejectedCount,1);

@@ -26,7 +26,7 @@ export default function ChangePasswordScreen() {
         <Text style={text.muted}>
           {mustChangePassword
             ? 'Your submitter number is your temporary password. Replace it before continuing.'
-            : 'After saving, sign in again with your new password.'}
+            : 'You can change your password once every 14 days. After saving, sign in again with your new password. Contact the PWSS office if you need a reset sooner.'}
         </Text>
         <Input
           label="Current password"

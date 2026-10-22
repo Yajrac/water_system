@@ -54,3 +54,9 @@ Run `npm run admin:create` from `server` to provision an admin with a temporary 
 ### Customer Excel export and import
 
 Customer exports include applicant/contact/address fields, account and submitter references, username, service/connection status, dates, meter readings/details, document checks/details, and installation estimate inputs. Importing the exported file into an empty destination preserves these values; duplicate accounts, usernames, submitter/application references and meter numbers are rejected. Passwords, password hashes, uploaded files, bills, payments and activity history are not part of this customer workbook. New imported logins use the submitter number as a temporary password and must change it at first login. Older templates without status/check columns retain the Approved/completed-check defaults. Import up to 100 rows per file.
+# Consumer saved sessions
+
+The consumer app stores only its renewal token in Expo SecureStore on Android/iOS (session storage on web). Access tokens remain in memory. Sessions renew automatically while the app is active and when reopening it, with a rolling 30-day renewal window. Offline restoration offers a retry without deleting the saved session. Logout, password changes/resets, and revoked or inactive accounts invalidate existing sessions. Temporary-password accounts still have to change their password before accessing their records.
+
+Deploy the updated backend before installing the updated consumer APK. Rebuild the APK because this change adds the Expo SecureStore native module. No database migration is required.
+

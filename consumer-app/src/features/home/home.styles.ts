@@ -1,6 +1,17 @@
 import { StyleSheet } from 'react-native';
 import { colors } from '@/theme/tokens';
 export const styles = StyleSheet.create({
+  skeletonLayout: { gap: 18 },
+  skeletonWelcome: { flex: 1, gap: 10 },
+  skeletonLine: { height: 14, borderRadius: 5, backgroundColor: colors.border, width: '100%' },
+  skeletonShort: { width: '55%' },
+  skeletonAvatar: { width: 48, height: 48, borderRadius: 24, backgroundColor: colors.border },
+  skeletonBalance: { padding: 20, minHeight: 154, borderRadius: 8, gap: 18, backgroundColor: colors.tint },
+  skeletonAmount: { height: 34, width: '65%', borderRadius: 6, backgroundColor: colors.border },
+  skeletonQuickLink: { flex: 1, height: 56, borderRadius: 8, backgroundColor: colors.border },
+  refreshRow: { alignItems: 'flex-end' },
+  refreshButton: { flexDirection: 'row', alignItems: 'center', gap: 8, minHeight: 44, paddingHorizontal: 12, justifyContent: 'center' },
+  refreshText: { color: colors.primary, fontSize: 13, fontWeight: '600' },
   welcome: { flexDirection: 'row', alignItems: 'center', gap: 14 },
   welcomeTitle: { fontSize: 21, fontWeight: '700', color: colors.ink, marginVertical: 4 },
   avatar: { width: 48, height: 48, borderRadius: 24, borderWidth: 1, borderColor: colors.border },

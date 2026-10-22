@@ -1,3 +1,4 @@
+import { LoadingCards, RefreshControl } from '@/components/consumer/LoadingState';
 import { RecordCard } from '@/components/consumer/RecordCard';
 import { useState } from 'react';
 import { Text } from 'react-native';
@@ -13,11 +14,8 @@ export default function BillsScreen() {
   return (
     <Screen title="My bills">
       <Text style={text.muted}>Your monthly statements and meter readings.</Text>
-      <Button
-        label={busy ? 'Loading...' : 'Refresh bills'}
-        disabled={busy}
-        onPress={() => void reload()}
-      />
+      <RefreshControl busy={busy} onRefresh={() => void reload()} />
+      {busy && !data && <LoadingCards />}
       {!!error && (
         <Text accessibilityRole="alert" style={text.muted}>
           {error}
