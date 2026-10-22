@@ -234,6 +234,37 @@ collapseButton.addEventListener('click', () => {
 sidebar.querySelectorAll('.sidebar-menu-item').forEach((link) => {
   link.setAttribute('aria-label', link.textContent.trim());
 });
+// Read state belongs to the signed-in admin and is shared across their devices.
+const feedbackMenu = sidebar.querySelector('a[href="feedback.html"]');
+if (feedbackMenu) {
+  const dot = document.createElement('span');
+  dot.className = 'feedback-unread-dot';
+  dot.hidden = true;
+  dot.setAttribute('aria-hidden', 'true');
+  feedbackMenu.appendChild(dot);
+  let checkingFeedback = false;
+  async function refreshFeedbackBadge() {
+    if (checkingFeedback || document.hidden) return;
+    checkingFeedback = true;
+    try {
+      const result = await AdminAPI.request('/feedback/unread');
+      dot.hidden = !result.unread;
+      feedbackMenu.setAttribute('aria-label', result.unread ? 'Feedback, unread feedback' : 'Feedback');
+    } catch {
+      // Keep the last known state while the server is unavailable.
+    } finally {
+      checkingFeedback = false;
+    }
+  }
+  AdminAuth.ready.then(user => {
+    if (!user || user.mustChangePassword) return;
+    refreshFeedbackBadge();
+    setInterval(refreshFeedbackBadge, 30000);
+    window.addEventListener('focus', refreshFeedbackBadge);
+    window.addEventListener('feedback-read', refreshFeedbackBadge);
+    document.addEventListener('visibilitychange', refreshFeedbackBadge);
+  });
+}
 const sidebarTheme = document.getElementById('themeToggle');
 [sidebarTheme, logoutButton].filter(Boolean).forEach((button) => {
   const label = document.createElement('span');

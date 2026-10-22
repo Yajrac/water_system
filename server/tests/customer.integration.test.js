@@ -616,6 +616,13 @@ test(
       const feedbackList=await request('/feedback?status=New');
       assert.equal(feedbackList.status,200,JSON.stringify(feedbackList));
       assert.equal(feedbackList.data.pagination.total,1);
+      assert.equal((await request('/feedback/unread')).data.unread,1);
+      assert.equal((await request('/feedback/'+submission.data.id+'/read','POST',undefined,ownerToken)).status,403);
+      assert.equal((await request('/feedback/not-an-id/read','POST')).status,400);
+      assert.equal((await request('/feedback/999999999/read','POST')).status,404);
+      assert.equal((await request('/feedback/'+submission.data.id+'/read','POST')).status,200);
+      assert.equal((await request('/feedback/'+submission.data.id+'/read','POST')).status,200);
+      assert.equal((await request('/feedback/unread')).data.unread,0);
       assert.equal((await request('/feedback/'+submission.data.id,'PATCH',{status:'Resolved',reply:'No replies'})).status,400);
       assert.equal((await request('/feedback/'+submission.data.id,'PATCH',{status:'Resolved'})).status,200);
       const resolved=await request('/consumer/feedback','GET',undefined,ownerToken);

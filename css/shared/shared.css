@@ -2736,3 +2736,15 @@ html.theme-switching *::after {
     scrollbar-color: auto;
   }
 }
+.sidebar-menu-item { position: relative; }
+.feedback-unread-dot {
+  position: absolute;
+  top: 9px;
+  right: 10px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #ef4444;
+  box-shadow: 0 0 0 2px var(--sidebar-bg, #123447);
+}
+.feedback-unread-dot[hidden] { display: none; }

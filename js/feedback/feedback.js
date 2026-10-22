@@ -25,7 +25,12 @@ async function viewFeedback(entry){
   try{
     const preview=document.createElement('section'),message=document.createElement('p');message.textContent=entry.message||'';
     preview.appendChild(message);
-    await showNotice('Customer feedback',entry.name+' | '+entry.category+' | '+entry.date,preview);
+    const notice=showNotice('Customer feedback',entry.name+' | '+entry.category+' | '+entry.date,preview);
+    try {
+      await AdminAPI.request('/feedback/'+encodeURIComponent(entry.id)+'/read',{method:'POST'});
+      window.dispatchEvent(new Event('feedback-read'));
+    } catch(error) { AdminUI.message(error.message); }
+    await notice;
   }catch(error){AdminUI.message(error.message);}finally{feedbackSaving=false;}
 }
 document.getElementById('feedbackSearch').addEventListener('input',()=>{
