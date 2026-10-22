@@ -1,4 +1,5 @@
 {
   "python.terminal.useEnvFile": true,
+  "liveServer.settings.file": "html/404.html",
   "postman.settings.dotenv-detection-notification-visibility": false
 }

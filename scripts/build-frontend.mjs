@@ -12,6 +12,7 @@ await mkdir(output, { recursive: true });
 for (const name of ['index.html', 'html', 'css', 'js', 'assets']) {
   await cp(resolve(root, name), resolve(output, name), { recursive: true });
 }
+await cp(resolve(root, 'html/404.html'), resolve(output, '404.html'));
 await mkdir(resolve(output, 'data'), { recursive: true });
 for (const name of ['pio-duran-barangays.json', 'sample-customers.json', 'sample-service-records.json']) {
   await cp(resolve(root, 'data', name), resolve(output, 'data', name));

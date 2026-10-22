@@ -142,7 +142,7 @@ const AdminAuth = {
 };
 
 const currentAuthPage = location.pathname.split('/').pop();
-const isPublicAuthPage = ['login.html', 'forgot-password.html'].includes(currentAuthPage);
+const isPublicAuthPage = currentAuthPage === 'login.html';
 
 // Hide protected content until the API has verified the current account.
 const authGateStyle = document.createElement('style');

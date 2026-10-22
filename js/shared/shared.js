@@ -182,7 +182,21 @@ const logoutButton = document.createElement('button');
 logoutButton.type = 'button';
 logoutButton.className = 'btn logout-button';
 logoutButton.textContent = 'Log out';
-logoutButton.addEventListener('click', () => AdminAuth.logout());
+let logoutConfirming = false;
+logoutButton.addEventListener('click', async () => {
+  if (logoutConfirming) return;
+  logoutConfirming = true;
+  try {
+    const accepted = await confirmAction(
+      'Log out?',
+      'Are you sure you want to log out?',
+      'Yes, log out',
+    );
+    if (accepted) await AdminAuth.logout();
+  } finally {
+    logoutConfirming = false;
+  }
+});
 document.querySelector('.sidebar-tools').appendChild(logoutButton);
 // Keep the same sidebar on every page, with an optional compact desktop view.
 function sidebarIcon(name) {

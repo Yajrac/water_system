@@ -28,3 +28,17 @@ For browser testing of the consumer app with Expo Web, also add its exact origin
 `CORS_ORIGINS`. Keep the admin site origin in the same comma-separated value.
 Use the port shown by Expo if different. A successful health check does not prove
 that browser login is allowed; missing CORS headers can still block login fetches.
+
+
+## Custom not-found page
+
+The build copies `html/404.html` to `dist-frontend/404.html`. The error page uses root-relative links so styling and navigation work at nested missing URLs. After deployment, check a missing path such as `/html/missing-page.html` and verify the HTTP response and custom page. Existing catch-all redirects/rewrites may take precedence; remove any old `/*` rule pointing to the login/dashboard if it hides missing pages.
+
+VS Code Live Server is configured through `.vscode/settings.json` to display `html/404.html` for missing files. Stop and restart Live Server after changing its configuration. Its fallback displays the page but may return HTTP 200; use the preview server below to verify real HTTP 404 responses. Run these commands from the repository root:
+
+```sh
+node scripts/build-frontend.mjs
+node scripts/preview-frontend.mjs
+```
+
+Open `http://127.0.0.1:5501/html/index.html/?` or `/missing/page` to test the 404. This local preview serves only `dist-frontend`. For authenticated local API requests, add `http://127.0.0.1:5501` to the local server's `CORS_ORIGINS` if it is not already allowed, then restart the API. A 404 page is error handling; authentication, authorization and parameterized queries remain the API protections.
