@@ -55,8 +55,24 @@ Profile and feedback now use the authenticated API: `/api/v1/consumer/profile`
 returns only the linked consumer's public profile fields. Home identity and meter
 number use that same profile. Feedback is submission-only with category/message,
 server storage and the consumer's own submission history. Admin Feedback can view
-submissions and change review status, with no reply/chat endpoint. Other financial
-screens and Home totals/advisory preview still contain sample data pending their
-own integration. Deploy the updated backend before testing these screens against
+submissions and change review status, with no reply/chat endpoint. Home totals, latest billed consumption, My Bills and Payment History now load
+`/api/v1/consumer/finances`; the Home advisory uses the live notification feed.
+Bill/payment lists are paginated and refresh when focused, with manual refresh
+and explicit loading/error/empty states. Receipts display their historical
+balance before/after the selected payment. Deploy the updated backend before testing these screens against
 Render; local and hosted accounts remain separate. No new migration is required
 for profile/feedback (uses existing migration 010 tables).
+
+
+The finance API selects the customer from the authenticated consumer user, never
+from a supplied customer ID. Money remains decimal strings over the API; totals
+and balances are calculated in MySQL within a transaction. No additional schema
+migration is required. Deploy the updated server before testing these screens
+against the default Render API.
+
+
+Notifications include a server-backed unread badge and a detail view that marks
+items read. Apply migration 019 before using this version with the hosted API.
+Notifications are in-app only: no phone push permission, EAS setup or background
+push delivery is required. The applied migration is retained unchanged; its
+unused device/delivery tables are reserved and no longer used by application code.

@@ -389,3 +389,18 @@ Consumer profile and submission-only feedback:
 - No reply endpoint. Existing internal notes and legacy admin messages are not
   exposed to consumers. Submission/status changes are transactional with audit logs.
   These features use existing feedback tables; no additional migration is needed.
+
+
+Consumer financial records: `GET /api/v1/consumer/finances?billsPage=1&paymentsPage=1`
+returns account-wide summary and latest bill plus 20 bills and 20 payments per
+page. Authentication determines the linked customer. Reads share a transaction;
+MySQL calculates decimal-string balances, Philippine-date overdue status and
+historical receipt balances using payment order. No mutation/payment collection
+is allowed through this endpoint. No new migration is required.
+
+
+Migration 019 provides persisted notification read state. Consumer-only POST
+`/api/v1/notifications/read` accepts accessible feed IDs. Phone push registration
+routes and the delivery worker were removed; notifications are in-app only.
+The migration remains unchanged because it has already been applied locally;
+its unused device/delivery tables do not start any background service.

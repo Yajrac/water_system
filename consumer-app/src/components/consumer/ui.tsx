@@ -9,9 +9,8 @@
   View,
   type ViewStyle,
 } from 'react-native';
-import { useRef, type ReactNode } from 'react';
+import { useRef, type ReactNode, type PropsWithChildren } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import type { PropsWithChildren } from 'react';
 
 import { colors } from '@/theme/tokens';
 import { Icon, type IconName } from './Icon';
@@ -28,6 +27,7 @@ export function Screen({
     'My bills': 'bills',
     'Payment history': 'payments',
     Announcements: 'news',
+    Notifications: 'news',
     Feedback: 'feedback',
     'My profile': 'profile',
   };

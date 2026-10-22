@@ -23,7 +23,7 @@ export default function FeedbackScreen() {
     catch(failure){setNotice(failure instanceof Error?failure.message:'Could not load feedback.');}
     finally{setLoading(false);}
   },[accessToken]);
-  useEffect(()=>{void load();},[load]);
+  useEffect(()=>{const timer=setTimeout(()=>void load(),0);return()=>clearTimeout(timer);},[load]);
   async function send(){
     if(sending.current||!accessToken||!message.trim())return;
     sending.current=true;setBusy(true);setNotice('');

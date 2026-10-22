@@ -18,6 +18,8 @@ export function useConsumerProfile() {
     }catch(failure){if(current===version.current)setError(failure instanceof Error?failure.message:'Could not load profile.');}
     finally{if(current===version.current)setBusy(false);}
   },[accessToken]);
-  useEffect(()=>{setProfile(null);void reload();return()=>{version.current++;};},[reload]);
+  const invalidate=useCallback(()=>{version.current++;},[]);
+  useEffect(()=>{const timer=setTimeout(()=>{setProfile(null);void reload();},0);
+    return()=>{clearTimeout(timer);invalidate();};},[reload,invalidate]);
   return {profile,error,busy,reload};
 }

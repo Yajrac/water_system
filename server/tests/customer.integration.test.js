@@ -438,6 +438,15 @@ test(
       const paid = await request('/payments', 'POST', pay);
       assert.equal(paid.status, 200, JSON.stringify(paid));
       assert.equal(paid.data.payment.balanceAfter, '10.00');
+      const partialFinances=await request('/consumer/finances','GET',undefined,
+        jwt.sign({role:'consumer',version:1},authConfig.secret,{algorithm:'HS256',subject:String(customer.userId),expiresIn:'5m',issuer:authConfig.issuer,audience:authConfig.audience}));
+      // Account password reset earlier increments its auth version once.
+      assert.equal(partialFinances.status,200,JSON.stringify(partialFinances));
+      assert.equal(Number(partialFinances.data.summary.balance),10);
+      assert.equal(Number(partialFinances.data.bills[0].paid),4);
+      assert.equal(Number(partialFinances.data.bills[0].balance),10);
+      assert.notEqual(partialFinances.data.bills[0].status,'Paid');
+
       const again = await request('/payments', 'POST', pay);
       assert.equal(again.data.payment.id, paid.data.payment.id);
       assert.equal((await request('/bills?billId=' + billId)).data.bills[0].balance, '10.00');
@@ -613,6 +622,46 @@ test(
       assert.equal(resolved.data[0].status,'Resolved');
       const [[messageCount]]=await control.execute('SELECT COUNT(*) AS total FROM feedback_messages WHERE thread_id=?',[submission.data.id]);
       assert.equal(Number(messageCount.total),1);
+      const finances=await request('/consumer/finances','GET',undefined,ownerToken);
+      assert.equal(finances.status,200,JSON.stringify(finances));
+      assert.equal(finances.data.summary.billCount,1);
+      assert.equal(Number(finances.data.summary.balance),0);
+      assert.equal(Number(finances.data.summary.totalPaid),14);
+      assert.equal(finances.data.bills[0].status,'Paid');
+      assert.equal(Number(finances.data.bills[0].consumption),2);
+      assert.equal(finances.data.latestBill.id,finances.data.bills[0].id);
+      assert.equal(finances.data.payments.length,3);
+      const receipts=finances.data.payments.slice().sort((a,b)=>Number(a.id)-Number(b.id));
+      assert.equal(Number(receipts[0].balanceBefore),14);
+      assert.equal(Number(receipts[0].balanceAfter),10);
+      assert.equal(Number(receipts[1].balanceBefore),10);
+      assert.equal(Number(receipts[1].balanceAfter),4);
+      assert.equal(Number(receipts[2].balanceBefore),4);
+      assert.equal(Number(receipts[2].balanceAfter),0);
+      assert.equal(receipts[1].method,'Bank transfer');
+      assert.equal(receipts[1].reference,'BANK-TEST');
+      const emptyFinances=await request('/consumer/finances','GET',undefined,nextLogin.data.accessToken);
+      assert.equal(emptyFinances.status,200);
+      assert.deepEqual(emptyFinances.data.bills,[]);
+      assert.deepEqual(emptyFinances.data.payments,[]);
+      assert.equal(emptyFinances.data.latestBill,null);
+      assert.equal(Number(emptyFinances.data.summary.balance),0);
+      const later=await request('/consumer/finances?billsPage=2&paymentsPage=2','GET',undefined,ownerToken);
+      assert.equal(later.data.bills.length,0);
+      assert.equal(later.data.payments.length,0);
+      assert.equal(later.data.summary.billCount,1);
+      assert.equal((await request('/consumer/finances?billsPage=-1','GET',undefined,ownerToken)).status,400);
+      assert.equal((await request('/consumer/finances','GET')).status,403);
+      const unread=await request('/notifications/mine','GET',undefined,ownerToken);
+      assert.ok(unread.data.some(item=>!item.read));
+      const firstKey=unread.data[0].id;
+      assert.equal((await request('/notifications/read','POST',{ids:[firstKey]},ownerToken)).status,200);
+      const afterRead=await request('/notifications/mine','GET',undefined,ownerToken);
+      assert.equal(afterRead.data.find(item=>item.id===firstKey).read,true);
+      assert.equal((await request('/notifications/read','POST',{ids:[firstKey]},nextLogin.data.accessToken)).status,404);
+
+
+
 
 
 

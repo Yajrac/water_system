@@ -19,12 +19,20 @@ export async function consumerRequest<T>(path: string, body: unknown, token?: st
     });
     const result = await response.json().catch(() => null);
     if (!response.ok || result?.success !== true) {
-      throw new Error(result?.message || 'Request failed. Please try again.');
+      const message = response.status >= 500
+        ? 'This service is temporarily unavailable. Please try again shortly.'
+        : response.status === 404
+          ? 'This service is currently unavailable. Please try again later.'
+          : result?.message || 'Your request could not be completed. Please try again.';
+      throw new Error(message);
     }
     return result.data as T;
   } catch (error) {
     if (error instanceof Error && error.name === 'AbortError') {
-      throw new Error('The server took too long to respond. Please try again.');
+      throw new Error('Connecting is taking longer than usual. Please try again.');
+    }
+    if (error instanceof TypeError) {
+      throw new Error('Unable to connect. Check your internet connection and try again.');
     }
     throw error;
   } finally {

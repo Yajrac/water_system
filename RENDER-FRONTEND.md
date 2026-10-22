@@ -22,3 +22,9 @@ JWT secrets and the database certificate on the API service only.
 `js/shared/api-config.js` targets `https://water-system-1.onrender.com/api/v1`.
 For local API testing, set `useLocalAdminApi = true` and preview on localhost.
 When switching API databases, log out and sign in again.
+
+For browser testing of the consumer app with Expo Web, also add its exact origin
+(usually `http://localhost:8081` or `http://127.0.0.1:8081`) to the Render API's
+`CORS_ORIGINS`. Keep the admin site origin in the same comma-separated value.
+Use the port shown by Expo if different. A successful health check does not prove
+that browser login is allowed; missing CORS headers can still block login fetches.
