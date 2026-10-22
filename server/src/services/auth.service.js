@@ -89,6 +89,6 @@ export async function renewAdminSession(token) {
       issuer: authConfig.issuer, audience: authConfig.audience,
     }),
     refreshToken: signSession(user),
-    user: { id: String(user.id), username: user.username, role: user.role, mustChangePassword: false },
+    user: { id: String(user.id), username: user.username, role: user.role, mustChangePassword: Number(user.must_change_password) === 1 },
   };
 }

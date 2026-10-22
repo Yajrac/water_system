@@ -42,7 +42,9 @@ AdminAuth.ready.then((user) => {
   const reason = new URLSearchParams(location.search).get('reason');
   loginMessage.textContent =
     AdminAuth.sessionError ||
-    (reason === 'expired'
+    (reason === 'password-changed'
+      ? 'Password changed successfully. Sign in with your new password.'
+      : reason === 'expired'
       ? 'Your session has expired. Please sign in again.'
       : reason === 'unavailable'
         ? 'Cannot verify your session. Check the server connection and sign in again.'

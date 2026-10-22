@@ -131,7 +131,7 @@ test(
         ...body, username: 'different.username', meterNumber: 'DIFFERENT-METER',
       });
       assert.equal(duplicate.status, 409);
-      assert.match(duplicate.message, /customer already exists/i);
+      assert.match(duplicate.message, /possible duplicate/i);
 
       assert.equal(customer.reading, 400);
       assert.equal(customer.active, true);
@@ -555,8 +555,8 @@ test(
       assert.equal(Number(stats.totalCollections), 14);
       assert.equal(Number(stats.todayCollections), 14);
       assert.equal(Number(stats.monthCollections), 14);
-      assert.equal(dashboard.data.monthlyCollections.length, 6);
-      assert.equal(Number(dashboard.data.monthlyCollections.at(-1).amount), 14);
+      assert.equal(dashboard.data.monthlyCollections.length, 12);
+      assert.equal(Number(dashboard.data.monthlyCollections.find(row => row.month === today.slice(0,7)).amount), 14);
       assert.equal(
         dashboard.data.barangayConsumption.reduce((sum, row) => sum + Number(row.volume), 0),
         2,
@@ -628,6 +628,19 @@ test(
       assert.equal(Number(finances.data.summary.balance),0);
       assert.equal(Number(finances.data.summary.totalPaid),14);
       assert.equal(finances.data.bills[0].status,'Paid');
+      const report = await request('/reports?status=Paid');
+      assert.equal(report.status, 200, JSON.stringify(report));
+      assert.equal(report.data.bills.length, 1);
+      assert.equal(report.data.summary.total, '14.00');
+      assert.equal(report.data.summary.paid, '14.00');
+      assert.equal(report.data.summary.balance, '0.00');
+      assert.equal(report.data.consumption[0].volume, '2.000');
+      assert.equal(report.data.consumption[0].accounts, 1);
+      assert.equal((await request('/reports?status=Unpaid')).data.bills.length, 0);
+      assert.equal((await request('/reports?search=nonexistent-account')).data.bills.length, 0);
+      assert.equal((await request('/reports?month=invalid')).status, 400);
+      assert.equal((await request('/reports', 'GET', undefined, ownerToken)).status, 403);
+
       assert.equal(Number(finances.data.bills[0].consumption),2);
       assert.equal(finances.data.latestBill.id,finances.data.bills[0].id);
       assert.equal(finances.data.payments.length,3);
@@ -652,6 +665,66 @@ test(
       assert.equal(later.data.summary.billCount,1);
       assert.equal((await request('/consumer/finances?billsPage=-1','GET',undefined,ownerToken)).status,400);
       assert.equal((await request('/consumer/finances','GET')).status,403);
+      // Newly provisioned admins must replace their temporary password, including after refresh.
+      const { createAdminUser } = await import('../src/models/user.model.js');
+      const temporaryAdminId = await createAdminUser('new.admin', await hashPassword('Temp123!'));
+      const adminLogin = await request('/auth/login', 'POST', { username: 'new.admin', password: 'Temp123!' });
+      assert.equal(adminLogin.status, 200);
+      assert.equal(adminLogin.data.user.mustChangePassword, true);
+      const adminAccess = adminLogin.data.accessToken;
+      assert.equal((await request('/reports', 'GET', undefined, adminAccess)).status, 403);
+      const renewedAdmin = await request('/auth/refresh', 'POST', { refreshToken: adminLogin.data.refreshToken });
+      assert.equal(renewedAdmin.data.user.mustChangePassword, true);
+      assert.equal((await request('/reports', 'GET', undefined, renewedAdmin.data.accessToken)).status, 403);
+      assert.equal((await request('/auth/change-password', 'POST', {currentPassword:'wrong',newPassword:'password123'}, adminAccess)).status, 400);
+      assert.equal((await request('/auth/change-password', 'POST', {currentPassword:'Temp123!',newPassword:'short'}, adminAccess)).status, 400);
+      assert.equal((await request('/auth/change-password', 'POST', {currentPassword:'Temp123!',newPassword:'password123'}, adminAccess)).status, 200);
+      assert.equal((await request('/auth/me', 'GET', undefined, adminAccess)).status, 401);
+      assert.equal((await request('/auth/refresh', 'POST', {refreshToken:adminLogin.data.refreshToken})).status, 401);
+      assert.equal((await request('/auth/login', 'POST', {username:'new.admin',password:'Temp123!'})).status, 401);
+      const permanentAdmin = await request('/auth/login', 'POST', {username:'new.admin',password:'password123'});
+      assert.equal(permanentAdmin.status, 200);
+      assert.equal(permanentAdmin.data.user.mustChangePassword, false);
+      assert.equal((await request('/reports', 'GET', undefined, permanentAdmin.data.accessToken)).status, 200);
+      const [[adminPasswordLog]] = await control.execute("SELECT COUNT(*) AS total FROM activity_logs WHERE actor_id=? AND action='admin.password_changed'", [temporaryAdminId]);
+      assert.equal(Number(adminPasswordLog.total), 1);
+      for (let index = 0; index < 12; index++) {
+        await control.execute("INSERT INTO activity_logs (actor_id,actor_role,action,description,created_at) VALUES (1,'admin','audit.probe',?,'2026-01-01 00:00:00')", ['audit-probe-' + index]);
+      }
+      for (const timestamp of ['2025-12-31 15:59:59', '2026-01-01 16:00:00']) {
+        await control.execute("INSERT INTO activity_logs (actor_id,actor_role,action,description,created_at) VALUES (1,'admin','audit.probe','audit-probe-boundary',?)", [timestamp]);
+      }
+      await control.execute("INSERT INTO activity_logs (actor_id,actor_role,action,description,created_at) VALUES (1,'consumer','audit.probe','audit-probe-consumer','2026-01-01 00:00:00')");
+      const audit = await request('/activity-logs?role=admin&date=2026-01-01&search=audit-probe');
+      assert.equal(audit.status, 200, JSON.stringify(audit));
+      assert.equal(audit.data.pagination.total, 12);
+      assert.equal(audit.data.logs.length, 10);
+      assert.equal(audit.data.logs[0].actor, 'test.admin');
+      assert.equal(audit.data.logs[0].password_hash, undefined);
+      assert.equal(audit.data.logs[0].timestamp, '2026-01-01T00:00:00Z');
+      const auditNext = await request('/activity-logs?role=admin&date=2026-01-01&search=audit-probe&page=2');
+      assert.equal(auditNext.data.logs.length, 2);
+      assert.equal(new Set([...audit.data.logs,...auditNext.data.logs].map(log=>log.id)).size,12);
+      const consumerAudit = await request('/activity-logs?role=consumer&date=2026-01-01&search=audit-probe');
+      assert.equal(consumerAudit.data.pagination.total, 1);
+      assert.equal((await request('/activity-logs?role=invalid')).status, 400);
+      assert.equal((await request('/activity-logs?date=2026-02-30')).status, 400);
+      assert.equal((await request('/activity-logs', 'GET', undefined, ownerToken)).status, 403);
+      assert.equal((await request('/activity-logs', 'GET', undefined, '')).status, 401);
+      const currentDashboardYear = Number(today.slice(0,4));
+      const previousDashboardYear = currentDashboardYear - 1;
+      await control.execute('UPDATE payments SET paid_at = ? WHERE id = (SELECT id FROM (SELECT MIN(id) AS id FROM payments) first_payment)', [previousDashboardYear + '-06-15 00:00:00']);
+      const yearlyDashboard = await request('/dashboard?year=' + previousDashboardYear);
+      assert.equal(yearlyDashboard.status, 200, JSON.stringify(yearlyDashboard));
+      assert.equal(yearlyDashboard.data.period.year, previousDashboardYear);
+      assert.equal(yearlyDashboard.data.monthlyCollections.length, 12);
+      assert.equal(Number(yearlyDashboard.data.monthlyCollections[5].amount), 4);
+      assert.equal(yearlyDashboard.data.availableYears.includes(previousDashboardYear), true);
+      assert.equal(yearlyDashboard.data.period.through, previousDashboardYear + '-12-31');
+      const currentDashboard = await request('/dashboard');
+      assert.equal(currentDashboard.data.period.year, currentDashboardYear);
+      assert.equal(Number(currentDashboard.data.summary.monthCollections), Number(yearlyDashboard.data.summary.monthCollections));
+      assert.equal((await request('/dashboard?year=' + (currentDashboardYear + 1))).status, 400);
       const unread=await request('/notifications/mine','GET',undefined,ownerToken);
       assert.ok(unread.data.some(item=>!item.read));
       const firstKey=unread.data[0].id;
@@ -659,6 +732,52 @@ test(
       const afterRead=await request('/notifications/mine','GET',undefined,ownerToken);
       assert.equal(afterRead.data.find(item=>item.id===firstKey).read,true);
       assert.equal((await request('/notifications/read','POST',{ids:[firstKey]},nextLogin.data.accessToken)).status,404);
+      const exportSource = (await request('/customers/' + customer.id)).data.customer;
+      const separateConnection = {...body, firstName:exportSource.firstName,contact:exportSource.contact,barangayId:exportSource.barangayId,address:exportSource.address,username:'separate.connection',meterNumber:'SEPARATE-METER'};
+      assert.equal((await request('/customers/check-duplicate','POST',{...separateConnection,address:'Purok 7'})).data.exists,false);
+      assert.equal((await request('/customers/check-duplicate','POST',{...separateConnection,barangayId:'999'})).data.exists,false);
+      assert.equal((await request('/customers/check-duplicate','POST',separateConnection)).data.exists,true);
+      assert.equal((await request('/customers','POST',separateConnection)).status,409);
+      assert.equal((await request('/customers','POST',{...separateConnection,duplicateReviewed:'true'})).status,400);
+      const reviewedConnection = await request('/customers','POST',{...separateConnection,duplicateReviewed:true});
+      assert.equal(reviewedConnection.status,201,JSON.stringify(reviewedConnection));
+      assert.equal((await request('/customers','POST',{...separateConnection,duplicateReviewed:true})).status,409);
+
+      const restoreKeys = ['firstName','middleName','lastName','extensionName','gender','contact','address','street','customerType','natureOfWork','dateApplied','dateApproved','dateInstalled','meterNumber','meterKind','meterSize','initialReading','reading','certificateReceived','contractReceived','acknowledgementReceived','contractDate','acknowledgementDate','ctcNumber','ctcDate','ctcPlace','representativeCtc','representativeCtcDate','representativeCtcPlace','documentNotes','installationFee','setbackLength','setbackRate','reinstallationFee','violationFee'];
+      const amountKeys = ['initialReading','reading','installationFee','setbackLength','setbackRate','reinstallationFee','violationFee'];
+      for (const [index, serviceStatus] of ['Pending','Approved','Installed'].entries()) {
+        const restoredInput = Object.fromEntries(restoreKeys.map(key=>[key, exportSource[key]]));
+        Object.assign(restoredInput, {account:'RESTORE-' + index,submitterNumber:'SUB-RESTORE-' + index,applicationNumber:'APP-RESTORE-' + index,username:'restore@' + index,barangayId:'1',
+          serviceStatus,connectionStatus:serviceStatus === 'Installed' ? 'Disconnected' : 'Inactive',
+          dateApplied:'2025-01-01',dateApproved:serviceStatus === 'Pending' ? '' : '2025-01-02',
+          dateInstalled:serviceStatus === 'Installed' ? '2025-01-03' : '',meterNumber:serviceStatus === 'Installed' ? 'MTR-RESTORE-001' : '',
+          reading:serviceStatus === 'Installed' ? '12.345' : '0',initialReading:serviceStatus === 'Installed' ? '1.250' : '0',
+          certificateReceived:true,contractReceived:false,acknowledgementReceived:true,
+          documentNotes:'Imported record notes',ctcNumber:'000123',ctcPlace:'Pio Duran',
+          installationFee:'123.45',setbackLength:'1.250',setbackRate:'9.99',reinstallationFee:'2.00',violationFee:'0.00'});
+        const preview = await request('/customers/import/preview','POST',{customers:[restoredInput]});
+        assert.equal(preview.status,200,JSON.stringify(preview));
+        assert.equal(preview.data.count,1,JSON.stringify(preview));
+        const saved = await request('/customers/import','POST',{customers:[restoredInput],reviewRevision:preview.data.revision});
+        assert.equal(saved.status,201,JSON.stringify(saved));
+        const restoredCustomer = (await request('/customers?search=' + restoredInput.account)).data.customers[0];
+        for (const key of [...restoreKeys,'account','submitterNumber','applicationNumber','username','serviceStatus','connectionStatus']) {
+          assert.equal(String(restoredCustomer[key]),String(amountKeys.includes(key) ? Number(restoredInput[key]) : restoredInput[key]),key);
+        }
+        const restoredLogin = await request('/auth/login','POST',{username:restoredInput.username,password:restoredInput.submitterNumber});
+        assert.equal(restoredLogin.status,200,JSON.stringify(restoredLogin));
+        assert.equal(restoredLogin.data.user.mustChangePassword,true);
+        const duplicatePreview = await request('/customers/import/preview','POST',{customers:[restoredInput]});
+        assert.equal(duplicatePreview.data.count,0);
+        assert.equal(duplicatePreview.data.rejectedCount,1);
+        assert.equal((await request('/customers/import','POST',{customers:[restoredInput]})).status,409);
+        const reusedUsername = {...restoredInput,account:'OTHER-' + index,submitterNumber:'OTHER-SUB-' + index,applicationNumber:'OTHER-APP-' + index,meterNumber:restoredInput.meterNumber ? 'OTHER-METER-' + index : ''};
+        const usernamePreview = await request('/customers/import/preview','POST',{customers:[reusedUsername]});
+        assert.equal(usernamePreview.data.count,0);
+        assert.match(usernamePreview.data.rows[0].reason,/username.*already registered/);
+
+      }
+
 
 
 

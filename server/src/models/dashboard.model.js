@@ -1,6 +1,9 @@
 import { pool } from '../database/pool.js';
 
-export async function readDashboard({ day, month, start, end }, database = pool) {
+export async function readDashboard(
+  { day, month, start, end, monthEnd, consumptionStart },
+  database = pool,
+) {
   const connection = await database.getConnection();
   try {
     // InnoDB consistent reads share one snapshot, preventing mixed payment/bill totals.
@@ -30,7 +33,7 @@ export async function readDashboard({ day, month, start, end }, database = pool)
       COALESCE(SUM(CASE WHEN paid_at >= CONVERT_TZ(?, '+08:00', '+00:00')
         AND paid_at < CONVERT_TZ(?, '+08:00', '+00:00') THEN amount ELSE 0 END), 0) AS monthCollections
       FROM payments`,
-      [day + ' 00:00:00', day + ' 00:00:00', month + '-01 00:00:00', end + ' 00:00:00'],
+      [day + ' 00:00:00', day + ' 00:00:00', month + '-01 00:00:00', monthEnd + ' 00:00:00'],
     );
     const [collections] = await connection.execute(
       `SELECT DATE_FORMAT(CONVERT_TZ(paid_at, '+00:00', '+08:00'), '%Y-%m') AS month,
@@ -44,10 +47,13 @@ export async function readDashboard({ day, month, start, end }, database = pool)
         SELECT barangay_id, SUM(consumption) AS volume FROM bills WHERE billing_month >= ?
         AND billing_month < ? GROUP BY barangay_id
       ) v ON v.barangay_id = br.id ORDER BY br.name, br.id`,
-      [start, end],
+      [consumptionStart, monthEnd],
+    );
+    const [years] = await connection.query(
+      `SELECT DISTINCT YEAR(CONVERT_TZ(paid_at, '+00:00', '+08:00')) AS year FROM payments ORDER BY year DESC`,
     );
     await connection.commit();
-    return { customers, areas, billing, payments, collections, consumption };
+    return { customers, areas, billing, payments, collections, consumption, years };
   } catch (error) {
     await connection.rollback();
     throw error;

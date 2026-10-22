@@ -54,7 +54,7 @@ export async function logGeneration(setup, actorId, count, connection) {
   );
 }
 
-export async function listBills(filters, connection = pool) {
+export async function listBills(filters, connection = pool, { all = false } = {}) {
   const projection = `SELECT b.id, b.customer_id AS customerId, b.bill_number AS billNumber,
     c.account_number AS account, c.submitter_number AS submitterNumber, b.barangay_id AS barangayId,
     br.name AS barangay, c.purok AS address, c.street,
@@ -112,8 +112,11 @@ export async function listBills(filters, connection = pool) {
   const total = Number(count.total);
   const page = Math.min(filters.page, Math.max(1, Math.ceil(total / filters.limit)));
   const [rows] = await connection.query(
-    'SELECT * FROM ' + source + ' ORDER BY generatedOn DESC, id DESC LIMIT ? OFFSET ?',
-    [...values, filters.limit, (page - 1) * filters.limit],
+    'SELECT * FROM ' +
+      source +
+      ' ORDER BY generatedOn DESC, id DESC' +
+      (all ? '' : ' LIMIT ? OFFSET ?'),
+    all ? values : [...values, filters.limit, (page - 1) * filters.limit],
   );
   return {
     bills: rows.map((row) => ({

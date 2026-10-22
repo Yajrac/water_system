@@ -55,10 +55,42 @@ const CustomerAPI = {
     if (password) result.password = password;
     return result;
   },
-  save(input, password, id = null) {
+  async save(input, password, id = null) {
+    const payload = this.payload(input, password);
+    if (payload.firstName && payload.lastName && payload.contact && payload.address) {
+      const result = await AdminAPI.request('/customers/check-duplicate', {
+        method: 'POST',
+        body: {
+          ...Object.fromEntries(
+            [
+              'firstName',
+              'middleName',
+              'lastName',
+              'extensionName',
+              'contact',
+              'barangayId',
+              'address',
+            ].map((key) => [key, payload[key]]),
+          ),
+          ...(id ? { excludeId: id } : {}),
+        },
+      });
+      if (result.exists) {
+        const accepted = await confirmAction(
+          'Possible duplicate customer',
+          'A record has the same full name, mobile number, barangay and purok. Verify this is a separate customer or water connection before continuing.',
+          'Reviewed ? save separate record',
+        );
+        if (!accepted)
+          throw new Error(
+            'Save cancelled. Review the existing customer before adding another record.',
+          );
+        payload.duplicateReviewed = true;
+      }
+    }
     return AdminAPI.request('/customers' + (id ? '/' + encodeURIComponent(id) : ''), {
       method: id ? 'PUT' : 'POST',
-      body: this.payload(input, password),
+      body: payload,
     });
   },
   changeStatus(customer, status, reason) {

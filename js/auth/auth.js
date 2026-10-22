@@ -110,6 +110,7 @@ const AdminAuth = {
     location.replace('login.html');
   },
   destination() {
+    if (this.user?.mustChangePassword) return 'settings.html#passwordSettingsPanel';
     const next = new URLSearchParams(location.search).get('next') || 'index.html';
     const allowed = [
       'index.html',
@@ -156,6 +157,10 @@ async function requireAdminSession() {
     const user = await AdminAuth.verifySession();
     if (!user && !isPublicAuthPage) {
       AdminAuth.redirectToLogin();
+      return null;
+    }
+    if (user?.mustChangePassword && currentAuthPage !== 'settings.html' && !isPublicAuthPage) {
+      location.replace('settings.html#passwordSettingsPanel');
       return null;
     }
     document.documentElement.classList.remove('auth-pending');

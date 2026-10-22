@@ -23,7 +23,7 @@ const input = {
   contractDate: today(),
 };
 
-test('bulk import approves verified existing consumers while normal applications remain Pending', () => {
+test('bulk import preserves explicit status and checks, with Approved defaults for legacy files', () => {
   const body = {
     ...input,
     serviceStatus: 'Pending',
@@ -31,15 +31,18 @@ test('bulk import approves verified existing consumers while normal applications
     contractReceived: false,
   };
   const imported = validateCustomer({ ...body, account: 'OLD-001' }, { importing: true });
-  assert.equal(imported.serviceStatus, 'Approved');
-  assert.equal(imported.dateApproved, today());
-  assert.equal(imported.certificateReceived, true);
-  assert.equal(imported.contractReceived, true);
-  assert.equal(imported.acknowledgementReceived, true);
-  const normal = validateCustomer(body);
-  assert.equal(normal.serviceStatus, 'Pending');
-  assert.equal(normal.dateApproved, '');
-  assert.equal(normal.certificateReceived, false);
+  assert.equal(imported.serviceStatus, 'Pending');
+  assert.equal(imported.dateApproved, '');
+  assert.equal(imported.certificateReceived, false);
+  assert.equal(imported.contractReceived, false);
+  const legacy = { ...body, account: 'OLD-002' };
+  delete legacy.serviceStatus;
+  delete legacy.certificateReceived;
+  delete legacy.contractReceived;
+  const approved = validateCustomer(legacy, { importing: true });
+  assert.equal(approved.serviceStatus, 'Approved');
+  assert.equal(approved.certificateReceived, true);
+  assert.equal(validateCustomer(body).serviceStatus, 'Pending');
 });
 
 test('customer validation normalizes contact and server-controlled application dates', () => {
@@ -185,12 +188,14 @@ test('customer view maps IDs, registration flags and fingerprint without passwor
   assert.equal(view.password_hash, undefined);
 });
 
-
 test('consumer usernames accept symbols while rejecting whitespace, markup and invalid lengths', () => {
-  for (const username of ['test','test@','test1','test!#$%&*+=?','name@email.com']) {
-    assert.equal(validateCustomer({...input,username,password:'password123'}).username,username);
+  for (const username of ['test', 'test@', 'test1', 'test!#$%&*+=?', 'name@email.com']) {
+    assert.equal(
+      validateCustomer({ ...input, username, password: 'password123' }).username,
+      username,
+    );
   }
-  for (const username of ['ab','a'.repeat(41),'test name','test<','test>','ab\u0000cd']) {
-    assert.throws(()=>validateCustomer({...input,username,password:'password123'}));
+  for (const username of ['ab', 'a'.repeat(41), 'test name', 'test<', 'test>', 'ab\u0000cd']) {
+    assert.throws(() => validateCustomer({ ...input, username, password: 'password123' }));
   }
 });

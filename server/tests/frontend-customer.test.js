@@ -113,7 +113,7 @@ test('CSV import parses quoted values and maps barangays to database IDs', () =>
   assert.equal(records[0].barangayId, '1');
   assert.equal(records[0].street, 'Street, Block 2');
   assert.equal(records[0].account, 'OLD-001');
-  assert.equal(records[0].serviceStatus, 'Pending');
+  assert.equal(records[0].serviceStatus, undefined);
   assert.throws(() => parse('name,barangay\nAna,Barangay Agol'), /columns/);
 });
 
@@ -616,4 +616,29 @@ test('profile loads database fields and activation uses the API instead of brows
   assert.equal(changed[0].revision, 'version');
   assert.equal(changed[1], 'Inactive');
   assert.equal(reloaded, true);
+});
+
+
+test('possible customer duplicates require explicit review before saving a separate connection', async () => {
+  for (const accepted of [false, true]) {
+    const calls = [];
+    const context = vm.createContext({URLSearchParams,
+      confirmAction:async()=>accepted,
+      AdminAPI:{request:async(path, options)=>{calls.push([path,options]);return path.includes('check-duplicate') ? {exists:true} : {id:'2'};}}
+    });
+    vm.runInContext(apiSource,context);
+    const api=vm.runInContext('CustomerAPI',context);
+    api.barangays=[{id:'1',name:'Barangay Agol'}];
+    const input={firstName:'Ana',lastName:'Reyes',contact:'09123456789',barangay:'Barangay Agol',address:'Purok 1'};
+    if (accepted) {
+      await api.save(input,'password123');
+      assert.equal(calls[1][1].body.duplicateReviewed,true);
+      assert.equal(calls[1][0],'/customers');
+    } else {
+      await assert.rejects(api.save(input,'password123'),/Save cancelled/);
+      assert.equal(calls.length,1);
+    }
+    assert.equal(calls[0][1].body.barangayId,'1');
+    assert.equal(calls[0][1].body.address,'Purok 1');
+  }
 });

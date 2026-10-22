@@ -43,7 +43,7 @@ test('real compressed Excel import preserves contact text and maps barangay IDs'
   const rows = await context.readCustomerExcel(file([headers, record]));
   assert.equal(rows[0].contact, '+639171234567');
   assert.equal(rows[0].barangayId, '1');
-  assert.equal(rows[0].serviceStatus, 'Pending');
+  assert.equal(rows[0].serviceStatus, '');
   assert.equal(rows[0].password, undefined);
 });
 
@@ -118,4 +118,66 @@ test('Excel export uses allowlisted text fields and cannot include password hash
   } finally {
     XLSX.writeFile = original;
   }
+});
+
+test('exported form details survive real Excel export and re-import without credentials', async () => {
+  const customer = Object.fromEntries(headers.map((key) => [key, '']));
+  Object.assign(customer, {
+    account: 'RESTORE-001',
+    firstName: 'Ana',
+    lastName: 'Reyes',
+    gender: 'Female',
+    contact: '+639171234567',
+    address: 'Purok 1',
+    barangay: 'Barangay Agol',
+    customerType: 'Commercial',
+    submitterNumber: 'SUB-001',
+    applicationNumber: 'APP-001',
+    username: 'ana@sample',
+    serviceStatus: 'Installed',
+    connectionStatus: 'Disconnected',
+    natureOfWork: 'New connection',
+    dateApplied: '2025-01-01',
+    dateApproved: '2025-01-02',
+    dateInstalled: '2025-01-03',
+    meterNumber: 'MTR-001',
+    meterKind: 'Mechanical',
+    meterSize: '1/2',
+    initialReading: '1.250',
+    reading: '12.345',
+    certificateReceived: true,
+    contractReceived: false,
+    acknowledgementReceived: true,
+    ctcNumber: '0000123',
+    ctcDate: '2025-01-01',
+    documentNotes: 'Verified, existing record',
+    installationFee: '1000.00',
+    setbackLength: '1.500',
+    setbackRate: '12.50',
+    reinstallationFee: '0.00',
+    violationFee: '1.00',
+    password: 'never-export',
+    password_hash: 'never-export',
+    revision: 'never-export',
+  });
+  let buffer;
+  const original = XLSX.writeFile;
+  XLSX.writeFile = (book) => {
+    buffer = XLSX.write(book, { type: 'buffer', bookType: 'xlsx', compression: true });
+  };
+  try {
+    context.downloadCustomerExcel([customer], 'customers.xlsx');
+  } finally {
+    XLSX.writeFile = original;
+  }
+  const [restored] = await context.readCustomerExcel({ arrayBuffer: async () => buffer });
+  for (const key of headers) {
+    if (key === 'barangay') continue;
+    if (restored[key] === undefined && customer[key] === '') continue;
+    assert.equal(restored[key], customer[key], key);
+  }
+  assert.equal(restored.barangayId, '1');
+  assert.equal(restored.password, undefined);
+  assert.equal(restored.password_hash, undefined);
+  assert.equal(restored.revision, undefined);
 });

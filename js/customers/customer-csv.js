@@ -40,6 +40,37 @@ const customerCSVColumns = [
   'street',
   'barangay',
   'customerType',
+  'submitterNumber',
+  'applicationNumber',
+  'username',
+  'serviceStatus',
+  'connectionStatus',
+  'natureOfWork',
+  'dateApplied',
+  'dateApproved',
+  'dateInstalled',
+  'meterNumber',
+  'meterKind',
+  'meterSize',
+  'initialReading',
+  'reading',
+  'certificateReceived',
+  'contractReceived',
+  'acknowledgementReceived',
+  'contractDate',
+  'acknowledgementDate',
+  'ctcNumber',
+  'ctcDate',
+  'ctcPlace',
+  'representativeCtc',
+  'representativeCtcDate',
+  'representativeCtcPlace',
+  'documentNotes',
+  'installationFee',
+  'setbackLength',
+  'setbackRate',
+  'reinstallationFee',
+  'violationFee',
 ];
 function customerCSVRecords(text) {
   const rows = readCSV(text);
@@ -59,6 +90,24 @@ function customerCSVRecords(text) {
     if (row.length !== headers.length)
       throw new Error('Invalid column count on row ' + (index + 2) + '.');
     const values = Object.fromEntries(headers.map((key, position) => [key, row[position]]));
+    for (const key of ['certificateReceived', 'contractReceived', 'acknowledgementReceived']) {
+      if (values[key] !== undefined) {
+        const value = values[key].toLowerCase();
+        if (!['true', 'false', '1', '0', 'yes', 'no', ''].includes(value))
+          throw new Error('Invalid document check on row ' + (index + 2) + ': ' + key);
+        values[key] = ['true', '1', 'yes'].includes(value);
+      }
+    }
+    for (const key of [
+      'initialReading',
+      'reading',
+      'installationFee',
+      'setbackLength',
+      'setbackRate',
+      'reinstallationFee',
+      'violationFee',
+    ])
+      if (values[key] === '') delete values[key];
     if (!values.address) {
       const purok = /^purok\s+([1-7])$/i.exec(values.street || '');
       values.address = purok ? 'Purok ' + purok[1] : '';
@@ -81,7 +130,6 @@ function customerCSVRecords(text) {
     return {
       ...values,
       ...(barangay ? { barangayId: String(barangay.id) } : { barangayName }),
-      serviceStatus: 'Pending',
     };
   });
 }

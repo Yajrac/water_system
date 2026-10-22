@@ -51,9 +51,10 @@ export async function createAdminUser(username, passwordHash) {
         username,
         password_hash,
         role,
-        is_active
+        is_active,
+        must_change_password
       )
-      VALUES (?, ?, 'admin', 1)
+      VALUES (?, ?, 'admin', 1, 1)
     `,
     [username, passwordHash],
   );

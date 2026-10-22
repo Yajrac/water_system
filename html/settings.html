@@ -64,7 +64,7 @@
             >
           </li>
           <li>
-            <a href="billing.html" class="sidebar-menu-item">
+            <a href="generated-bills.html" class="sidebar-menu-item">
               <i class="bi bi-file-earmark-text" aria-hidden="true"></i>
               <span>Billing &amp; Meter Reading</span>
             </a>
@@ -156,14 +156,8 @@
             role="tablist"
             aria-label="Settings sections"
           >
-            <button
-              type="button"
-              id="officeSettingsTab"
-              role="tab"
-              aria-controls="officeSettingsPanel"
-              aria-selected="true"
-            >
-              <i class="bi bi-building" aria-hidden="true"></i><span>Office details</span>
+            <button type="button" id="passwordSettingsTab" role="tab" aria-controls="passwordSettingsPanel" aria-selected="true" tabindex="0">
+              <i class="bi bi-shield-lock" aria-hidden="true"></i><span>Change password</span>
             </button>
             <button
               type="button"
@@ -187,19 +181,17 @@
             </button>
           </nav>
           <p id="pageMessage" role="status" tabindex="-1"></p>
-          <section
-            class="panel section-tab-panel"
-            id="officeSettingsPanel"
-            role="tabpanel"
-            aria-labelledby="officeSettingsTab"
-          >
-            <div class="panel-header"><h2>Office details</h2></div>
+          <section class="panel section-tab-panel" id="passwordSettingsPanel" role="tabpanel" aria-labelledby="passwordSettingsTab">
+            <div class="panel-header"><h2>Change password</h2></div>
             <div class="admin-body">
-              <form id="officeForm" class="admin-form">
-                <label>Utility name<input name="name" type="text" required maxlength="120" /></label
-                ><label>Office address<input name="address" type="text" maxlength="200" /></label
-                ><label>Contact number<input name="contact" type="tel" maxlength="30" /></label>
-                <div class="wide"><button class="btn btn-primary">Save office details</button></div>
+              <p id="passwordInstructions">Choose your own password with 8?128 characters. Letters, numbers and symbols are allowed.</p>
+              <p id="passwordMessage" role="status" tabindex="-1"></p>
+              <form id="adminPasswordForm" class="admin-form">
+                <label>Current password<input name="currentPassword" type="password" autocomplete="current-password" required maxlength="1024" /></label>
+                <label>New password<input name="newPassword" type="password" autocomplete="new-password" required minlength="8" maxlength="128" /></label>
+                <label>Confirm new password<input name="confirmPassword" type="password" autocomplete="new-password" required minlength="8" maxlength="128" /></label>
+                <div class="wide"><label><input id="showAdminPasswords" type="checkbox" /> Show passwords</label></div>
+                <div class="wide"><button type="submit" class="btn btn-primary" disabled>Change password</button></div>
               </form>
             </div>
           </section>
@@ -297,7 +289,7 @@
     <script src="../js/shared/confirmation.js"></script>
     <script src="../js/shared/pagination.js"></script>
     <script src="../js/shared/section-tabs.js"></script>
-    <script src="../js/settings/settings.js"></script>
     <script src="../js/settings/activity-logs.js"></script>
+    <script src="../js/settings/change-password.js"></script>
   </body>
 </html>

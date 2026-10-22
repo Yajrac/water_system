@@ -30,9 +30,9 @@ async function createAdmin() {
   const askPassword = showPassword ? input : password;
 
   const newPassword = await askPassword({
-    message: 'Password:',
+    message: 'Temporary password:',
     validate(value) {
-      return (value.length >= 12 && value.length <= 128)
+      return (value.length >= 8 && value.length <= 128)
         || 'Use a password with 12–128 characters.';
     },
   });
@@ -58,7 +58,7 @@ async function createAdmin() {
 
   await createAdminUser(name, passwordHash);
 
-  console.log('Admin account created successfully.');
+  console.log('Admin account created. The temporary password must be changed at first sign-in.');
 }
 
 try {

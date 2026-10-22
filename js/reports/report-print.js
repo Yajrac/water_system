@@ -1,6 +1,6 @@
 // Build a print preview from the exact records selected by the report filters.
 document.getElementById('printReport').addEventListener('click', () => {
-  if (document.getElementById('reportPrintPreview')) return;
+  if (!reportReady || document.getElementById('reportPrintPreview')) return;
   const consumption =
     document.getElementById('barangayConsumptionTab').getAttribute('aria-selected') === 'true';
   const title = consumption
@@ -80,6 +80,7 @@ document.getElementById('printReport').addEventListener('click', () => {
         'Submitter no.',
         'Customer name',
         'Address',
+        'Billing month',
         'Consumption',
         reportStatus.value === 'Paid' ? 'Amount paid' : 'Bill / paid / balance',
         'Status',
@@ -93,11 +94,11 @@ document.getElementById('printReport').addEventListener('click', () => {
     });
   } else
     reportMatchedBills.forEach(({ bill, customer, status }, index) => {
-      const balance = WaterStore.balance(bill, reportRecords);
+      const balance = Number(bill.balance);
       const amount =
         reportStatus.value === 'Paid'
-          ? WaterStore.money(bill.total - balance)
-          : [bill.total, bill.total - balance, balance]
+          ? WaterStore.money(Number(bill.paid))
+          : [bill.total, Number(bill.paid), balance]
               .map((value) => WaterStore.money(value))
               .join(' / ');
       const row = body.insertRow();
@@ -106,6 +107,7 @@ document.getElementById('printReport').addEventListener('click', () => {
         customer.submitterNumber || customer.account,
         customer.name,
         [customer.address, customer.street, customer.barangay].filter(Boolean).join(', '),
+        bill.cycle,
         bill.consumption + ' m\u00b3',
         amount,
         status,

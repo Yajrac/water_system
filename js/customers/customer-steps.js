@@ -156,10 +156,25 @@ async function checkCustomerIdentity() {
   const version = ++identityVersion;
   const fields = customerForm.elements;
   const message = document.getElementById('customerDuplicateMessage');
-  const body = Object.fromEntries(['firstName', 'middleName', 'lastName', 'extensionName', 'contact']
-    .map((key) => [key, fields[key].value.trim()]));
+  const body = Object.fromEntries(
+    ['firstName', 'middleName', 'lastName', 'extensionName', 'contact'].map((key) => [
+      key,
+      fields[key].value.trim(),
+    ]),
+  );
+  const barangay = CustomerAPI.barangays.find(
+    (item) => item.name === fields.barangay.value || String(item.id) === fields.barangay.value,
+  );
+  body.barangayId = barangay ? String(barangay.id) : '';
+  body.address = fields.address.value;
   if (editingCustomerId) body.excludeId = editingCustomerId;
-  if (!body.firstName || !body.lastName || !/^0?9\d{9}$/.test(body.contact)) {
+  if (
+    !body.firstName ||
+    !body.lastName ||
+    !/^0?9\d{9}$/.test(body.contact) ||
+    !body.barangayId ||
+    !body.address
+  ) {
     message.textContent = '';
     nextCustomerStep.disabled = false;
     return true;
@@ -170,9 +185,11 @@ async function checkCustomerIdentity() {
     const result = await AdminAPI.request('/customers/check-duplicate', { method: 'POST', body });
     if (version !== identityVersion) return false;
     message.textContent = result.exists
-      ? 'This customer already exists with the same full name and mobile number.' : '';
-    nextCustomerStep.disabled = result.exists;
-    return !result.exists;
+      ? 'Possible duplicate: the same name, mobile, barangay and purok are already recorded. Review this before saving a separate connection.'
+      : '';
+    message.style.color = result.exists ? '#b45309' : '';
+    nextCustomerStep.disabled = false;
+    return true;
   } catch (error) {
     if (version !== identityVersion) return false;
     message.textContent = 'Could not check customer: ' + error.message + ' Try Next again.';
@@ -181,7 +198,18 @@ async function checkCustomerIdentity() {
   }
 }
 customerForm.addEventListener('input', (event) => {
-  if (!['firstName', 'middleName', 'lastName', 'extensionName', 'contact'].includes(event.target.name)) return;
+  if (
+    ![
+      'firstName',
+      'middleName',
+      'lastName',
+      'extensionName',
+      'contact',
+      'barangay',
+      'address',
+    ].includes(event.target.name)
+  )
+    return;
   ++identityVersion;
   clearTimeout(identityTimer);
   nextCustomerStep.disabled = false;
@@ -189,5 +217,5 @@ customerForm.addEventListener('input', (event) => {
   identityTimer = setTimeout(checkCustomerIdentity, 400);
 });
 customerForm.addEventListener('change', (event) => {
-  if (event.target.name === 'extensionName') checkCustomerIdentity();
+  if (['extensionName', 'barangay', 'address'].includes(event.target.name)) checkCustomerIdentity();
 });

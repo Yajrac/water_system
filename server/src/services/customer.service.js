@@ -24,7 +24,8 @@ async function writeApplication(
   imported = false,
 ) {
   const suffix = randomBytes(6).toString('hex').toUpperCase();
-  const submitterNumber = 'PWSS-' + today().replaceAll('-', '') + '-' + suffix;
+  const submitterNumber =
+    (imported && details.submitterNumber) || 'PWSS-' + today().replaceAll('-', '') + '-' + suffix;
   if (imported) {
     const stem =
       [details.firstName, details.lastName]
@@ -34,7 +35,7 @@ async function writeApplication(
         .toLowerCase()
         .replace(/[^a-z0-9.]/g, '')
         .slice(0, 24) || 'consumer';
-    details.username = stem + '.' + suffix.toLowerCase();
+    details.username ||= stem + '.' + suffix.toLowerCase();
     preparedHash = await hashPassword(submitterNumber);
   }
   const barangay = await model.lockBarangay(details.barangayId, connection);
@@ -44,8 +45,15 @@ async function writeApplication(
   ) {
     throw new AppError('Select an active registered barangay.', 400);
   }
-  if (!imported && await duplicateCustomer(details, connection, existing?.id))
-    throw new AppError('This customer already exists with the same full name and mobile number.', 409);
+  if (
+    !imported &&
+    !details.duplicateReviewed &&
+    (await duplicateCustomer(details, connection, existing?.id))
+  )
+    throw new AppError(
+      'Possible duplicate customer: review the matching name, mobile number, barangay and purok before saving.',
+      409,
+    );
   let userId = existing?.userId || null;
   if (userId) {
     const [[user]] = await connection.execute('SELECT role FROM users WHERE id = ? FOR UPDATE', [
@@ -93,9 +101,10 @@ async function writeApplication(
     );
   }
   const connectionStatus =
-    details.serviceStatus === 'Installed' && (!existing || existing.serviceStatus !== 'Installed')
+    (imported && details.connectionStatus) ||
+    (details.serviceStatus === 'Installed' && (!existing || existing.serviceStatus !== 'Installed')
       ? 'Active'
-      : existing?.connectionStatus || 'Inactive';
+      : existing?.connectionStatus || 'Inactive');
   const id = await model.writeRecord(
     'customers',
     {
@@ -126,7 +135,11 @@ async function writeApplication(
     {
       customer_id: id,
       ...(!existing?.applicationId
-        ? { application_number: 'APP-' + today().slice(0, 4) + '-' + suffix }
+        ? {
+            application_number:
+              (imported && details.applicationNumber) ||
+              'APP-' + today().slice(0, 4) + '-' + suffix,
+          }
         : {}),
       nature_of_work: details.natureOfWork,
       status: details.serviceStatus,
@@ -193,7 +206,9 @@ async function writeApplication(
         meter_number: details.meterNumber,
         meter_kind: optional(details.meterKind),
         meter_size: optional(details.meterSize),
-        ...(!existing?.meterId ? { initial_reading: details.reading } : {}),
+        ...(!existing?.meterId
+          ? { initial_reading: imported ? details.initialReading : details.reading }
+          : {}),
         current_reading: details.reading,
         date_installed: details.dateInstalled,
         is_active: 1,
@@ -207,7 +222,8 @@ async function writeApplication(
     actorId,
     existing ? 'customer.updated' : 'customer.created',
     id,
-    existing ? 'Customer application updated.' : 'Customer application registered.',
+    (existing ? 'Customer application updated.' : 'Customer application registered.') +
+      (details.duplicateReviewed ? ' Admin reviewed a possible duplicate.' : ''),
   );
   return customerView(await model.findCustomer(id, connection));
 }
@@ -283,8 +299,8 @@ function prepareCustomerImport(body) {
   return body.customers.map((item) => {
     if (!item || typeof item !== 'object' || Array.isArray(item))
       throw new AppError('Each import row must contain customer fields.', 400);
-    if (item.username || item.password)
-      throw new AppError('Provision app credentials individually after import.', 400);
+    if (item.password !== undefined)
+      throw new AppError('Passwords must not be included in customer imports.', 400);
     if (!item.account)
       throw new AppError('Each import row must provide its existing account number.', 400);
     return validateCustomer(item, { importing: true });
@@ -375,15 +391,24 @@ async function duplicateCustomer(details, connection = pool, excludedId = null) 
   const [rows] = await connection.execute(
     `SELECT id FROM customers WHERE first_name = ? AND COALESCE(middle_name, '') = ?
      AND last_name = ? AND COALESCE(extension_name, '') = ? AND contact_number = ?
-     AND id <> ? LIMIT 1`,
-    [details.firstName, details.middleName || '', details.lastName,
-      details.extensionName || '', details.contact, excludedId || '0'],
+     AND barangay_id = ? AND purok = ? AND id <> ? LIMIT 1`,
+    [
+      details.firstName,
+      details.middleName || '',
+      details.lastName,
+      details.extensionName || '',
+      details.contact,
+      details.barangayId,
+      details.address,
+      excludedId || '0',
+    ],
   );
   return rows.length > 0;
 }
 
 export async function checkCustomerDuplicate(body) {
-  if (!body || typeof body !== 'object') throw new AppError('Provide customer name and mobile number.', 400);
+  if (!body || typeof body !== 'object')
+    throw new AppError('Provide customer name and mobile number.', 400);
   const details = {};
   for (const key of ['firstName', 'middleName', 'lastName', 'extensionName']) {
     if (typeof (body[key] ?? '') !== 'string' || (body[key] || '').length > 60)
@@ -393,19 +418,36 @@ export async function checkCustomerDuplicate(body) {
   if (!details.firstName || !details.lastName || typeof body.contact !== 'string')
     throw new AppError('Provide customer name and mobile number.', 400);
   details.contact = '+63' + body.contact.replace(/^(\+?63|0)/, '');
-  if (!/^\+639\d{9}$/.test(details.contact)) throw new AppError('Provide a valid mobile number.', 400);
+  if (!/^\+639\d{9}$/.test(details.contact))
+    throw new AppError('Provide a valid mobile number.', 400);
+  details.barangayId = customerId(body.barangayId);
+  if (typeof body.address !== 'string' || !/^Purok [1-7]$/.test(body.address))
+    throw new AppError('Select a valid purok.', 400);
+  details.address = body.address;
   if (body.excludeId) customerId(body.excludeId);
   return { exists: await duplicateCustomer(details, pool, body.excludeId) };
 }
 
 export async function getConnectionRecords(query) {
   const state = query.state || 'open';
-  if (!['open','all','active','disconnected','inactive'].includes(state)) throw new AppError('Invalid connection filter.',400);
-  const filters = validateCustomerQuery({page:query.page,limit:query.limit,search:query.search});
-  const result = await model.listConnectionRecords(filters,state);
-  return {customers:result.rows.map(row=>{
-    const {disconnectedOn,disconnectionReason,outstanding,...customer} = row;
-    return {...customerView(customer),disconnectedOn:disconnectedOn || '',
-      disconnectionReason:disconnectionReason || '',outstanding:String(outstanding)};
-  }),pagination:result.pagination};
+  if (!['open', 'all', 'active', 'disconnected', 'inactive'].includes(state))
+    throw new AppError('Invalid connection filter.', 400);
+  const filters = validateCustomerQuery({
+    page: query.page,
+    limit: query.limit,
+    search: query.search,
+  });
+  const result = await model.listConnectionRecords(filters, state);
+  return {
+    customers: result.rows.map((row) => {
+      const { disconnectedOn, disconnectionReason, outstanding, ...customer } = row;
+      return {
+        ...customerView(customer),
+        disconnectedOn: disconnectedOn || '',
+        disconnectionReason: disconnectionReason || '',
+        outstanding: String(outstanding),
+      };
+    }),
+    pagination: result.pagination,
+  };
 }

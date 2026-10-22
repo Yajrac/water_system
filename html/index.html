@@ -67,7 +67,7 @@
             >
           </li>
           <li>
-            <a href="billing.html" class="sidebar-menu-item">
+            <a href="generated-bills.html" class="sidebar-menu-item">
               <i class="bi bi-file-earmark-text" aria-hidden="true"></i>
               <span>Billing &amp; Meter Reading</span>
             </a>
@@ -162,7 +162,9 @@
           <section id="summary" class="admin-summary" aria-label="Dashboard totals"></section>
           <section class="dashboard-charts" aria-label="Billing and collection charts">
             <section class="panel">
-              <div class="panel-header"><h2>Monthly collections</h2></div>
+              <div class="panel-header"><h2 id="collectionsTitle">Monthly collections</h2>
+                <label>Year <select id="collectionsYear" aria-label="Collections year" disabled><option value="">Current year</option></select></label>
+              </div>
               <div class="dashboard-chart" id="collectionsChart"></div>
             </section>
             <section class="panel">

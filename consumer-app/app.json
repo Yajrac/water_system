@@ -4,24 +4,20 @@
     "slug": "consumer-app",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/consumer-icon.png",
     "scheme": "consumerapp",
     "userInterfaceStyle": "light",
     "ios": {
-      "icon": "./assets/expo.icon"
+      "icon": "./assets/images/consumer-icon.png"
     },
     "android": {
-      "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/images/android-icon-foreground.png",
-        "backgroundImage": "./assets/images/android-icon-background.png",
-        "monochromeImage": "./assets/images/android-icon-monochrome.png"
-      },
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.jaycaber.consumerapp",
+      "icon": "./assets/images/consumer-icon.png"
     },
     "web": {
       "output": "static",
-      "favicon": "./assets/images/favicon.png"
+      "favicon": "./assets/images/consumer-icon.png"
     },
     "plugins": [
       "expo-router",
@@ -29,7 +25,7 @@
         "expo-splash-screen",
         {
           "backgroundColor": "#f3f7f9",
-          "image": "./assets/images/splash-icon.png",
+          "image": "./assets/images/consumer-icon.png",
           "imageWidth": 76
         }
       ]
@@ -37,6 +33,12 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "455b8917-6f83-4432-9f60-5d077e52f0a1"
+      }
     }
   }
 }

@@ -252,3 +252,27 @@ test('saved admin session renews on reload and before expiry without redirecting
   assert.equal(app.storage.has('pwss-admin-refresh-token'), false);
   assert.ok(app.requests.some(({ url }) => url.endsWith('/auth/logout')));
 });
+
+
+test('temporary admins are directed to password settings before protected pages', async () => {
+  const app = browser({
+    page: 'reports.html',
+    stored: { 'pwss-admin-access-token': 'temporary-token' },
+    respond: async () => ({body: {success: true, data: {user: {id:'1',role:'admin',mustChangePassword:true}}}}),
+  });
+  await app.auth.ready;
+  assert.deepEqual(app.redirects, ['settings.html#passwordSettingsPanel']);
+  assert.equal(app.classes.has('auth-pending'), true);
+  assert.equal(app.auth.destination(), 'settings.html#passwordSettingsPanel');
+});
+
+test('temporary admin can open password settings without a redirect loop', async () => {
+  const app = browser({
+    page: 'settings.html',
+    stored: { 'pwss-admin-access-token': 'temporary-token' },
+    respond: async () => ({body: {success: true, data: {user: {id:'1',role:'admin',mustChangePassword:true}}}}),
+  });
+  await app.auth.ready;
+  assert.equal(app.redirects.length, 0);
+  assert.equal(app.classes.has('auth-pending'), false);
+});

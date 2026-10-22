@@ -3,18 +3,21 @@ import assert from 'node:assert/strict';
 import { dashboardPeriod, createDashboardService } from '../src/services/dashboard.service.js';
 import { readDashboard } from '../src/models/dashboard.model.js';
 
-test('dashboard six-month window crosses calendar years correctly', () => {
-  const period = dashboardPeriod('2026-02-03');
-  assert.deepEqual(period.months, [
-    '2025-09',
-    '2025-10',
-    '2025-11',
-    '2025-12',
-    '2026-01',
-    '2026-02',
-  ]);
-  assert.equal(period.start, '2025-09-01');
-  assert.equal(period.end, '2026-03-01');
+test('dashboard defaults to the current year and retains selectable historical years', () => {
+  const period = dashboardPeriod('2027-01-01');
+  assert.equal(period.year, 2027);
+  assert.equal(period.months.length, 12);
+  assert.equal(period.months[0], '2027-01');
+  assert.equal(period.months[11], '2027-12');
+  assert.equal(period.start, '2027-01-01');
+  assert.equal(period.end, '2028-01-01');
+  const history = dashboardPeriod('2027-01-01', '2026');
+  assert.equal(history.start, '2026-01-01');
+  assert.equal(history.end, '2027-01-01');
+  assert.equal(history.monthEnd, '2027-02-01');
+  assert.equal(history.consumptionStart, '2026-08-01');
+  for (const year of ['2028', 'bad', '0', ['2026']])
+    assert.throws(() => dashboardPeriod('2027-01-01', year));
 });
 
 test('dashboard fills missing months and preserves exact monetary strings', async () => {
@@ -41,7 +44,7 @@ test('dashboard fills missing months and preserves exact monetary strings', asyn
   assert.equal(data.summary.outstanding, '9999999999999.99');
   assert.deepEqual(
     data.monthlyCollections.map((row) => row.amount),
-    ['0.00', '0.00', '0.00', '0.00', '0.00', '0.01'],
+    ['0.00', '0.01', ...Array(10).fill('0.00')],
   );
   assert.equal(
     data.billStatuses.reduce((sum, row) => sum + row.count, 0),

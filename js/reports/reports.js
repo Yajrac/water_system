@@ -1,85 +1,126 @@
-const reportRecords = WaterStore.load();
 const reportBarangay = document.getElementById('reportBarangay');
 const reportCycle = document.getElementById('reportCycle');
 const reportStatus = document.getElementById('reportStatus');
+const reportSearch = document.getElementById('reportSearch');
+const reportMessage = document.getElementById('pageMessage');
 let consumptionReportRows = [];
+let reportMatchedBills = [];
+let reportReady = false;
+let reportRequest = 0;
+let reportTimer;
 const accountReportPager = createPagination('accountReportPagination', showReport);
 const consumptionReportPager = createPagination('consumptionReportPagination', showReport);
-let reportRows = [];
-let reportMatchedBills = [];
-const reportHeadings = ['Account', 'Customer', 'Barangay', 'Cycle', 'Total', 'Balance', 'Status'];
 
 function showReport() {
-  const search = document.getElementById('reportSearch').value.trim().toLowerCase();
   const body = document.getElementById('reportRows');
   const consumptionBody = document.getElementById('consumptionRows');
   body.replaceChildren();
   consumptionBody.replaceChildren();
-  reportRows = [];
-  reportMatchedBills = [];
-  // A barangay name is a record key, including names such as "constructor".
-  const groups = Object.create(null);
-  reportRecords.bills.forEach((bill) => {
-    const customer = reportRecords.customers.find((item) => item.id === bill.customerId);
-    if (!customer || !(customer.name + ' ' + customer.account).toLowerCase().includes(search))
-      return;
-    const status = WaterStore.status(bill, reportRecords);
-    if (reportBarangay.value && customer.barangay !== reportBarangay.value) return;
-    if (reportCycle.value && bill.cycle !== reportCycle.value) return;
-    if (reportStatus.value && status !== reportStatus.value) return;
-    const values = [
-      customer.account,
-      customer.name,
-      customer.barangay,
-      bill.cycle,
-      bill.total.toFixed(2),
-      WaterStore.balance(bill, reportRecords).toFixed(2),
-      status,
-    ];
-    reportRows.push(values);
-    reportMatchedBills.push({ bill, customer, status });
-    if (!groups[customer.barangay])
-      groups[customer.barangay] = { customers: new Set(), consumption: 0 };
-    groups[customer.barangay].customers.add(customer.id);
-    groups[customer.barangay].consumption += bill.consumption;
-  });
   accountReportPager.update(reportMatchedBills.length);
-  accountReportPager.items(reportMatchedBills).forEach(({ customer }, index) => {
-    const values = reportRows[(accountReportPager.page - 1) * accountReportPager.size + index];
+  accountReportPager.items(reportMatchedBills).forEach(({ bill, customer, status }) => {
     const row = body.insertRow();
     AdminUI.customer(row, customer);
-    values
-      .slice(2)
-      .forEach((value, index) =>
-        AdminUI.cell(
-          row,
-          index === 2 || index === 3 ? WaterStore.money(Number(value)) : value,
-          reportHeadings[index + 2],
-        ),
-      );
+    [
+      customer.barangay,
+      bill.cycle,
+      WaterStore.money(bill.total),
+      WaterStore.money(bill.balance),
+      status,
+    ].forEach((value, index) =>
+      AdminUI.cell(row, value, ['Barangay', 'Cycle', 'Total', 'Balance', 'Status'][index]),
+    );
   });
-  consumptionReportRows = Object.entries(groups)
-    .sort((a, b) => b[1].consumption - a[1].consumption)
-    .map(([barangay, group]) => [barangay, group.customers.size,
-      Number(group.consumption.toFixed(3)),
-      Number((group.consumption / group.customers.size).toFixed(3))]);
   consumptionReportPager.update(consumptionReportRows.length);
   consumptionReportPager.items(consumptionReportRows).forEach((values) => {
     const row = consumptionBody.insertRow();
-    values.forEach((value, index) => AdminUI.cell(row, value,
-      ['Barangay', 'Billed accounts', 'Total consumption', 'Average per billed account'][index]));
+    values.forEach((value, index) =>
+      AdminUI.cell(
+        row,
+        value,
+        ['Barangay', 'Billed accounts', 'Total consumption', 'Average per billed account'][index],
+      ),
+    );
   });
-  AdminUI.empty(body, 6, 'No bills match the selected filters.');
-  AdminUI.empty(consumptionBody, 4, 'No consumption records match the selected filters.');
+  AdminUI.empty(
+    body,
+    6,
+    reportReady ? 'No bills match the selected filters.' : 'Report not loaded.',
+  );
+  AdminUI.empty(
+    consumptionBody,
+    4,
+    reportReady ? 'No consumption records match the selected filters.' : 'Report not loaded.',
+  );
 }
-WaterStore.barangays.forEach((barangay) => reportBarangay.add(new Option(barangay, barangay)));
-[reportBarangay, reportCycle, reportStatus].forEach((filter) =>
-  filter.addEventListener('change', resetReportPages),
-);
-function resetReportPages() {
-  accountReportPager.page = 1;
-  consumptionReportPager.page = 1;
+
+function clearReport() {
+  reportReady = false;
+  reportMatchedBills = [];
+  consumptionReportRows = [];
+  document.getElementById('printReport').disabled = true;
+  document.getElementById('reportSummary').textContent = '';
   showReport();
 }
-document.getElementById('reportSearch').addEventListener('input', resetReportPages);
-showReport();
+
+async function loadReport() {
+  const request = ++reportRequest;
+  clearReport();
+  reportMessage.textContent = 'Loading report...';
+  const params = new URLSearchParams();
+  if (reportSearch.value.trim()) params.set('search', reportSearch.value.trim());
+  if (reportBarangay.value) params.set('barangayId', reportBarangay.value);
+  if (reportCycle.value) params.set('month', reportCycle.value);
+  if (reportStatus.value) params.set('status', reportStatus.value);
+  try {
+    const data = await AdminAPI.request('/reports?' + params);
+    if (request !== reportRequest) return;
+    reportMatchedBills = data.bills.map((bill) => ({ bill, customer: bill, status: bill.status }));
+    consumptionReportRows = data.consumption.map((group) => [
+      group.barangay,
+      group.accounts,
+      group.volume,
+      group.average,
+    ]);
+    reportReady = true;
+    accountReportPager.page = consumptionReportPager.page = 1;
+    document.getElementById('reportSummary').textContent =
+      data.summary.bills +
+      ' bills | Total: ' +
+      WaterStore.money(data.summary.total) +
+      ' | Paid toward these bills: ' +
+      WaterStore.money(data.summary.paid) +
+      ' | Outstanding: ' +
+      WaterStore.money(data.summary.balance);
+    reportMessage.textContent = '';
+    document.getElementById('printReport').disabled = false;
+    showReport();
+  } catch (error) {
+    if (request !== reportRequest) return;
+    reportMessage.textContent = error.message;
+  }
+}
+
+function scheduleReport() {
+  ++reportRequest;
+  clearTimeout(reportTimer);
+  clearReport();
+  reportMessage.textContent = 'Loading report...';
+  reportTimer = setTimeout(loadReport, 300);
+}
+[reportBarangay, reportCycle, reportStatus].forEach((filter) =>
+  filter.addEventListener('change', scheduleReport),
+);
+reportSearch.addEventListener('input', scheduleReport);
+document.getElementById('refreshReport').addEventListener('click', () => {
+  clearTimeout(reportTimer);
+  loadReport();
+});
+(async () => {
+  try {
+    const data = await AdminAPI.request('/barangays');
+    for (const barangay of data) reportBarangay.add(new Option(barangay.name, barangay.id));
+  } catch (error) {
+    reportMessage.textContent = error.message;
+  }
+  await loadReport();
+})();

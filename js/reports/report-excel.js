@@ -93,12 +93,15 @@ function excelWorkbook(rows) {
 }
 
 function exportCurrentReport() {
+  if (!reportReady) return;
   const consumption =
     document.getElementById('barangayConsumptionTab').getAttribute('aria-selected') === 'true';
   const rows = [];
   if (consumption) {
     rows.push(['Barangay', 'Billed accounts', 'Consumption (m³)', 'Average per account (m³)']);
-    consumptionReportRows.forEach((values) => rows.push([...values]));
+    consumptionReportRows.forEach(([barangay, accounts, volume, average]) =>
+      rows.push([barangay, accounts, Number(volume), Number(average)]),
+    );
   } else {
     rows.push([
       'Submitter no.',
@@ -113,16 +116,16 @@ function exportCurrentReport() {
       'Status',
     ]);
     reportMatchedBills.forEach(({ bill, customer, status }) => {
-      const balance = WaterStore.balance(bill, reportRecords);
+      const balance = Number(bill.balance);
       rows.push([
         customer.submitterNumber || '',
         customer.account,
         customer.name,
         [customer.address, customer.street, customer.barangay].filter(Boolean).join(', '),
         bill.cycle,
-        bill.consumption,
-        bill.total,
-        Math.round((bill.total - balance) * 100) / 100,
+        Number(bill.consumption),
+        Number(bill.total),
+        Number(bill.paid),
         balance,
         status,
       ]);

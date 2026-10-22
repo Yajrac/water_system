@@ -6,7 +6,7 @@ function renderDashboardCharts(data) {
   }
   const monthKeys = data.period.months;
   const monthLabel = (key) =>
-    new Intl.DateTimeFormat('en', { month: 'short', year: '2-digit', timeZone: 'UTC' }).format(
+    new Intl.DateTimeFormat('en', { month: 'short', timeZone: 'UTC' }).format(
       new Date(key + '-01T00:00:00Z'),
     );
   function chartNode(tag, attributes = {}, text = '') {
@@ -38,6 +38,7 @@ function renderDashboardCharts(data) {
     format,
     line = false,
     labels = monthKeys.map(monthLabel),
+    annualTotal = null,
   ) {
     const container = document.getElementById(id);
     const availableWidth = Math.max(0, container.clientWidth - 44);
@@ -127,7 +128,9 @@ function renderDashboardCharts(data) {
     container.appendChild(svg);
     const total = document.createElement('p');
     total.className = 'chart-period-total';
-    total.textContent = 'Six-month total: ' + format(values.reduce((sum, value) => sum + value, 0));
+    total.textContent =
+      (id === 'collectionsChart' ? 'Year total: ' : 'Six-month total: ') +
+      format(annualTotal ?? values.reduce((sum, value) => sum + value, 0));
     container.appendChild(total);
     if (!values.some((value) => value > 0)) {
       const empty = document.createElement('p');
@@ -149,13 +152,39 @@ function renderDashboardCharts(data) {
     }
   }
   const collections = data.monthlyCollections.map((row) => Number(row.amount));
-  renderMonthlyChart(
-    'collectionsChart',
-    'Monthly collections — last six months',
-    collections,
-    (value) => WaterStore.money(value),
-  );
-  // Use the same six-month coverage and bar style as monthly collections.
+  const annualTotal = collections.reduce((sum, value) => sum + value, 0);
+  let half = Number(data.asOf.slice(0, 4)) === data.period.year && Number(data.asOf.slice(5, 7)) >= 7 ? 1 : 0;
+  function showCollectionHalf() {
+    const container = document.getElementById('collectionsChart');
+    container.replaceChildren();
+    container.style.overflowX = '';
+    const offset = half * 6;
+    renderMonthlyChart('collectionsChart', 'Monthly collections - ' + data.period.year,
+      collections.slice(offset, offset + 6), value => WaterStore.money(value), false,
+      monthKeys.slice(offset, offset + 6).map(monthLabel), annualTotal);
+    const controls = document.createElement('nav');
+    controls.className = 'collection-half-controls';
+    controls.setAttribute('aria-label', 'Collection months');
+    const previous = document.createElement('button');
+    previous.type = 'button';
+    previous.className = 'btn btn-secondary step-navigation-button';
+    previous.textContent = 'Previous';
+    previous.disabled = half === 0;
+    const range = document.createElement('span');
+    range.textContent = half === 0 ? 'Jan - Jun' : 'Jul - Dec';
+    range.setAttribute('aria-live', 'polite');
+    const next = document.createElement('button');
+    next.type = 'button';
+    next.className = 'btn btn-secondary step-navigation-button';
+    next.textContent = 'Next';
+    next.disabled = half === 1;
+    previous.addEventListener('click', () => { half = 0; showCollectionHalf(); container.querySelector('button:last-child').focus(); });
+    next.addEventListener('click', () => { half = 1; showCollectionHalf(); container.querySelector('button').focus(); });
+    controls.append(previous, range, next);
+    container.prepend(controls);
+  }
+  showCollectionHalf();
+  // Barangay consumption retains its recent six-month coverage.
   const barangayVolumes = new Map(
     data.barangayConsumption.map((row) => [row.barangay, Number(row.volume)]),
   );

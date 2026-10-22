@@ -66,7 +66,12 @@ const fields = [
   'username',
   'password',
   'revision',
+  'duplicateReviewed',
   'account',
+  'submitterNumber',
+  'applicationNumber',
+  'connectionStatus',
+  'initialReading',
 ];
 
 export function validateCustomer(body, { existing = null, importing = false } = {}) {
@@ -79,6 +84,34 @@ export function validateCustomer(body, { existing = null, importing = false } = 
     throw new AppError('Provide valid customer fields only.', 400);
   }
   const result = {};
+  if (
+    body.duplicateReviewed !== undefined &&
+    (importing || typeof body.duplicateReviewed !== 'boolean')
+  )
+    throw new AppError('Invalid duplicate review confirmation.', 400);
+  result.duplicateReviewed = body.duplicateReviewed === true;
+  for (const key of [
+    'submitterNumber',
+    'applicationNumber',
+    'connectionStatus',
+    'initialReading',
+  ]) {
+    if (body[key] !== undefined && !importing)
+      throw new AppError('Only imports may restore ' + key + '.', 400);
+  }
+  if (importing) {
+    for (const key of ['submitterNumber', 'applicationNumber']) {
+      const value = body[key] || '';
+      if (typeof value !== 'string' || (value && !/^[A-Za-z0-9_-]{3,40}$/.test(value.trim())))
+        throw new AppError('Provide a valid ' + key + '.', 400);
+      result[key] = value.trim();
+    }
+    if (body.connectionStatus) {
+      if (!['Active', 'Inactive', 'Disconnected'].includes(body.connectionStatus))
+        throw new AppError('Select a valid connection status.', 400);
+      result.connectionStatus = body.connectionStatus;
+    }
+  }
   if (body.account !== undefined) {
     if (
       !importing ||
@@ -123,7 +156,7 @@ export function validateCustomer(body, { existing = null, importing = false } = 
     if (!allowed.includes(value)) throw new AppError('Select a valid ' + key + '.', 400);
     result[key] = value;
   }
-  if (importing) result.serviceStatus = 'Approved';
+  if (importing && !body.serviceStatus) result.serviceStatus = 'Approved';
   if (importing && body.barangayName !== undefined) {
     if (body.barangayId !== undefined)
       throw new AppError('Provide either barangay ID or name for each import row.', 400);
@@ -154,13 +187,20 @@ export function validateCustomer(body, { existing = null, importing = false } = 
     }
     result[key] = value;
   }
-  result.dateApplied = existing?.dateApplied || today();
-  result.dateApproved = result.serviceStatus === 'Pending' ? '' : existing?.dateApproved || today();
+  result.dateApplied = existing?.dateApplied || (importing && result.dateApplied) || today();
+  result.dateApproved =
+    result.serviceStatus === 'Pending'
+      ? ''
+      : existing?.dateApproved || (importing && result.dateApproved) || today();
   for (const key of checks) {
     if (body[key] !== undefined && typeof body[key] !== 'boolean')
       throw new AppError('Invalid document checklist.', 400);
-    result[key] = importing ? true : Boolean(body[key]);
+    result[key] = importing && body[key] === undefined ? true : Boolean(body[key]);
   }
+  if (result.dateApproved && result.dateApproved < result.dateApplied)
+    throw new AppError('Approval date cannot precede application.', 400);
+  if (importing && result.connectionStatus === 'Active' && result.serviceStatus !== 'Installed')
+    throw new AppError('Active connections require Installed service status.', 400);
   if (result.dateInstalled && result.dateInstalled < (result.dateApproved || result.dateApplied)) {
     throw new AppError('Installation date cannot precede application or approval.', 400);
   }
@@ -174,6 +214,11 @@ export function validateCustomer(body, { existing = null, importing = false } = 
   for (const key of quantity) result[key] = decimal(body[key] ?? '0', 3, 12, key);
   if (!result.meterNumber && Number(result.reading))
     throw new AppError('A reading requires an installed meter.', 400);
+  if (importing) {
+    result.initialReading = decimal(body.initialReading ?? result.reading, 3, 12, 'initialReading');
+    if (Number(result.initialReading) > Number(result.reading))
+      throw new AppError('Initial reading cannot exceed current reading.', 400);
+  }
   result.installationTotal = installationTotal(result);
   result.username = typeof body.username === 'string' ? body.username.trim() : '';
   result.password = body.password ?? '';
@@ -190,7 +235,7 @@ export function validateCustomer(body, { existing = null, importing = false } = 
     );
   }
   if (
-    (result.username && !existing?.userId && !result.password) ||
+    (!importing && result.username && !existing?.userId && !result.password) ||
     (result.password && !result.username)
   ) {
     throw new AppError('Provide both username and password to create a consumer account.', 400);

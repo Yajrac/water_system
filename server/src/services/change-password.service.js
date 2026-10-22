@@ -25,8 +25,8 @@ export async function changeOwnPassword(userId, body) {
       'SELECT password_hash, role, is_active FROM users WHERE id = ? FOR UPDATE',
       [userId],
     );
-    if (!user || Number(user.is_active) !== 1 || user.role !== 'consumer')
-      throw new AppError('Consumer account is unavailable.', 403);
+    if (!user || Number(user.is_active) !== 1 || !['admin', 'consumer'].includes(user.role))
+      throw new AppError('Account is unavailable.', 403);
     if (!(await verifyPassword(user.password_hash, currentPassword)))
       throw new AppError('Current password is incorrect.', 400);
     await connection.execute(
@@ -34,8 +34,8 @@ export async function changeOwnPassword(userId, body) {
       [await hashPassword(newPassword), userId],
     );
     await connection.execute(
-      "INSERT INTO activity_logs (actor_id, actor_role, action, entity_type, entity_id, description) VALUES (?, 'consumer', 'consumer.password_changed', 'users', ?, 'Consumer changed password.')",
-      [userId, userId],
+      "INSERT INTO activity_logs (actor_id, actor_role, action, entity_type, entity_id, description) VALUES (?, ?, ?, 'users', ?, ?)",
+      [userId, user.role, user.role + '.password_changed', userId, 'Account owner changed password.'],
     );
     await connection.commit();
   } catch (error) {

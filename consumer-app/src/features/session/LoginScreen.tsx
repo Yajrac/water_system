@@ -29,7 +29,7 @@ export default function LoginScreen() {
       >
         <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={styles.scroll}>
           <View style={styles.form}>
-            <Image source={require('../../../assets/images/pwss-logo.jpg')} style={styles.logo} />
+            <Image source={require('../../../assets/images/consumer-icon.png')} style={styles.logo} />
             <Text style={styles.eyebrow}>PIO DURAN WATER SUPPLY</Text>
             <Text style={styles.title}>Your water account, all in one place.</Text>
             <Text style={text.muted}>View your bills, track consumption and stay connected.</Text>
