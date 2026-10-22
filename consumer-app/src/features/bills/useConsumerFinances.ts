@@ -47,14 +47,16 @@ export type ConsumerFinances = {
 };
 export function useConsumerFinances(billsPage = 1, paymentsPage = 1) {
   const { accessToken } = useSession();
-  const [data, setData] = useState<ConsumerFinances | null>(null);
+  const queryKey = billsPage + ':' + paymentsPage;
+  const [snapshot, setSnapshot] = useState<{ key: string; value: ConsumerFinances } | null>(null);
+  const data = snapshot?.key === queryKey ? snapshot.value : null;
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(true);
   const version = useRef(0);
   const reload = useCallback(async () => {
     const current = ++version.current;
     if (!accessToken) {
-      setData(null);
+      setSnapshot(null);
       setBusy(false);
       return;
     }
@@ -67,7 +69,7 @@ export function useConsumerFinances(billsPage = 1, paymentsPage = 1) {
         accessToken,
         'GET',
       );
-      if (current === version.current) setData(result);
+      if (current === version.current) setSnapshot({ key: queryKey, value: result });
     } catch (failure) {
       if (current === version.current) {
         setError(failure instanceof Error ? failure.message : 'Could not load account records.');
@@ -75,10 +77,9 @@ export function useConsumerFinances(billsPage = 1, paymentsPage = 1) {
     } finally {
       if (current === version.current) setBusy(false);
     }
-  }, [accessToken, billsPage, paymentsPage]);
+  }, [accessToken, billsPage, paymentsPage, queryKey]);
   useFocusEffect(
     useCallback(() => {
-      setData(null);
       void reload();
       return () => {
         version.current++;

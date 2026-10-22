@@ -8,6 +8,7 @@ export default function AnnouncementsScreen() {
   const { items, busy, error, refresh, markRead } = useNotifications();
   const [selected, setSelected] = useState<ConsumerNotice | null>(null);
   const [readError, setReadError] = useState('');
+  const [visibleCount, setVisibleCount] = useState(10);
   useFocusEffect(
     useCallback(() => {
       void refresh();
@@ -29,7 +30,7 @@ export default function AnnouncementsScreen() {
       {busy && !items.length && <LoadingCards />}
       {!!error && <Text style={text.muted}>{error}</Text>}
       {!busy && !error && !items.length && <Text style={text.muted}>No notifications yet.</Text>}
-      {items.map((item) => (
+      {items.slice(0, visibleCount).map((item) => (
         <Pressable
           key={item.id}
           accessibilityRole="button"
@@ -47,6 +48,7 @@ export default function AnnouncementsScreen() {
           </Card>
         </Pressable>
       ))}
+      {items.length > visibleCount && <Button label="See more" secondary onPress={() => setVisibleCount(count => count + 10)} />}
       <Sheet
         title={selected?.title || 'Notification'}
         visible={!!selected}

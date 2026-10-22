@@ -1,51 +1,31 @@
 import { useConsumerProfile } from '../profile/useConsumerProfile';
 import { router, useFocusEffect } from 'expo-router';
-import { useCallback, useRef, useState } from 'react';
-import { useSession } from '../session/SessionProvider';
-import { consumerRequest } from '../session/api';
+import { useCallback, useState } from 'react';
+import { useNotifications, type ConsumerNotice } from '../notifications/NotificationProvider';
 import { useConsumerFinances } from '../bills/useConsumerFinances';
 import { ActivityIndicator, Pressable, Text, View } from 'react-native';
 import { Avatar } from '@/components/consumer/Avatar';
 import { Icon, type IconName } from '@/components/consumer/Icon';
-import { Badge, Button, Card, CardTitle, Screen, text } from '@/components/consumer/ui';
+import { Badge, Button, Card, CardTitle, Screen, Sheet, text } from '@/components/consumer/ui';
 import { colors, money } from '@/theme/tokens';
 import { styles } from './home.styles';
 
 export default function HomeScreen() {
   const { profile: customer, error: profileError, reload: reloadProfile } = useConsumerProfile();
   const { data, error, busy, reload } = useConsumerFinances();
-  const { accessToken } = useSession();
-  const [advisory, setAdvisory] = useState<{ title: string; date: string } | null>(null);
-  const [advisoryError, setAdvisoryError] = useState('');
-  const advisoryVersion = useRef(0);
-  const loadAdvisory = useCallback(async () => {
-    const version = ++advisoryVersion.current;
-    if (!accessToken) return;
-    setAdvisoryError('');
-    try {
-      const notices = await consumerRequest<{ category: string; title: string; date: string }[]>(
-        '/notifications/mine',
-        undefined,
-        accessToken,
-        'GET',
-      );
-      if (version === advisoryVersion.current)
-        setAdvisory(notices.find((item) => item.category === 'Advisory') || null);
-    } catch {
-      if (version === advisoryVersion.current) {
-        setAdvisory(null);
-        setAdvisoryError('Could not load advisories.');
-      }
+  const { items: notices, error: noticeError, busy: noticesBusy, refresh: refreshNotices, markRead } = useNotifications();
+  const [selectedNotice, setSelectedNotice] = useState<ConsumerNotice | null>(null);
+  const [readError, setReadError] = useState('');
+  const latestNotices = notices.slice(0, 2);
+  async function viewNotice(item: ConsumerNotice) {
+    setSelectedNotice(item);
+    setReadError('');
+    if (!item.read) {
+      try { await markRead([item.id]); }
+      catch { setReadError('Could not save read status. Please try again.'); }
     }
-  }, [accessToken]);
-  useFocusEffect(
-    useCallback(() => {
-      void loadAdvisory();
-      return () => {
-        advisoryVersion.current++;
-      };
-    }, [loadAdvisory]),
-  );
+  }
+  useFocusEffect(useCallback(() => { void refreshNotices(); }, [refreshNotices]));
   const latest = data?.latestBill;
   const balance = Number(data?.summary.balance || 0);
   const usage = latest?.consumption || '0';
@@ -112,7 +92,7 @@ export default function HomeScreen() {
           onPress={() => {
             void reload();
             void reloadProfile();
-            void loadAdvisory();
+            void refreshNotices();
           }}
         >
           {busy && <ActivityIndicator size="small" color={colors.primary} />}
@@ -190,17 +170,33 @@ export default function HomeScreen() {
         <Text style={text.muted}>Meter no. {customer?.meter || 'Not recorded'}</Text>
       </Card>
       <Card>
-        <CardTitle title="Latest advisory" icon="news" />
-        <Text style={styles.advisory}>
-          {advisoryError || advisory?.title || 'No advisories yet.'}
-        </Text>
-        <Text style={text.muted}>{advisory?.date || ''}</Text>
-        <Button
-          label="Read announcements"
-          secondary
-          onPress={() => router.push('/announcements')}
-        />
+        <CardTitle title="Latest notifications" icon="news" />
+        {!!noticeError && <Text style={text.muted}>{noticeError}</Text>}
+        {!latestNotices.length && <Text style={text.muted}>
+          {noticesBusy ? 'Loading notifications...' : noticeError ? 'Notifications are unavailable right now.' : 'No notifications yet.'}
+        </Text>}
+        {latestNotices.map(item => (
+          <Pressable key={item.id} accessibilityRole="button"
+            accessibilityLabel={(item.read ? '' : 'Unread: ') + item.title}
+            onPress={() => void viewNotice(item)} style={styles.notificationPreview}>
+            <View style={styles.row}>
+              <Text style={styles.advisory}>{item.title}</Text>
+              {!item.read && <Text style={styles.newNotice}>New</Text>}
+            </View>
+            <Text style={text.muted}>{item.date}</Text>
+            <Text style={text.body} numberOfLines={2}>{item.body}</Text>
+          </Pressable>
+        ))}
+        <Button label="View all notifications" secondary onPress={() => router.push('/announcements')} />
       </Card>
+      <Sheet title={selectedNotice?.title || 'Notification'} visible={!!selectedNotice} onClose={() => setSelectedNotice(null)}>
+        <Text style={text.muted}>{selectedNotice?.date}</Text>
+        <Text style={text.body}>{selectedNotice?.body}</Text>
+        {!!readError && <>
+          <Text accessibilityRole="alert" style={text.muted}>{readError}</Text>
+          <Button label="Retry read status" onPress={() => { if (selectedNotice) void viewNotice(selectedNotice); }} />
+        </>}
+      </Sheet>
     </Screen>
   );
 }

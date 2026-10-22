@@ -1,6 +1,8 @@
 # PWSS Consumer App
 
-React Native + Expo SDK 57 prototype for Pio Duran Water Supply System.
+Android consumer application built with React Native + Expo SDK 57 for Pio Duran Water Supply System.
+
+The Expo configuration supports Android only (`platforms: ["android"]`). Web and iOS launch scripts are disabled. The separate admin website and backend are configured outside this app.
 
 ## Run
 
@@ -18,8 +20,7 @@ Scan the QR code with Expo Go. Keep your phone and computer on the same local ne
 Login now uses the Express API and accepts a consumer username or account number.
 The default public API is `https://water-system-1.onrender.com/api/v1`; override it
 with `EXPO_PUBLIC_API_URL` before starting Expo. A physical phone cannot use your
-computer's `localhost` address. For Expo web, add the preview's exact origin to the
-backend `CORS_ORIGINS`.
+computer's `localhost` address.
 
 Apply server migration 017 before using this version. Newly bulk-uploaded verified
 consumers receive a submitter-number temporary password. Login requires changing it
@@ -76,3 +77,9 @@ items read. Apply migration 019 before using this version with the hosted API.
 Notifications are in-app only: no phone push permission, EAS setup or background
 push delivery is required. The applied migration is retained unchanged; its
 unused device/delivery tables are reserved and no longer used by application code.
+## Expo Router 57 Android startup patch
+
+`npm install` / `npm ci` runs `scripts/patch-router-linking.cjs` to guard the initial-link state update until NavigationContainer mounts. This addresses the SDK 57 race tracked in [Expo issue #49378](https://github.com/expo/expo/issues/49378). Queued links are applied after mount; callbacks after unmount are ignored. The patch preserves link handling and does not suppress React warnings.
+
+The script is repeatable and stops on unrecognized source or a new SDK major so the workaround can be reviewed when upgrading. Run `node --test --test-isolation=none scripts/patch-router-linking.test.cjs` to check the mount/unmount behavior. Restart Metro with `npx expo start --clear` after applying the patch; Android device cold-start testing is still required.
+

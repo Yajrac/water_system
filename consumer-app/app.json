@@ -7,17 +7,10 @@
     "icon": "./assets/images/consumer-icon.png",
     "scheme": "consumerapp",
     "userInterfaceStyle": "light",
-    "ios": {
-      "icon": "./assets/images/consumer-icon.png"
-    },
     "android": {
       "predictiveBackGestureEnabled": false,
       "package": "com.jaycaber.consumerapp",
       "icon": "./assets/images/consumer-icon.png"
-    },
-    "web": {
-      "output": "static",
-      "favicon": "./assets/images/consumer-icon.png"
     },
     "plugins": [
       "expo-router",
@@ -40,6 +33,9 @@
       "eas": {
         "projectId": "455b8917-6f83-4432-9f60-5d077e52f0a1"
       }
-    }
+    },
+    "platforms": [
+      "android"
+    ]
   }
 }

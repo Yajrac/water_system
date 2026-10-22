@@ -32,7 +32,8 @@ export async function ownFinances(userId, query = {}) {
   };
   const billsPage = pageValue(query.billsPage),
     paymentsPage = pageValue(query.paymentsPage),
-    limit = 20;
+    limit = 10,
+    billsLimit = 10;
   const connection = await pool.getConnection();
   try {
     await connection.beginTransaction();
@@ -59,7 +60,7 @@ export async function ownFinances(userId, query = {}) {
       CASE WHEN b.total_amount<=COALESCE(p.paid,0) THEN 'Paid'
         WHEN b.due_date<DATE(CONVERT_TZ(UTC_TIMESTAMP(),'+00:00','+08:00')) THEN 'Overdue' ELSE 'Unpaid' END AS status`;
     const [bills] = await connection.execute(
-      `SELECT ${columns} ${source} ORDER BY b.billing_month DESC,b.id DESC LIMIT 20 OFFSET ${(billsPage - 1) * limit}`,
+      `SELECT ${columns} ${source} ORDER BY b.billing_month DESC,b.id DESC LIMIT ${billsLimit} OFFSET ${(billsPage - 1) * billsLimit}`,
       [id],
     );
     const [latest] = await connection.execute(
@@ -76,7 +77,7 @@ export async function ownFinances(userId, query = {}) {
       CAST(b.total_amount-COALESCE((SELECT SUM(pr.amount) FROM payments pr WHERE pr.bill_id=p.bill_id AND pr.id<p.id),0) AS CHAR) AS balanceBefore,
       CAST(GREATEST(0,b.total_amount-COALESCE((SELECT SUM(pr.amount) FROM payments pr WHERE pr.bill_id=p.bill_id AND pr.id<=p.id),0)) AS CHAR) AS balanceAfter
       FROM payments p JOIN bills b ON b.id=p.bill_id WHERE b.customer_id=?
-      ORDER BY p.paid_at DESC,p.id DESC LIMIT 20 OFFSET ${(paymentsPage - 1) * limit}`,
+      ORDER BY p.paid_at DESC,p.id DESC LIMIT 10 OFFSET ${(paymentsPage - 1) * limit}`,
       [id],
     );
     await connection.commit();
@@ -89,7 +90,7 @@ export async function ownFinances(userId, query = {}) {
       latestBill: latest[0] || null,
       bills,
       payments,
-      billsPagination: { page: billsPage, limit, total: Number(summary.billCount) },
+      billsPagination: { page: billsPage, limit: billsLimit, total: Number(summary.billCount) },
       paymentsPagination: { page: paymentsPage, limit, total: Number(count.total) },
     };
   } catch (error) {

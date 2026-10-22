@@ -1,22 +1,21 @@
+import { useConsumerHistory } from '@/features/bills/useConsumerHistory';
 import { LoadingCards, RefreshControl } from '@/components/consumer/LoadingState';
 import { RecordCard } from '@/components/consumer/RecordCard';
 import { useState } from 'react';
 import { Text } from 'react-native';
 import { Button, Detail, Screen, Sheet, text } from '@/components/consumer/ui';
-import { useConsumerFinances, type ConsumerPayment } from '../bills/useConsumerFinances';
+import { type ConsumerPayment } from '../bills/useConsumerFinances';
 import { useConsumerProfile } from '../profile/useConsumerProfile';
 import { money } from '@/theme/tokens';
 
 export default function PaymentsScreen() {
-  const [page, setPage] = useState(1);
-  const { data, error, busy, reload } = useConsumerFinances(1, page);
+  const { items: payments, loaded, error, busy, reload, seeMore, hasMore } = useConsumerHistory('payments');
   const { profile: customer } = useConsumerProfile();
-  const payments = data?.payments || [];
   const [selected, setSelected] = useState<ConsumerPayment | null>(null);
   return (
     <Screen title="Payment history">
       <RefreshControl busy={busy} onRefresh={() => void reload()} />
-      {busy && !data && <LoadingCards />}
+      {busy && !loaded && <LoadingCards />}
       {!!error && (
         <Text accessibilityRole="alert" style={text.muted}>
           {error}
@@ -38,23 +37,7 @@ export default function PaymentsScreen() {
           onPress={() => setSelected(payment)}
         />
       ))}
-      {!!data && (
-        <>
-          <Text style={text.muted}>Page {page}</Text>
-          <Button
-            label="Previous"
-            secondary
-            disabled={busy || page === 1}
-            onPress={() => setPage(page - 1)}
-          />
-          <Button
-            label="Next"
-            secondary
-            disabled={busy || page * data.paymentsPagination.limit >= data.paymentsPagination.total}
-            onPress={() => setPage(page + 1)}
-          />
-        </>
-      )}
+      {hasMore && <Button label={busy ? 'Loading...' : 'See more'} secondary disabled={busy} onPress={() => void seeMore()} />}
       <Sheet title="Payment receipt" visible={!!selected} onClose={() => setSelected(null)}>
         {selected ? (
           <>

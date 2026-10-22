@@ -1,6 +1,8 @@
 import { StyleSheet } from 'react-native';
 import { colors } from '@/theme/tokens';
 export const styles = StyleSheet.create({
+  notificationPreview: { gap: 8, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: colors.border },
+  newNotice: { color: '#dc2626', fontSize: 12, fontWeight: '700' },
   skeletonLayout: { gap: 18 },
   skeletonWelcome: { flex: 1, gap: 10 },
   skeletonLine: { height: 14, borderRadius: 5, backgroundColor: colors.border, width: '100%' },

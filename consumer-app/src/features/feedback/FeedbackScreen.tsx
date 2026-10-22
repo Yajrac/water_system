@@ -1,7 +1,7 @@
 import { LoadingCards, RefreshControl } from '@/components/consumer/LoadingState';
 import { Icon } from '@/components/consumer/Icon';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Text, TextInput, View, StyleSheet, Pressable } from 'react-native';
+import { Keyboard, Text, TextInput, View, StyleSheet, Pressable } from 'react-native';
 import { Button, Card, Detail, Screen, Sheet, text } from '@/components/consumer/ui';
 import { colors } from '@/theme/tokens';
 import { useSession } from '../session/SessionProvider';
@@ -18,14 +18,17 @@ export default function FeedbackScreen() {
   const [busy,setBusy]=useState(false);
   const [loading,setLoading]=useState(false);
   const [notice,setNotice]=useState('');
+  const [historyError,setHistoryError]=useState('');
+  const [sent,setSent]=useState(false);
   const [historyOpen,setHistoryOpen]=useState(false);
   const sending=useRef(false);
   const messageInput=useRef<TextInput>(null);
   const load=useCallback(async()=>{
     if(!accessToken)return;
     setLoading(true);
+    setHistoryError('');
     try{setItems(await consumerRequest<Feedback[]>('/consumer/feedback',undefined,accessToken,'GET'));}
-    catch(failure){setNotice(failure instanceof Error?failure.message:'Could not load feedback.');}
+    catch(failure){setHistoryError(failure instanceof Error?failure.message:'Could not load feedback.');}
     finally{setLoading(false);}
   },[accessToken]);
   useEffect(()=>{const timer=setTimeout(()=>void load(),0);return()=>clearTimeout(timer);},[load]);
@@ -34,7 +37,8 @@ export default function FeedbackScreen() {
     sending.current=true;setBusy(true);setNotice('');
     try{
       await consumerRequest('/consumer/feedback',{category,message:composedMessage},accessToken);
-      setMessage('');setOtherConcern('');setNotice('Feedback sent successfully.');await load();
+      setMessage('');setOtherConcern('');setCategory('Billing');
+      Keyboard.dismiss();setSent(true);void load();
     }catch(failure){setNotice(failure instanceof Error?failure.message:'Could not send feedback.');}
     finally{sending.current=false;setBusy(false);}
   }
@@ -69,18 +73,30 @@ export default function FeedbackScreen() {
         value={message} onChangeText={setMessage} style={styles.input}/>
       <Text style={text.muted}>{composedMessage.length}/1500 characters</Text>
     </Card>
+    <Sheet title="Feedback sent" visible={sent} onClose={()=>setSent(false)}>
+      <View style={styles.successIcon} accessible accessibilityLabel="Success">
+        <Text style={styles.successCheck}>{'\u2713'}</Text>
+      </View>
+      <Text accessibilityRole="alert" style={text.heading}>Feedback sent successfully</Text>
+      <Text style={text.body}>The PWSS office has received your feedback.</Text>
+      <Button label="View feedback history" onPress={()=>{setSent(false);setHistoryOpen(true);void load();}} />
+      <Button label="Done" secondary onPress={()=>setSent(false)} />
+    </Sheet>
     <Sheet title="Feedback history" visible={historyOpen} onClose={()=>setHistoryOpen(false)}>
     <RefreshControl busy={loading||busy} onRefresh={()=>void load()} />
+    {!!historyError&&<Text accessibilityRole="alert" style={text.muted}>{historyError}</Text>}
     {loading&&!items.length&&<LoadingCards count={2}/>}
-    {!loading&&!items.length&&<Text style={text.muted}>No feedback submitted yet.</Text>}
+    {!loading&&!historyError&&!items.length&&<Text style={text.muted}>No feedback submitted yet.</Text>}
     {items.map(item=><Card key={item.id}>
       <Text style={text.heading}>{item.category}</Text><Text style={text.body}>{item.message}</Text>
-      <Text style={text.muted}>{item.date}</Text><Detail label="Status" value={item.status}/>
+      <Text style={text.muted}>{item.date}</Text><Detail label="Status" value={item.status==='New'?'Submitted':item.status}/>
     </Card>)}
     </Sheet>
   </Screen>;
 }
 const styles=StyleSheet.create({
+  successIcon:{width:56,height:56,borderRadius:28,backgroundColor:colors.successTint,alignItems:'center',justifyContent:'center'},
+  successCheck:{fontSize:32,fontWeight:'700',color:colors.success},
   historyButton:{minWidth:44,minHeight:44,alignItems:'center',justifyContent:'center'},
   sendArea:{gap:10},
   categories:{flexDirection:'row',flexWrap:'wrap',gap:8},

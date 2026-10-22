@@ -1,21 +1,20 @@
+import { useConsumerHistory } from '@/features/bills/useConsumerHistory';
 import { LoadingCards, RefreshControl } from '@/components/consumer/LoadingState';
 import { RecordCard } from '@/components/consumer/RecordCard';
 import { useState } from 'react';
 import { Text } from 'react-native';
 import { Button, Detail, Screen, Sheet, text } from '@/components/consumer/ui';
-import { useConsumerFinances, type ConsumerBill } from './useConsumerFinances';
+import { type ConsumerBill } from './useConsumerFinances';
 import { money } from '@/theme/tokens';
 
 export default function BillsScreen() {
-  const [page, setPage] = useState(1);
-  const { data, error, busy, reload } = useConsumerFinances(page);
-  const bills = data?.bills || [];
+  const { items: bills, loaded, error, busy, reload, seeMore, hasMore } = useConsumerHistory('bills');
   const [selected, setSelected] = useState<ConsumerBill | null>(null);
   return (
     <Screen title="My bills">
       <Text style={text.muted}>Your monthly statements and meter readings.</Text>
       <RefreshControl busy={busy} onRefresh={() => void reload()} />
-      {busy && !data && <LoadingCards />}
+      {busy && !loaded && <LoadingCards />}
       {!!error && (
         <Text accessibilityRole="alert" style={text.muted}>
           {error}
@@ -35,23 +34,7 @@ export default function BillsScreen() {
           onPress={() => setSelected(bill)}
         />
       ))}
-      {!!data && (
-        <>
-          <Text style={text.muted}>Page {page}</Text>
-          <Button
-            label="Previous"
-            secondary
-            disabled={busy || page === 1}
-            onPress={() => setPage(page - 1)}
-          />
-          <Button
-            label="Next"
-            secondary
-            disabled={busy || page * data.billsPagination.limit >= data.billsPagination.total}
-            onPress={() => setPage(page + 1)}
-          />
-        </>
-      )}
+      {hasMore && <Button label={busy ? 'Loading...' : 'See more'} secondary disabled={busy} onPress={() => void seeMore()} />}
       <Sheet
         title={selected?.month || 'Bill details'}
         visible={!!selected}

@@ -39,13 +39,17 @@ export async function consumerRequest<T>(path: string, body: unknown, token?: st
     }
     return result.data as T;
   } catch (error) {
+    if (error instanceof ConsumerApiError) throw error;
+    if (error instanceof Error && /cancelled|canceled|fetch failed|failed to fetch|network request failed/i.test(error.message)) {
+      throw new Error('Something went wrong. Please check your connection and try again.');
+    }
     if (error instanceof Error && error.name === 'AbortError') {
       throw new Error('Connecting is taking longer than usual. Please try again.');
     }
     if (error instanceof TypeError) {
       throw new Error('Unable to connect. Check your internet connection and try again.');
     }
-    throw error;
+    throw new Error('Something went wrong. Please try again.');
   } finally {
     clearTimeout(timeout);
   }
