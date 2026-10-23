@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSession } from '../session/SessionProvider';
 import { consumerRequest } from '../session/api';
 export type ConsumerProfile = { id:string; name:string; firstName:string; account:string; submitter:string;
-  customerType:string; status:string; address:string; contact:string; meter:string };
+  customerType:string; status:string; address:string; contact:string; meter:string; gender?:string };
 export function useConsumerProfile() {
   const { accessToken } = useSession();
   const [profile,setProfile]=useState<ConsumerProfile|null>(null);

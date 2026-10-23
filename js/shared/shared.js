@@ -249,7 +249,8 @@ if (feedbackMenu) {
     try {
       const result = await AdminAPI.request('/feedback/unread');
       dot.hidden = !result.unread;
-      feedbackMenu.setAttribute('aria-label', result.unread ? 'Feedback, unread feedback' : 'Feedback');
+      dot.textContent = result.unread > 99 ? '99+' : String(result.unread);
+      feedbackMenu.setAttribute('aria-label', result.unread ? 'Feedback, ' + result.unread + ' unread' : 'Feedback');
     } catch {
       // Keep the last known state while the server is unavailable.
     } finally {

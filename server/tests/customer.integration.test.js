@@ -613,6 +613,7 @@ test(
       assert.equal(ownProfile.status,200,JSON.stringify(ownProfile));
       assert.equal(ownProfile.data.account,customer.account);
       assert.equal(ownProfile.data.name,'Anna Reyes');
+      assert.equal(ownProfile.data.gender,'Female');
       assert.equal(ownProfile.data.password_hash,undefined);
       assert.equal((await request('/consumer/profile','GET')).status,403);
       const submission=await request('/consumer/feedback','POST',{category:'Water supply',message:'Test low water pressure'},ownerToken);

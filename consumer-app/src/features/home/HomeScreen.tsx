@@ -114,7 +114,7 @@ export default function HomeScreen() {
           accessibilityLabel="View my profile"
           onPress={() => router.push('/profile')}
         >
-          <Avatar active={customer?.status === 'Active'} />
+          <Avatar active={customer?.status === 'Active'} gender={customer?.gender} />
         </Pressable>
       </View>
       <View style={styles.balanceCard}>

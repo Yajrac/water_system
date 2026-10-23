@@ -14,7 +14,7 @@ export async function ownProfile(userId) {
   const [[row]] = await pool.execute(
     `SELECT c.id,c.account_number AS account,c.submitter_number AS submitter,
     CONCAT_WS(' ',c.first_name,NULLIF(c.middle_name,''),c.last_name,NULLIF(c.extension_name,'')) AS name,
-    c.first_name AS firstName,c.customer_type AS customerType,c.connection_status AS status,
+    c.first_name AS firstName,c.gender,c.customer_type AS customerType,c.connection_status AS status,
     CONCAT_WS(', ',NULLIF(c.purok,''),NULLIF(c.street,''),b.name) AS address,c.contact_number AS contact,
     COALESCE((SELECT meter_number FROM water_meters WHERE customer_id=c.id AND is_active=1 ORDER BY id DESC LIMIT 1),'Not recorded') AS meter
     FROM customers c JOIN barangays b ON b.id=c.barangay_id WHERE c.id=?`,

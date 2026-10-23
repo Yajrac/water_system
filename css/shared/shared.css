@@ -747,9 +747,17 @@ html:where(.theme-teal) {
 }
 
 :where(html.theme-teal) .legend-dot {
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
+  min-width: 19px;
+  height: 19px;
+  padding: 0 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
   flex-shrink: 0;
 }
 

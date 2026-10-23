@@ -18,7 +18,7 @@ export default function ProfileScreen() {
       {busy && !customer && <LoadingCards count={1} />}
       {customer && <Card>
         <View style={styles.identity}>
-          <Avatar size={76} active={customer.status === 'Active'} />
+          <Avatar size={76} active={customer.status === 'Active'} gender={customer.gender} />
           <View style={{ flex: 1, gap: 6 }}>
             <Text style={text.heading}>{customer.name}</Text>
             <Text style={text.muted}>{customer.customerType} consumer</Text>

@@ -3,7 +3,13 @@ import { StyleSheet, View } from 'react-native';
 
 import { colors } from '@/theme/tokens';
 
-export function Avatar({ size = 48, active }: { size?: number; active: boolean }) {
+export function Avatar({ size = 48, active, gender }: { size?: number; active: boolean; gender?: string }) {
+  const normalizedGender = gender?.trim().toLowerCase();
+  const source = normalizedGender === 'male'
+    ? require('../../../assets/images/avatar-male.svg')
+    : normalizedGender === 'female'
+      ? require('../../../assets/images/avatar-female.svg')
+      : require('../../../assets/images/avatar-neutral.svg');
   return (
     <View
       accessible
@@ -11,7 +17,7 @@ export function Avatar({ size = 48, active }: { size?: number; active: boolean }
       style={{ width: size, height: size }}
     >
       <Image
-        source={require('../../../assets/images/avatar-female.svg')}
+        source={source}
         style={{ width: size, height: size, borderRadius: size / 2 }}
       />
       <View style={[styles.dot, !active && { backgroundColor: colors.muted }]} />
