@@ -204,8 +204,10 @@ if (document.readyState === 'loading') {
   mountSessionLoading();
 }
 
-async function requireAdminSession() {
-  if (!isPublicAuthPage) document.documentElement.classList.add('auth-pending');
+let adminPageVerified = false;
+async function requireAdminSession({ background = false } = {}) {
+  const checkInBackground = background && adminPageVerified;
+  if (!isPublicAuthPage && !checkInBackground) document.documentElement.classList.add('auth-pending');
   AdminAuth.sessionError = '';
   try {
     sessionStorage.removeItem('pwss-admin-session');
@@ -218,11 +220,15 @@ async function requireAdminSession() {
       location.replace('settings.html#passwordSettingsPanel');
       return null;
     }
+    adminPageVerified = Boolean(user);
     document.documentElement.classList.remove('auth-pending');
     return user;
   } catch (error) {
     if ([401, 403].includes(error.status)) AdminAuth.clear();
     AdminAuth.sessionError = error.message;
+    // A connection failure does not prove that the existing session is invalid.
+    // Protected API requests continue to enforce authentication on the server.
+    if (checkInBackground && ![401, 403].includes(error.status)) return null;
     AdminAuth.redirectToLogin(error.status === 401 ? 'expired' : 'unavailable');
     return null;
   }
@@ -234,10 +240,10 @@ window.addEventListener('admin:unauthorized', (event) => {
   AdminAuth.redirectToLogin('expired');
 });
 window.addEventListener('pageshow', (event) => {
-  if (event.persisted) requireAdminSession();
+  if (event.persisted) requireAdminSession({ background: true });
 });
 document.addEventListener('visibilitychange', () => {
-  if (!document.hidden && !isPublicAuthPage) requireAdminSession();
+  if (!document.hidden && !isPublicAuthPage) requireAdminSession({ background: true });
 });
 AdminAuth.ready = requireAdminSession();
 
