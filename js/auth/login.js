@@ -31,9 +31,16 @@ loginForm.addEventListener('focusout', () => setTimeout(keepLoginFieldVisible, 0
 window.addEventListener('resize', keepLoginFieldVisible);
 if (loginViewport) loginViewport.addEventListener('resize', keepLoginFieldVisible);
 const loginSubmit = loginForm.querySelector('[type="submit"]');
+const loginSubmitLabel = loginSubmit.querySelector('.auth-submit-label');
+const loginSpinner = loginSubmit.querySelector('.auth-submit-spinner');
+function setLoginProgress(busy, label) {
+  loginSubmit.disabled = busy;
+  loginSubmit.setAttribute('aria-busy', String(busy));
+  loginSpinner.hidden = !busy;
+  loginSubmitLabel.textContent = label;
+}
 let loginBusy = true;
-loginSubmit.disabled = true;
-loginSubmit.textContent = 'Checking session...';
+setLoginProgress(true, 'Checking session...');
 AdminAuth.ready.then((user) => {
   if (user) {
     location.replace(AdminAuth.destination());
@@ -50,16 +57,14 @@ AdminAuth.ready.then((user) => {
         ? 'Cannot verify your session. Check the server connection and sign in again.'
         : '');
   loginBusy = false;
-  loginSubmit.disabled = false;
-  loginSubmit.textContent = 'Sign in';
+  setLoginProgress(false, 'Sign in');
 });
 
 loginForm.addEventListener('submit', async (event) => {
   event.preventDefault();
   if (loginBusy) return;
   loginBusy = true;
-  loginSubmit.disabled = true;
-  loginSubmit.textContent = 'Signing in...';
+  setLoginProgress(true, 'Signing in...');
   loginForm.setAttribute('aria-busy', 'true');
   loginMessage.textContent = '';
   try {
@@ -73,8 +78,7 @@ loginForm.addEventListener('submit', async (event) => {
     loginMessage.focus();
   } finally {
     loginBusy = false;
-    loginSubmit.disabled = false;
-    loginSubmit.textContent = 'Sign in';
+    setLoginProgress(false, 'Sign in');
     loginForm.removeAttribute('aria-busy');
   }
 });
