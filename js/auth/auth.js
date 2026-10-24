@@ -145,16 +145,21 @@ const AdminAuth = {
 const currentAuthPage = location.pathname.split('/').pop();
 const isPublicAuthPage = currentAuthPage === 'login.html';
 
-// Hide protected content until the API has verified the current account.
+// Keep navigation visible while the protected content is being verified.
 const authGateStyle = document.createElement('style');
 authGateStyle.textContent = `
-  html.auth-pending body { visibility: hidden; }
+  html.auth-pending main > :not(.page-header):not(.admin-session-loading) {
+    display: none !important;
+  }
+  html.auth-pending main > .page-header :is(button, a, input, select) {
+    visibility: hidden;
+  }
   .admin-session-loading { display: none; }
   html.auth-pending .admin-session-loading {
     visibility: visible;
-    position: fixed;
-    inset: 0;
-    z-index: 10000;
+    position: relative;
+    width: 100%;
+    min-height: 320px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -162,8 +167,9 @@ authGateStyle.textContent = `
     gap: 12px;
     padding: 24px;
     box-sizing: border-box;
-    background: var(--bg-color, #edf8fc);
-    color: var(--text-color, #15384a);
+    background: var(--card-bg, #fff);
+    color: var(--color-text, inherit);
+    border-radius: 12px;
     font: 500 16px/1.5 system-ui, sans-serif;
     text-align: center;
   }
@@ -205,7 +211,9 @@ function mountSessionLoading() {
   retry.hidden = true;
   retry.addEventListener('click', () => location.reload());
   loading.append(spinner, label, hint, retry);
-  document.body.appendChild(loading);
+  const content = document.querySelector('main');
+  if (!content) return;
+  content.appendChild(loading);
   if (AdminAuth.sessionError) showSessionConnectionError();
 }
 function showSessionConnectionError() {
