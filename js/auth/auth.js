@@ -146,8 +146,63 @@ const isPublicAuthPage = currentAuthPage === 'login.html';
 
 // Hide protected content until the API has verified the current account.
 const authGateStyle = document.createElement('style');
-authGateStyle.textContent = 'html.auth-pending body { visibility: hidden; }';
+authGateStyle.textContent = `
+  html.auth-pending body { visibility: hidden; }
+  .admin-session-loading { display: none; }
+  html.auth-pending .admin-session-loading {
+    visibility: visible;
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 24px;
+    box-sizing: border-box;
+    background: var(--bg-color, #edf8fc);
+    color: var(--text-color, #15384a);
+    font: 500 16px/1.5 system-ui, sans-serif;
+    text-align: center;
+  }
+  .admin-session-loading p { margin: 0; }
+  .admin-session-loading small { font-size: 13px; }
+  .admin-session-spinner {
+    width: 30px;
+    height: 30px;
+    border: 3px solid #bddce9;
+    border-top-color: #0783b5;
+    border-radius: 50%;
+    animation: admin-session-spin .8s linear infinite;
+  }
+  @keyframes admin-session-spin { to { transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) {
+    .admin-session-spinner { animation: none; }
+  }
+`;
 document.head.appendChild(authGateStyle);
+function mountSessionLoading() {
+  if (isPublicAuthPage) return;
+  const loading = document.createElement('div');
+  loading.className = 'admin-session-loading';
+  loading.setAttribute('role', 'status');
+  loading.setAttribute('aria-live', 'polite');
+  const spinner = document.createElement('span');
+  spinner.className = 'admin-session-spinner';
+  spinner.setAttribute('aria-hidden', 'true');
+  const label = document.createElement('p');
+  label.textContent = 'Checking session...';
+  const hint = document.createElement('small');
+  hint.textContent = 'Connecting securely. This may take a moment.';
+  loading.append(spinner, label, hint);
+  document.body.appendChild(loading);
+}
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', mountSessionLoading, { once: true });
+} else {
+  mountSessionLoading();
+}
 
 async function requireAdminSession() {
   if (!isPublicAuthPage) document.documentElement.classList.add('auth-pending');
