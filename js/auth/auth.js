@@ -57,7 +57,8 @@ const AdminAuth = {
     try { await this.renewing; } finally { this.renewing = null; }
   },
   async verifySession() {
-    if (localStorage.getItem('pwss-admin-refresh-token')) await this.renewSession();
+    // AdminAPI renews expiring credentials before authenticated requests.
+    if (!AdminAPI.getToken() && localStorage.getItem('pwss-admin-refresh-token')) await this.renewSession();
     const token = AdminAPI.getToken();
     if (!token) {
       this.user = null;
@@ -192,11 +193,28 @@ function mountSessionLoading() {
   spinner.className = 'admin-session-spinner';
   spinner.setAttribute('aria-hidden', 'true');
   const label = document.createElement('p');
+  label.className = 'admin-session-label';
   label.textContent = 'Checking session...';
   const hint = document.createElement('small');
+  hint.className = 'admin-session-hint';
   hint.textContent = 'Connecting securely. This may take a moment.';
-  loading.append(spinner, label, hint);
+  const retry = document.createElement('button');
+  retry.type = 'button';
+  retry.className = 'btn btn-primary admin-session-retry';
+  retry.textContent = 'Retry connection';
+  retry.hidden = true;
+  retry.addEventListener('click', () => location.reload());
+  loading.append(spinner, label, hint, retry);
   document.body.appendChild(loading);
+  if (AdminAuth.sessionError) showSessionConnectionError();
+}
+function showSessionConnectionError() {
+  const loading = document.querySelector('.admin-session-loading');
+  if (!loading) return;
+  loading.querySelector('.admin-session-spinner').style.display = 'none';
+  loading.querySelector('.admin-session-label').textContent = 'Unable to check your session';
+  loading.querySelector('.admin-session-hint').textContent = AdminAuth.sessionError;
+  loading.querySelector('.admin-session-retry').hidden = false;
 }
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', mountSessionLoading, { once: true });
@@ -229,6 +247,10 @@ async function requireAdminSession({ background = false } = {}) {
     // A connection failure does not prove that the existing session is invalid.
     // Protected API requests continue to enforce authentication on the server.
     if (checkInBackground && ![401, 403].includes(error.status)) return null;
+    if (!isPublicAuthPage && ![401, 403].includes(error.status)) {
+      showSessionConnectionError();
+      return null;
+    }
     AdminAuth.redirectToLogin(error.status === 401 ? 'expired' : 'unavailable');
     return null;
   }
