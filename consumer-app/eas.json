@@ -3,7 +3,7 @@
     "preview": {
       "distribution": "internal",
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://water-system-1.onrender.com/api/v1"
+        "EXPO_PUBLIC_API_URL": "https://pioduranwater.tech/api/v1"
       },
       "android": {
         "buildType": "apk"

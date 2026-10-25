@@ -6,7 +6,7 @@ export function setSessionResolver(resolver: typeof resolveSession) { resolveSes
 
 // Public API URL only. Native devices cannot reach a computer's localhost.
 const baseUrl = (
-  process.env.EXPO_PUBLIC_API_URL || 'https://water-system-1.onrender.com/api/v1'
+  process.env.EXPO_PUBLIC_API_URL || 'https://pioduranwater.tech/api/v1'
 ).replace(/\/$/, '');
 
 export async function consumerRequest<T>(path: string, body: unknown, token?: string, method: 'GET' | 'POST' = 'POST', retry = true): Promise<T> {
