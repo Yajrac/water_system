@@ -2,7 +2,7 @@ const feedbackPager=createPagination('feedbackPagination',showFeedback);
 let feedbackVersion=0,feedbackTimer,feedbackSaving=false;
 async function showFeedback(){
   const version=++feedbackVersion,body=document.getElementById('feedbackRows');
-  if(!body.children.length)AdminUI.empty(body,6,'Loading feedback...');
+  if(!body.children.length)AdminUI.loading(body,6,'Loading feedback...');
   try{
     const query=new URLSearchParams({page:feedbackPager.page,search:document.getElementById('feedbackSearch').value.trim(),status:document.getElementById('feedbackStatus').value});
     const result=await AdminAPI.request('/feedback?'+query);if(version!==feedbackVersion)return;

@@ -125,6 +125,27 @@ main > .admin-page-header > .admin-header-actions {
   vertical-align: middle;
   transform-origin: center;
 }
+.table-loading-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 0;
+  color: var(--color-ink-muted, inherit);
+}
+.table-loading-spinner {
+  display: inline-block;
+  box-sizing: border-box;
+  width: 16px;
+  height: 16px;
+  flex: 0 0 16px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: admin-refresh-spin .8s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .table-loading-spinner { animation: none; }
+}
 .admin-refresh-icon svg { display: block; width: 100%; height: 100%; }
 .admin-refresh-spinning { animation: admin-refresh-spin .8s linear infinite; }
 @keyframes admin-refresh-spin { to { transform: rotate(360deg); } }

@@ -13,7 +13,7 @@ function setupActivityTable({ searchId, dateId, rowsId, pagerId, clearId, consum
     timeZone: 'Asia/Manila',
   });
   function pending() {
-    if (!body.children.length) AdminUI.empty(body, 5, 'Loading activity logs...');
+    if (!body.children.length) AdminUI.loading(body, 5, 'Loading activity logs...');
     container.querySelectorAll('button').forEach((button) => {
       button.disabled = true;
     });

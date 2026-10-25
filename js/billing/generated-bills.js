@@ -7,7 +7,7 @@ async function showGeneratedBills() {
   const version = ++billLoadVersion;
   const body = document.getElementById('billRows');
   body.setAttribute('aria-busy', 'true');
-  if (!body.children.length) AdminUI.empty(body, 10, 'Loading generated bills...');
+  if (!body.children.length) AdminUI.loading(body, 10, 'Loading generated bills...');
   try {
     const query = new URLSearchParams({
       page: billPager.page,

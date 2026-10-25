@@ -174,6 +174,20 @@ const AdminUI = {
     cell.colSpan = columns;
     cell.textContent = message;
   },
+  loading(table, columns, message = 'Loading records...') {
+    if (table.children.length) return;
+    const row = table.insertRow();
+    const cell = row.insertCell();
+    cell.colSpan = columns;
+    const status = document.createElement('span');
+    status.className = 'table-loading-status';
+    status.setAttribute('role', 'status');
+    const spinner = document.createElement('span');
+    spinner.className = 'table-loading-spinner';
+    spinner.setAttribute('aria-hidden', 'true');
+    status.append(spinner, document.createTextNode(message));
+    cell.appendChild(status);
+  },
   options(select, customers) {
     select.replaceChildren(new Option('Select customer', ''));
     customers.forEach((customer) =>

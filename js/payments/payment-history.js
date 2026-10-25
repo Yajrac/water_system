@@ -8,7 +8,7 @@ const historyCustomer = new URLSearchParams(location.search).get('customer') || 
 async function showPayments() {
   const version = ++paymentVersion;
   const body = document.getElementById('paymentRows');
-  if (!body.children.length) AdminUI.empty(body, 7, 'Loading payments...');
+  if (!body.children.length) AdminUI.loading(body, 7, 'Loading payments...');
   try {
     const query = new URLSearchParams({
       page: paymentPager.page,

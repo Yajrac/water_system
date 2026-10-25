@@ -39,7 +39,8 @@ function showBarangays() {
       ? 'Could not load barangays'
       : registryEntries.length + ' registered barangays';
   if (registryLoading || registryFailure) {
-    AdminUI.empty(body, 5, registryLoading ? 'Loading barangays...' : registryFailure);
+    if (registryLoading) AdminUI.loading(body, 5, 'Loading barangays...');
+    else AdminUI.empty(body, 5, registryFailure);
     document.getElementById('retryBarangayList').hidden = !registryFailure;
     return;
   }

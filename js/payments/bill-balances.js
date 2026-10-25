@@ -4,7 +4,7 @@ let balanceVersion = 0,
 async function showBalances() {
   const version = ++balanceVersion,
     body = document.getElementById('balanceRows');
-  if (!body.children.length) AdminUI.empty(body, 6, 'Loading bill balances...');
+  if (!body.children.length) AdminUI.loading(body, 6, 'Loading bill balances...');
   try {
     const query = new URLSearchParams({
       page: balancePager.page,

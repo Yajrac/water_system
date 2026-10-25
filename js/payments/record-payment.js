@@ -24,7 +24,7 @@ function fillCashierDetails(id, rows) {
 async function renderCashierRegistry() {
   const version = ++cashierVersion;
   const body = document.getElementById('cashierRows');
-  if (!body.children.length) AdminUI.empty(body, 5, 'Loading unpaid bills...');
+  if (!body.children.length) AdminUI.loading(body, 5, 'Loading unpaid bills...');
   try {
     const query = new URLSearchParams({
       page: cashierPager.page,

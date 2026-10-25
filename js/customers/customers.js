@@ -68,7 +68,7 @@ async function loadCustomers() {
   const version = ++customerLoadVersion;
   const body = document.getElementById('customerRows');
   body.setAttribute('aria-busy', 'true');
-  if (!body.children.length) AdminUI.empty(body, 6, 'Loading customers...');
+  if (!body.children.length) AdminUI.loading(body, 6, 'Loading customers...');
   document.getElementById('retryCustomers').hidden = true;
   try {
     const result = await CustomerAPI.list({

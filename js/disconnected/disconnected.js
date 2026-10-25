@@ -3,7 +3,7 @@ let changingAccount=false,disconnectVersion=0,disconnectTimer;
 async function showDisconnections() {
   const version=++disconnectVersion;
   const body=document.getElementById('disconnectRows');
-  if(!body.children.length)AdminUI.empty(body,6,'Loading service records...');
+  if(!body.children.length)AdminUI.loading(body,6,'Loading service records...');
   try {
     const query=new URLSearchParams({page:disconnectPager.page,limit:10,
       search:document.getElementById('disconnectSearch').value.trim(),
