@@ -30,20 +30,11 @@ const textLimits = {
   meterNumber: 120,
   meterKind: 120,
   meterSize: 40,
-  ctcNumber: 120,
-  ctcPlace: 120,
-  representativeCtc: 120,
-  representativeCtcPlace: 120,
-  documentNotes: 1000,
 };
 const dates = [
   'dateApplied',
   'dateApproved',
   'dateInstalled',
-  'contractDate',
-  'acknowledgementDate',
-  'ctcDate',
-  'representativeCtcDate',
 ];
 const checks = ['certificateReceived', 'contractReceived', 'acknowledgementReceived'];
 const money = ['installationFee', 'setbackRate', 'reinstallationFee', 'violationFee'];
@@ -244,20 +235,6 @@ export function validateCustomer(body, { existing = null, importing = false } = 
     throw new AppError('An existing consumer username cannot be cleared.', 400);
   if (existing && (typeof body.revision !== 'string' || !body.revision))
     throw new AppError('Reload the customer before saving changes.', 409);
-  // Preserve legacy document details omitted by the simplified checklist form.
-  for (const key of [
-    'contractDate',
-    'acknowledgementDate',
-    'ctcNumber',
-    'ctcDate',
-    'ctcPlace',
-    'representativeCtc',
-    'representativeCtcDate',
-    'representativeCtcPlace',
-    'documentNotes',
-  ]) {
-    if (body[key] === undefined && existing) result[key] = existing[key] || '';
-  }
   result.revision = body.revision;
   return result;
 }

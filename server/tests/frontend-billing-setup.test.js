@@ -63,7 +63,7 @@ async function browser(fail = false, failSave = false) {
     rate: '7.00',
   };
   const context = vm.createContext({
-    document: { getElementById: get, createElement: node },
+    document: { getElementById: get, createElement: node, addEventListener() {} },
     AdminAuth: { ready: Promise.resolve({ role: 'admin' }) },
     AdminAPI: {
       request: async (path, options) => {
@@ -92,6 +92,7 @@ async function browser(fail = false, failSave = false) {
                 name: 'Ana Reyes',
                 account: 'PWSS-001',
                 previous: '400.000',
+                suggestedLate: '10.00',
               },
             ],
             entries: meterEntries,
@@ -166,6 +167,8 @@ test('meter entry sends consumption to API, reloads saved rows and preserves inp
     const app = await browser(false, failSave);
     app.get('ledgerConsumers').children[0].events.click();
     const form = app.get('ledgerEntryForm');
+    assert.equal(form.elements.late.value, '10.00');
+    form.elements.late.value = '5.00';
     form.elements.consumption.value = '100';
     form.events.input();
     assert.equal(form.elements.current.value, '500');
@@ -174,6 +177,7 @@ test('meter entry sends consumption to API, reloads saved rows and preserves inp
     assert.equal(write.options.body.previous, '400.000');
     assert.equal(write.options.body.consumption, '100');
     assert.equal(write.options.body.current, undefined);
+    assert.equal(write.options.body.late, '5.00');
     if (failSave) {
       assert.equal(form.elements.consumption.value, '100');
       assert.equal(app.get('ledgerEntryStatus').textContent, 'Entry not saved');

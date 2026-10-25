@@ -52,21 +52,12 @@ async function loadCustomerApplication() {
       certificateReceived: 'Barangay certification verified',
       contractReceived: 'Signed contract received',
       acknowledgementReceived: 'Signed acknowledgement received',
-      contractDate: 'Contract date',
-      acknowledgementDate: 'Acknowledgement date',
-      ctcNumber: 'Applicant CTC no.',
-      ctcDate: 'CTC issue date',
-      ctcPlace: 'CTC place of issue',
-      representativeCtc: 'Representative CTC no.',
-      representativeCtcDate: 'Representative CTC issue date',
-      representativeCtcPlace: 'Representative CTC place of issue',
       natureOfWork: 'Nature of work',
       removedMeter: 'Removed meter no.',
       removedReading: 'Removed reading (m³)',
       removedKind: 'Removed meter kind',
       removedSize: 'Removed meter size',
       estimatedLiters: 'Estimated water consumed (liters)',
-      documentNotes: 'Remarks',
     };
     Object.entries(labels).forEach(([field, label]) => {
       const heading = document.createElement('dt');

@@ -148,9 +148,6 @@ test('exported form details survive real Excel export and re-import without cred
     certificateReceived: true,
     contractReceived: false,
     acknowledgementReceived: true,
-    ctcNumber: '0000123',
-    ctcDate: '2025-01-01',
-    documentNotes: 'Verified, existing record',
     installationFee: '1000.00',
     setbackLength: '1.500',
     setbackRate: '12.50',
@@ -178,6 +175,11 @@ test('exported form details survive real Excel export and re-import without cred
   }
   assert.equal(restored.barangayId, '1');
   assert.equal(restored.password, undefined);
+  for (const field of ['contractDate', 'acknowledgementDate', 'ctcNumber', 'ctcDate',
+    'ctcPlace', 'representativeCtc', 'representativeCtcDate', 'representativeCtcPlace', 'documentNotes']) {
+    assert.equal(headers.includes(field), false, field + ' must not be exported');
+    assert.equal(restored[field], undefined);
+  }
   assert.equal(restored.password_hash, undefined);
   assert.equal(restored.revision, undefined);
 });

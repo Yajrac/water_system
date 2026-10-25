@@ -144,7 +144,7 @@
     get('ledgerSelected').textContent = customer.name;
     form.elements.consumption.value = saved?.consumption ?? '';
     form.elements.connection.value = saved?.connectionCharge ?? '0';
-    form.elements.late.value = saved?.late ?? '0';
+    form.elements.late.value = saved?.late ?? customer.suggestedLate ?? '0';
     form.elements.other.value = saved?.other ?? '0';
     get('ledgerEntryStatus').textContent = saved ? 'Saved' : 'Unsaved entry';
     setFieldsDisabled(false);

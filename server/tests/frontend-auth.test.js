@@ -48,8 +48,11 @@ function browser({ page = 'login.html', search = '', stored = {}, respond } = {}
       removeItem: (key) => storage.delete(key),
     },
     document: {
+      readyState: 'complete',
       head: { appendChild() {} },
-      createElement: () => ({}),
+      createElement: () => ({ setAttribute() {}, append() {}, appendChild() {}, addEventListener() {} }),
+      getElementById: () => null,
+      querySelector: () => null,
       documentElement: {
         classList: { add: (name) => classes.add(name), remove: (name) => classes.delete(name) },
       },
@@ -85,6 +88,11 @@ function browser({ page = 'login.html', search = '', stored = {}, respond } = {}
     requests,
     timers,
     classes,
+    flushLoading() {
+      for (const [id, timer] of timers) {
+        if (timer.delay === 0) { timers.delete(id); timer.callback(); }
+      }
+    },
   };
 }
 
@@ -116,6 +124,7 @@ test('protected page stays hidden until the server verifies an active admin', as
   assert.equal(app.classes.has('auth-pending'), true);
   release({ body: { success: true, data: { user } } });
   assert.equal((await app.auth.ready).role, 'admin');
+  app.flushLoading();
   assert.equal(app.classes.has('auth-pending'), false);
   assert.equal(app.requests[0].options.headers.Authorization, 'Bearer ' + token);
 });
@@ -184,7 +193,8 @@ test('network failure does not masquerade as invalid credentials or erase the to
   await app.auth.ready;
   assert.equal(app.storage.get(key), token);
   assert.ok(app.auth.sessionError.includes('Cannot reach the server'));
-  assert.ok(app.redirects[0].includes('reason=unavailable'));
+  assert.equal(app.redirects.length, 0);
+  assert.equal(app.classes.has('auth-pending'), true);
 });
 
 test('logout clears local access and expiry callback ends a verified session', async () => {
@@ -233,7 +243,7 @@ test('every auth-protected HTML page loads config and API helper before authenti
 });
 
 
-test('saved admin session renews on reload and before expiry without redirecting', async () => {
+test('saved admin session verifies valid access and renews before expiry without redirecting', async () => {
   const app = browser({
     page: 'reports.html',
     stored: { [key]: token, 'pwss-admin-refresh-token': 'session-credential' },
@@ -243,9 +253,10 @@ test('saved admin session renews on reload and before expiry without redirecting
   await app.auth.ready;
   assert.equal(app.auth.user.role, 'admin');
   assert.equal(app.redirects.length, 0);
-  assert.ok(app.requests.some(({ url }) => url.endsWith('/auth/refresh')));
+  assert.equal(app.requests.some(({ url }) => url.endsWith('/auth/refresh')), false);
   const expiry = [...app.timers.values()][0];
   await expiry.callback();
+  assert.ok(app.requests.some(({ url }) => url.endsWith('/auth/refresh')));
   assert.equal(app.storage.get(key), token);
   assert.equal(app.redirects.length, 0);
   await app.auth.logout();
@@ -274,5 +285,6 @@ test('temporary admin can open password settings without a redirect loop', async
   });
   await app.auth.ready;
   assert.equal(app.redirects.length, 0);
+  app.flushLoading();
   assert.equal(app.classes.has('auth-pending'), false);
 });

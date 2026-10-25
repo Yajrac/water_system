@@ -14,6 +14,9 @@ test('dashboard loads authenticated database data, prevents concurrent refresh, 
       if (!nodes.has(id))
         nodes.set(id, {
           value: '',
+          setAttribute() {},
+          removeAttribute() {},
+          querySelector() { return null; },
           replaceChildren() {},
           add() {},
           addEventListener(type, handler) {

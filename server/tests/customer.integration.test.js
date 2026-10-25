@@ -105,8 +105,6 @@ test(
         certificateReceived: true,
         contractReceived: true,
         acknowledgementReceived: true,
-        acknowledgementDate: new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Manila' }),
-        contractDate: new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Manila' }),
         meterNumber: 'TEST-METER-1',
         dateInstalled: today,
         reading: '400',
@@ -763,7 +761,7 @@ test(
       assert.equal(reviewedConnection.status,201,JSON.stringify(reviewedConnection));
       assert.equal((await request('/customers','POST',{...separateConnection,duplicateReviewed:true})).status,409);
 
-      const restoreKeys = ['firstName','middleName','lastName','extensionName','gender','contact','address','street','customerType','natureOfWork','dateApplied','dateApproved','dateInstalled','meterNumber','meterKind','meterSize','initialReading','reading','certificateReceived','contractReceived','acknowledgementReceived','contractDate','acknowledgementDate','ctcNumber','ctcDate','ctcPlace','representativeCtc','representativeCtcDate','representativeCtcPlace','documentNotes','installationFee','setbackLength','setbackRate','reinstallationFee','violationFee'];
+      const restoreKeys = ['firstName','middleName','lastName','extensionName','gender','contact','address','street','customerType','natureOfWork','dateApplied','dateApproved','dateInstalled','meterNumber','meterKind','meterSize','initialReading','reading','certificateReceived','contractReceived','acknowledgementReceived','installationFee','setbackLength','setbackRate','reinstallationFee','violationFee'];
       const amountKeys = ['initialReading','reading','installationFee','setbackLength','setbackRate','reinstallationFee','violationFee'];
       for (const [index, serviceStatus] of ['Pending','Approved','Installed'].entries()) {
         const restoredInput = Object.fromEntries(restoreKeys.map(key=>[key, exportSource[key]]));
@@ -773,7 +771,6 @@ test(
           dateInstalled:serviceStatus === 'Installed' ? '2025-01-03' : '',meterNumber:serviceStatus === 'Installed' ? 'MTR-RESTORE-001' : '',
           reading:serviceStatus === 'Installed' ? '12.345' : '0',initialReading:serviceStatus === 'Installed' ? '1.250' : '0',
           certificateReceived:true,contractReceived:false,acknowledgementReceived:true,
-          documentNotes:'Imported record notes',ctcNumber:'000123',ctcPlace:'Pio Duran',
           installationFee:'123.45',setbackLength:'1.250',setbackRate:'9.99',reinstallationFee:'2.00',violationFee:'0.00'});
         const preview = await request('/customers/import/preview','POST',{customers:[restoredInput]});
         assert.equal(preview.status,200,JSON.stringify(preview));

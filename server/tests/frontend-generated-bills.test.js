@@ -66,6 +66,7 @@ test('Generated Bills displays the server page and balances without browser fina
       },
     },
     AdminUI: {
+      loading() {},
       cell: node,
       button() {},
       empty(body, columns, message) {

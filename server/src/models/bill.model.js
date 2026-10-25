@@ -1,6 +1,7 @@
 import { randomBytes } from 'node:crypto';
 import { pool } from '../database/pool.js';
 import { today } from '../validators/customer.validator.js';
+import { recordLateFee } from '../services/late-fee.service.js';
 
 export async function insertBill(
   setup,
@@ -39,6 +40,7 @@ export async function insertBill(
       amounts.total,
     ],
   );
+  await recordLateFee(entry, customer.id, connection);
   await connection.execute("UPDATE meter_entries SET status = 'Billed' WHERE id = ?", [entry.id]);
   await connection.execute('UPDATE water_meters SET current_reading = ? WHERE id = ?', [
     entry.current,

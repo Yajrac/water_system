@@ -20,7 +20,6 @@ const input = {
   serviceStatus: 'Approved',
   certificateReceived: true,
   contractReceived: true,
-  contractDate: today(),
 };
 
 test('bulk import preserves explicit status and checks, with Approved defaults for legacy files', () => {
@@ -53,7 +52,7 @@ test('customer validation normalizes contact and server-controlled application d
   assert.equal(result.dateApplied, today());
   assert.equal(result.dateApproved, today());
   assert.equal(result.reading, '0.000');
-  assert.equal(result.contractDate, today());
+  assert.equal(result.contractReceived, true);
 });
 
 test('customer validation rejects overposting, invalid names, dates, unsafe IDs and incomplete proofs', () => {
@@ -102,22 +101,14 @@ test('existing consumer password can be left blank and edited records require re
   assert.equal(result.dateApplied, '2020-01-01');
 });
 
-test('simplified checklist saves without document dates and preserves omitted legacy details', () => {
-  const { contractDate, ...body } = input;
-  assert.equal(validateCustomer(body).contractDate, '');
-  const result = validateCustomer(
-    { ...body, revision: 'v1' },
-    {
-      existing: {
-        contractDate: '2020-01-01',
-        ctcNumber: '123',
-        documentNotes: 'Existing reference',
-      },
-    },
-  );
-  assert.equal(result.contractDate, '2020-01-01');
-  assert.equal(result.ctcNumber, '123');
-  assert.equal(result.documentNotes, 'Existing reference');
+test('simplified checklist accepts checks and rejects retired document details', () => {
+  assert.equal(validateCustomer(input).contractReceived, true);
+  for (const field of ['contractDate', 'acknowledgementDate', 'ctcNumber', 'ctcDate',
+    'ctcPlace', 'representativeCtc', 'representativeCtcDate', 'representativeCtcPlace', 'documentNotes']) {
+    assert.throws(() => validateCustomer({ ...input, [field]: 'legacy value' }), { statusCode: 400 });
+    assert.throws(() => validateCustomer({ ...input, account: 'IMPORT-1', [field]: 'legacy value' },
+      { importing: true }), { statusCode: 400 });
+  }
 });
 
 test('only imports can resolve official unregistered barangay names', () => {

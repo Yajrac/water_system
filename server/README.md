@@ -4,6 +4,29 @@ Node.js 22 or newer. The migration files reproduce the 18 tables entered manuall
 in phpMyAdmin. Database commands manage schema history and the office seed.
 No admin account, sample customers or passwords are seeded by migrations.
 
+Migration `020_remove_unused_document_details.sql` removes the retired contract
+and acknowledgement dates, applicant and representative CTC details, and document
+notes from `application_documents`. It permanently deletes values in those
+columns; back up the existing database before applying it. The three document
+checklist flags remain. Keep migration 014 unchanged so existing migration
+checksums stay valid. New databases run 014 and then 020 in sequence.
+
+Migration `021_create_late_fee_assessments.sql` adds late-fee period tracking.
+Meter Entry suggests 10% of unpaid charges every seven Philippine calendar days
+from each bill's due date (first charge on due date + 7), rounding each increment
+to cents. Unbilled increments compound; previously billed unpaid penalties keep
+their source bill's clock. Payments settle ordinary charges before carried
+penalties in assessment order, using the Philippine payment date. This allocation
+is used for suggestions only; recorded payment totals are unchanged.
+
+The existing Late fee field remains editable. Saving approves its displayed
+amount, including zero; saved entries retain that approved amount on reload.
+Generation adds it to the new bill and records the assessed periods atomically,
+including waived periods. Old bills are not silently rewritten by a background
+job. A conflicting assessed period blocks generation and requires resaving the
+entry. Legacy manual late fees have no historical period metadata and remain
+ordinary charges; do not assume they cover previously assessed periods.
+
 ## API authentication
 
 Run `npm run dev` after configuring the database and JWT variables in `.env`.

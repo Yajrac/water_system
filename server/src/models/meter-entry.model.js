@@ -1,4 +1,5 @@
 import { pool } from '../database/pool.js';
+import { loadLateFeeData, customerLateFee } from '../services/late-fee.service.js';
 
 export async function findSetup(id, connection = pool, lock = false) {
   const [rows] = await connection.execute(
@@ -27,7 +28,8 @@ export async function listConsumers(setup, connection = pool) {
     ORDER BY c.last_name, c.first_name, c.id`,
     [setup.barangayId, setup.month + '-01'],
   );
-  return rows;
+  const feeData = await loadLateFeeData(rows.map((row) => String(row.id)), connection);
+  return rows.map((row) => ({ ...row, suggestedLate: customerLateFee(feeData, row.id).amount }));
 }
 
 export async function lockConsumer(id, connection) {
@@ -58,6 +60,7 @@ const entryColumns = `id, customer_id AS customerId, meter_id AS meterId,
   CAST(previous_reading AS CHAR) AS previous, CAST(consumption AS CHAR) AS consumption,
   CAST(current_reading AS CHAR) AS current, CAST(connection_charge AS CHAR) AS connectionCharge,
   CAST(late_fee AS CHAR) AS late, CAST(other_charge AS CHAR) AS other, status,
+  late_fee_basis AS lateFeeBasis,
   recorded_by AS recordedBy, CAST(updated_at AS CHAR) AS updatedAt`;
 
 export async function listEntries(setupId, connection = pool) {
@@ -77,24 +80,27 @@ export async function findEntry(details, connection) {
 }
 
 export async function saveEntry(details, consumer, actorId, existing, connection) {
+  const data = await loadLateFeeData([String(consumer.id)], connection);
+  const { basis, amount: suggestedLate } = customerLateFee(data, consumer.id);
   const values = [
     consumer.previous,
     details.consumption,
     details.connectionCharge,
     details.late,
     details.other,
+    JSON.stringify(basis),
     actorId,
   ];
   if (existing) {
     await connection.execute(
-      `UPDATE meter_entries SET previous_reading = ?, consumption = ?, connection_charge = ?, late_fee = ?, other_charge = ?, recorded_by = ? WHERE id = ?`,
+      `UPDATE meter_entries SET previous_reading = ?, consumption = ?, connection_charge = ?, late_fee = ?, other_charge = ?, late_fee_basis = ?, recorded_by = ? WHERE id = ?`,
       [...values, existing.id],
     );
   } else {
     await connection.execute(
       `INSERT INTO meter_entries
-      (previous_reading, consumption, connection_charge, late_fee, other_charge, recorded_by, billing_setup_id, customer_id, meter_id)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      (previous_reading, consumption, connection_charge, late_fee, other_charge, late_fee_basis, recorded_by, billing_setup_id, customer_id, meter_id)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [...values, details.setupId, details.customerId, consumer.meterId],
     );
   }
@@ -107,7 +113,7 @@ export async function saveEntry(details, consumer, actorId, existing, connection
       actorId,
       existing ? 'meter_entry.updated' : 'meter_entry.created',
       saved.id,
-      consumer.account + ' | consumption ' + details.consumption + ' m3',
+      consumer.account + ' | consumption ' + details.consumption + ' m3 | late fee ' + details.late + ' | suggested ' + suggestedLate,
     ],
   );
   return saved;

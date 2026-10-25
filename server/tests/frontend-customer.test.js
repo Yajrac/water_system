@@ -220,7 +220,6 @@ async function formBrowser(edit = false, saveError = null) {
     approvedBy: 'admin',
     certificateReceived: true,
     contractReceived: true,
-    contractDate: '2026-10-20',
     acknowledgementReceived: false,
     reading: 0,
     userId: '2',
@@ -371,6 +370,7 @@ test('customer list renders the server page without slicing it a second time and
         return cell;
       },
       empty() {},
+      loading() {},
       message() {},
     },
     CustomerAPI: {
@@ -493,7 +493,7 @@ test('Excel import shows loading, refreshes unfiltered records, then reports suc
         return { customers: [], pagination: { page: 1, total: 0 }, summary: {} };
       },
     },
-    AdminUI: { empty() {} },
+    AdminUI: { empty() {}, loading() {} },
     showNotice: async (title) => {
       assert.match(title, /successfully/);
       order.push('success');
