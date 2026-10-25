@@ -263,10 +263,7 @@ addProfileIcon('.profile-summary > div:nth-child(2) span');
 addProfileIcon('.profile-summary > div:nth-child(3) span');
 addProfileIcon('.profile-summary > div:nth-child(4) span');
 
-AdminAuth.ready.then(async (user) => {
-  if (!user) return;
-  document.getElementById('profileContent').hidden = true;
-  AdminUI.message('Loading customer profile...');
+async function refreshCustomerProfile() {
   try {
     if (!profileId) throw new Error('Choose a customer from the table.');
     const result = await CustomerAPI.profile(profileId);
@@ -280,4 +277,5 @@ AdminAuth.ready.then(async (user) => {
   } catch (error) {
     AdminUI.message(error.message + ' Reload the page to try again.');
   }
-});
+}
+AdminAuth.ready.then((user) => { if (user) return refreshCustomerProfile(); });

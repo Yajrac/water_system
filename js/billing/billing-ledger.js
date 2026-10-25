@@ -151,17 +151,20 @@
     render();
     totals();
   }
-  async function loadEntries() {
+  async function loadEntries({ preserve = false } = {}) {
     const version = ++loadVersion;
-    customers = [];
-    entries = new Map();
-    clearEntry();
+    const previousId = selectedId;
+    if (!preserve) {
+      customers = [];
+      entries = new Map();
+      clearEntry();
+    }
     if (!currentSetup()) {
       render();
       return;
     }
     loading = true;
-    render();
+    if (!preserve) render();
     try {
       const data = await MeterEntryAPI.list(currentSetup().id);
       if (version !== loadVersion) return;
@@ -179,7 +182,10 @@
     } finally {
       if (version === loadVersion) {
         loading = false;
-        if (customers.length && !generating) selectCustomer(customers[0].id);
+        if (preserve && dirty) render();
+        else if (customers.length && !generating) selectCustomer(
+          preserve && customers.some((customer) => customer.id === previousId) ? previousId : customers[0].id,
+        );
         else render();
       }
     }
@@ -346,6 +352,13 @@
       setFieldsDisabled(!selectedCustomer());
       render();
     }
+  });
+  document.addEventListener('admin:refresh-content', (event) => {
+    if (dirty || generating || saving || savingSetup || loading) {
+      AdminUI.message('Save your meter reading before refreshing.');
+      return;
+    }
+    event.detail.tasks.push(loadEntries({ preserve: true }));
   });
   clearEntry();
   render();

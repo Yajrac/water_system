@@ -453,6 +453,21 @@ async function loadCustomerForm() {
     AdminUI.message(error.message + ' Reload this page to try again.');
   }
 }
+// Update reference choices only; never overwrite an applicant's unsaved fields.
+async function refreshCustomerChoices() {
+  if (customerFormLoading) return;
+  const select = customerForm.elements.barangay;
+  const barangays = await CustomerAPI.loadBarangays();
+  const selected = select.value;
+  const previous = select.selectedOptions[0]?.textContent;
+  select.replaceChildren(new Option('Select barangay', ''));
+  barangays.filter((item) => Number(item.is_active) === 1 || item.name === selected)
+    .forEach((item) => select.add(new Option(item.name, item.name)));
+  if (selected && !Array.from(select.options).some((option) => option.value === selected)) {
+    select.add(new Option(previous || selected, selected));
+  }
+  select.value = selected;
+}
 AdminAuth.ready.then((user) => {
   if (user) loadCustomerForm();
 });

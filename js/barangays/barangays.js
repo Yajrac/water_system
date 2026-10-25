@@ -61,7 +61,7 @@ async function loadBarangays() {
   const version = ++registryLoadVersion;
   registryLoading = true;
   registryFailure = '';
-  showBarangays();
+  if (!registryEntries.length) showBarangays();
   try {
     const entries = await BarangayAPI.list();
     if (version !== registryLoadVersion) return;

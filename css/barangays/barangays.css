@@ -8,10 +8,23 @@
   stroke-linecap: round;
   stroke-linejoin: round;
 }
-.barangay-page .page-header > .btn {
+.barangay-header-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-left: auto;
+}
+.barangay-header-actions .admin-content-refresh { margin-left: 0; }
+.barangay-page .page-header { align-items: center; }
+.barangay-header-actions > .btn {
   display: inline-flex;
   align-items: center;
   gap: 8px;
+}
+@media (max-width: 600px) {
+  .barangay-header-actions { margin-left: 0; justify-content: flex-start; }
 }
 .barangay-count {
   color: var(--color-ink-muted);

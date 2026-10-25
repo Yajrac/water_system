@@ -13,8 +13,7 @@ function setupActivityTable({ searchId, dateId, rowsId, pagerId, clearId, consum
     timeZone: 'Asia/Manila',
   });
   function pending() {
-    body.replaceChildren();
-    AdminUI.empty(body, 5, 'Loading activity logs...');
+    if (!body.children.length) AdminUI.empty(body, 5, 'Loading activity logs...');
     container.querySelectorAll('button').forEach((button) => {
       button.disabled = true;
     });
@@ -93,6 +92,10 @@ function setupActivityTable({ searchId, dateId, rowsId, pagerId, clearId, consum
   });
   AdminAuth.ready.then((user) => {
     if (user && !user.mustChangePassword) render();
+  });
+  document.addEventListener('admin:refresh-content', (event) => {
+    clearTimeout(timer);
+    event.detail.tasks.push(render());
   });
 }
 setupActivityTable({

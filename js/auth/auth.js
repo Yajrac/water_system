@@ -144,12 +144,47 @@ const AdminAuth = {
 
 const currentAuthPage = location.pathname.split('/').pop();
 const isPublicAuthPage = currentAuthPage === 'login.html';
+let initialRequests = 0;
+let initialSessionReady = false;
+let initialDocumentReady = document.readyState !== 'loading';
+let initialLoadingFinished = false;
+let initialFinishTimer;
+function finishInitialLoading() {
+  clearTimeout(initialFinishTimer);
+  if (!initialSessionReady || !initialDocumentReady || initialRequests || initialLoadingFinished) return;
+  // Let page initialization start dependent requests and finish rendering first.
+  initialFinishTimer = setTimeout(() => {
+    if (initialRequests) return;
+    initialLoadingFinished = true;
+    document.documentElement.classList.remove('auth-pending');
+  }, 0);
+}
+const originalAdminRequest = AdminAPI.request;
+AdminAPI.request = async function (...args) {
+  const track = !initialLoadingFinished;
+  if (track) initialRequests++;
+  try { return await originalAdminRequest.apply(this, args); }
+  finally {
+    if (track) { initialRequests--; finishInitialLoading(); }
+  }
+};
+document.addEventListener('DOMContentLoaded', () => {
+  initialDocumentReady = true;
+  finishInitialLoading();
+}, { once: true });
 
 // Keep navigation visible while the protected content is being verified.
 const authGateStyle = document.createElement('style');
 authGateStyle.textContent = `
   html.auth-pending main > :not(.page-header):not(.admin-session-loading) {
     display: none !important;
+  }
+  html.auth-pending.auth-dashboard:not(.auth-session-error) main > #summary,
+  html.auth-pending.auth-dashboard:not(.auth-session-error) main > .dashboard-charts {
+    display: grid !important;
+  }
+  html.auth-pending.auth-dashboard:not(.auth-session-error) .admin-session-loading {
+    display: none;
   }
   html.auth-pending main > .page-header :is(button, a, input, select) {
     visibility: hidden;
@@ -177,19 +212,18 @@ authGateStyle.textContent = `
   .admin-session-loading small { font-size: 13px; }
   .admin-session-skeleton { display: grid; gap: 20px; width: 100%; }
   .admin-skeleton-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
-  .admin-skeleton-block {
-    display: block;
-    height: 16px;
-    border-radius: 6px;
-    background: currentColor;
-    opacity: .09;
-  }
+  .admin-skeleton-block { height: 16px; }
+  .admin-skeleton-card { padding: 20px; border: 1px solid var(--color-border); border-radius: 10px; }
+  .admin-skeleton-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; }
+  .admin-skeleton-field .skeleton-number { width: 100%; height: 42px; margin: 0; }
+  .admin-skeleton-plots { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
   .admin-skeleton-cards .admin-skeleton-block { height: 88px; }
   .admin-skeleton-row { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 24px; padding: 16px 0; }
   .admin-session-label[hidden], .admin-session-hint[hidden],
   .admin-session-retry[hidden], .admin-session-skeleton[hidden] { display: none; }
   @media (max-width: 600px) {
     .admin-skeleton-cards { grid-template-columns: 1fr; }
+    .admin-skeleton-fields, .admin-skeleton-plots { grid-template-columns: 1fr; }
     .admin-skeleton-cards .admin-skeleton-block { height: 56px; }
     .admin-skeleton-row { gap: 12px; }
   }
@@ -209,12 +243,40 @@ function mountSessionLoading() {
   cards.className = 'admin-skeleton-cards';
   function placeholder() {
     const block = document.createElement('span');
-    block.className = 'admin-skeleton-block';
+    block.className = 'skeleton-block skeleton-row-text admin-skeleton-block';
     return block;
   }
-  cards.append(placeholder(), placeholder(), placeholder());
+  const dashboard = Boolean(document.getElementById('summary') && document.getElementById('collectionsChart'));
+  if (dashboard) document.documentElement.classList.add('auth-dashboard');
+  const isForm = !document.querySelector('main table') && Boolean(document.querySelector('main form'));
+  for (let index = 0; index < (dashboard ? 8 : 3); index++) {
+    const card = document.createElement('div');
+    card.className = 'admin-skeleton-card';
+    for (const kind of ['heading', 'number', 'caption']) {
+      const block = placeholder();
+      block.className = 'skeleton-block skeleton-' + kind;
+      card.appendChild(block);
+    }
+    cards.appendChild(card);
+  }
+  if (dashboard) cards.className = 'admin-summary';
   skeleton.appendChild(cards);
-  for (let index = 0; index < 5; index++) {
+  if (dashboard || isForm) {
+    const fields = document.createElement('div');
+    fields.className = dashboard ? 'admin-skeleton-plots' : 'admin-skeleton-fields';
+    for (let index = 0; index < (dashboard ? 3 : 6); index++) {
+      const field = document.createElement('div');
+      field.className = 'admin-skeleton-field';
+      const title = placeholder();
+      title.className = 'skeleton-block skeleton-heading';
+      const value = placeholder();
+      value.className = 'skeleton-block ' + (dashboard ? 'skeleton-plot' : 'skeleton-number');
+      field.append(title, value);
+      fields.appendChild(field);
+    }
+    skeleton.appendChild(fields);
+  }
+  for (let index = 0; index < (dashboard || isForm ? 0 : 5); index++) {
     const row = document.createElement('div');
     row.className = 'admin-skeleton-row';
     row.append(placeholder(), placeholder(), placeholder());
@@ -241,6 +303,7 @@ function mountSessionLoading() {
 function showSessionConnectionError() {
   const loading = document.querySelector('.admin-session-loading');
   if (!loading) return;
+  document.documentElement.classList.add('auth-session-error');
   loading.removeAttribute('aria-label');
   loading.querySelector('.admin-session-skeleton').hidden = true;
   loading.querySelector('.admin-session-label').hidden = false;
@@ -257,7 +320,7 @@ if (document.readyState === 'loading') {
 
 let adminPageVerified = false;
 async function requireAdminSession({ background = false } = {}) {
-  const checkInBackground = background && adminPageVerified;
+  const checkInBackground = background && adminPageVerified && initialLoadingFinished;
   if (!isPublicAuthPage && !checkInBackground) document.documentElement.classList.add('auth-pending');
   AdminAuth.sessionError = '';
   try {
@@ -272,7 +335,12 @@ async function requireAdminSession({ background = false } = {}) {
       return null;
     }
     adminPageVerified = Boolean(user);
-    document.documentElement.classList.remove('auth-pending');
+    if (checkInBackground || isPublicAuthPage) {
+      document.documentElement.classList.remove('auth-pending');
+    } else {
+      initialSessionReady = true;
+      finishInitialLoading();
+    }
     return user;
   } catch (error) {
     if ([401, 403].includes(error.status)) AdminAuth.clear();

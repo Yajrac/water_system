@@ -64,7 +64,11 @@ function clearReport() {
 
 async function loadReport() {
   const request = ++reportRequest;
-  clearReport();
+  const refresh = document.getElementById('refreshReport');
+  refresh.disabled = true;
+  refresh.setAttribute('aria-busy', 'true');
+  const icon = refresh.querySelector('i');
+  icon?.classList.add('admin-refresh-spinning');
   reportMessage.textContent = 'Loading report...';
   const params = new URLSearchParams();
   if (reportSearch.value.trim()) params.set('search', reportSearch.value.trim());
@@ -97,6 +101,12 @@ async function loadReport() {
   } catch (error) {
     if (request !== reportRequest) return;
     reportMessage.textContent = error.message;
+  } finally {
+    if (request === reportRequest) {
+      refresh.disabled = false;
+      refresh.removeAttribute('aria-busy');
+      icon?.classList.remove('admin-refresh-spinning');
+    }
   }
 }
 

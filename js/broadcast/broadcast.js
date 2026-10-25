@@ -22,8 +22,8 @@ function changeAudience() {
 }
 async function showNotices() {
   const body = document.getElementById('noticeRows');
-  body.replaceChildren();
   const notices = await AdminAPI.request('/notifications');
+  body.replaceChildren();
   for (const notice of notices) {
     const row = body.insertRow();
     [notice.date,notice.type,notice.audience,notice.recipients,notice.message,notice.status]

@@ -1,18 +1,18 @@
 let dashboardLoading = false;
+let dashboardHasData = false;
 async function startDashboard() {
   if (dashboardLoading) return;
   dashboardLoading = true;
-  if (!(await AdminAuth.ready)) {
-    dashboardLoading = false;
-    return;
-  }
   const button = document.getElementById('refreshDashboard');
   button.disabled = true;
   const yearSelect = document.getElementById('collectionsYear');
+  button.setAttribute('aria-busy', 'true');
+  const refreshIcon = button.querySelector('i');
+  refreshIcon?.classList.add('admin-refresh-spinning');
   yearSelect.disabled = true;
   AdminUI.message('');
   const containers = ['summary', 'collectionsChart', 'statusChart', 'consumptionChart'];
-  const finish = containers.map((id) => {
+  const finish = dashboardHasData ? [] : containers.map((id) => {
     const container = document.getElementById(id);
     container.chartResizeObserver?.disconnect();
     container.replaceChildren();
@@ -22,6 +22,13 @@ async function startDashboard() {
       id === 'summary' ? 8 : 1,
     );
   });
+  if (!(await AdminAuth.ready)) {
+    dashboardLoading = false;
+    button.disabled = false;
+    button.removeAttribute('aria-busy');
+    refreshIcon?.classList.remove('admin-refresh-spinning');
+    return;
+  }
   try {
     const data = await AdminAPI.request(
       '/dashboard' + (yearSelect.value ? '?year=' + encodeURIComponent(yearSelect.value) : ''),
@@ -37,13 +44,16 @@ async function startDashboard() {
       'Monthly collections - ' + data.period.year;
     renderDashboard(data);
     renderDashboardCharts(data);
+    dashboardHasData = true;
   } catch (error) {
     finish.forEach((stop) => stop());
-    containers.forEach((id) => document.getElementById(id).replaceChildren());
+    if (!dashboardHasData) containers.forEach((id) => document.getElementById(id).replaceChildren());
     AdminUI.message(error.message + ' Select Refresh to try again.');
   } finally {
     dashboardLoading = false;
     button.disabled = false;
+    button.removeAttribute('aria-busy');
+    refreshIcon?.classList.remove('admin-refresh-spinning');
     yearSelect.disabled = false;
   }
 }

@@ -1,4 +1,90 @@
 // Small UI helpers used by each page.
+// Refresh handlers update records in place; they must never reload forms.
+function prepareRefreshIcon(icon) {
+  if (!icon) return;
+  icon.classList.remove('bi', 'bi-arrow-clockwise');
+  icon.classList.add('admin-refresh-icon');
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('viewBox', '0 0 24 24');
+  svg.setAttribute('fill', 'none');
+  svg.setAttribute('stroke', 'currentColor');
+  svg.setAttribute('stroke-width', '2');
+  svg.setAttribute('stroke-linecap', 'round');
+  svg.setAttribute('stroke-linejoin', 'round');
+  svg.setAttribute('aria-hidden', 'true');
+  const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  path.setAttribute('d', 'M20 4v5h-5 M19.1 9a7.5 7.5 0 1 0 .4 5');
+  svg.appendChild(path);
+  icon.replaceChildren(svg);
+}
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('#refreshDashboard i, #refreshReport i').forEach(prepareRefreshIcon);
+  const page = location.pathname.split('/').pop();
+  const loaders = {
+    'customers.html': () => loadCustomers(),
+    'barangays.html': () => loadBarangays(),
+    'generated-bills.html': () => showGeneratedBills(),
+    'bill-balances.html': () => showBalances(),
+    'payment-history.html': () => showPayments(),
+    'record-payment.html': () => renderCashierRegistry(),
+    'feedback.html': () => showFeedback(),
+    'disconnected.html': () => showDisconnections(),
+    'broadcast.html': () => showNotices(),
+    'customer-profile.html': () => refreshCustomerProfile(),
+    'customer-form.html': () => refreshCustomerChoices(),
+    'settings.html': () => refreshPageSections(),
+    'billing.html': () => refreshPageSections(),
+  };
+  function refreshPageSections() {
+    const tasks = [];
+    document.dispatchEvent(new CustomEvent('admin:refresh-content', { detail: { tasks } }));
+    return Promise.all(tasks);
+  }
+  const load = loaders[page];
+  const header = document.querySelector('main > .page-header');
+  if (page === 'reports.html' && header) {
+    const existing = document.getElementById('refreshReport');
+    existing.classList.add('admin-content-refresh');
+    header.appendChild(existing);
+  }
+  let headerActions;
+  if (header) {
+    header.classList.add('admin-page-header');
+    headerActions = header.querySelector(':scope > .customer-header-actions, :scope > .barangay-header-actions');
+    if (!headerActions) {
+      headerActions = document.createElement('div');
+      header.appendChild(headerActions);
+    }
+    headerActions.classList.add('admin-header-actions');
+    Array.from(header.children)
+      .filter((child) => child.matches('button, a.btn'))
+      .forEach((control) => headerActions.appendChild(control));
+  }
+  if (!load || !header) return;
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'btn admin-content-refresh';
+  const icon = document.createElement('i');
+  icon.className = 'bi bi-arrow-clockwise';
+  icon.setAttribute('aria-hidden', 'true');
+  prepareRefreshIcon(icon);
+  button.append(icon, document.createTextNode(' Refresh'));
+  headerActions.appendChild(button);
+  button.addEventListener('click', async () => {
+    if (button.disabled) return;
+    button.disabled = true;
+    button.setAttribute('aria-busy', 'true');
+    icon.classList.add('admin-refresh-spinning');
+    try {
+      if (await AdminAuth.ready) await load();
+    } catch (error) { AdminUI.message(error.message); }
+    finally {
+      button.disabled = false;
+      button.removeAttribute('aria-busy');
+      icon.classList.remove('admin-refresh-spinning');
+    }
+  });
+});
 // Numeric entry helpers also cover meter fields created after the page loads.
 function isNumericField(field) {
   return (
