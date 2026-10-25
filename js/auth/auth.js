@@ -162,7 +162,7 @@ authGateStyle.textContent = `
     min-height: 320px;
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: stretch;
     justify-content: center;
     gap: 12px;
     padding: 24px;
@@ -175,17 +175,23 @@ authGateStyle.textContent = `
   }
   .admin-session-loading p { margin: 0; }
   .admin-session-loading small { font-size: 13px; }
-  .admin-session-spinner {
-    width: 30px;
-    height: 30px;
-    border: 3px solid #bddce9;
-    border-top-color: #0783b5;
-    border-radius: 50%;
-    animation: admin-session-spin .8s linear infinite;
+  .admin-session-skeleton { display: grid; gap: 20px; width: 100%; }
+  .admin-skeleton-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .admin-skeleton-block {
+    display: block;
+    height: 16px;
+    border-radius: 6px;
+    background: currentColor;
+    opacity: .09;
   }
-  @keyframes admin-session-spin { to { transform: rotate(360deg); } }
-  @media (prefers-reduced-motion: reduce) {
-    .admin-session-spinner { animation: none; }
+  .admin-skeleton-cards .admin-skeleton-block { height: 88px; }
+  .admin-skeleton-row { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 24px; padding: 16px 0; }
+  .admin-session-label[hidden], .admin-session-hint[hidden],
+  .admin-session-retry[hidden], .admin-session-skeleton[hidden] { display: none; }
+  @media (max-width: 600px) {
+    .admin-skeleton-cards { grid-template-columns: 1fr; }
+    .admin-skeleton-cards .admin-skeleton-block { height: 56px; }
+    .admin-skeleton-row { gap: 12px; }
   }
 `;
 document.head.appendChild(authGateStyle);
@@ -195,22 +201,38 @@ function mountSessionLoading() {
   loading.className = 'admin-session-loading';
   loading.setAttribute('role', 'status');
   loading.setAttribute('aria-live', 'polite');
-  const spinner = document.createElement('span');
-  spinner.className = 'admin-session-spinner';
-  spinner.setAttribute('aria-hidden', 'true');
+  loading.setAttribute('aria-label', 'Loading page content');
+  const skeleton = document.createElement('div');
+  skeleton.className = 'admin-session-skeleton';
+  skeleton.setAttribute('aria-hidden', 'true');
+  const cards = document.createElement('div');
+  cards.className = 'admin-skeleton-cards';
+  function placeholder() {
+    const block = document.createElement('span');
+    block.className = 'admin-skeleton-block';
+    return block;
+  }
+  cards.append(placeholder(), placeholder(), placeholder());
+  skeleton.appendChild(cards);
+  for (let index = 0; index < 5; index++) {
+    const row = document.createElement('div');
+    row.className = 'admin-skeleton-row';
+    row.append(placeholder(), placeholder(), placeholder());
+    skeleton.appendChild(row);
+  }
   const label = document.createElement('p');
   label.className = 'admin-session-label';
-  label.textContent = 'Checking session...';
+  label.hidden = true;
   const hint = document.createElement('small');
   hint.className = 'admin-session-hint';
-  hint.textContent = 'Connecting securely. This may take a moment.';
+  hint.hidden = true;
   const retry = document.createElement('button');
   retry.type = 'button';
   retry.className = 'btn btn-primary admin-session-retry';
   retry.textContent = 'Retry connection';
   retry.hidden = true;
   retry.addEventListener('click', () => location.reload());
-  loading.append(spinner, label, hint, retry);
+  loading.append(skeleton, label, hint, retry);
   const content = document.querySelector('main');
   if (!content) return;
   content.appendChild(loading);
@@ -219,8 +241,11 @@ function mountSessionLoading() {
 function showSessionConnectionError() {
   const loading = document.querySelector('.admin-session-loading');
   if (!loading) return;
-  loading.querySelector('.admin-session-spinner').style.display = 'none';
-  loading.querySelector('.admin-session-label').textContent = 'Unable to check your session';
+  loading.removeAttribute('aria-label');
+  loading.querySelector('.admin-session-skeleton').hidden = true;
+  loading.querySelector('.admin-session-label').hidden = false;
+  loading.querySelector('.admin-session-hint').hidden = false;
+  loading.querySelector('.admin-session-label').textContent = 'Unable to load this page';
   loading.querySelector('.admin-session-hint').textContent = AdminAuth.sessionError;
   loading.querySelector('.admin-session-retry').hidden = false;
 }
