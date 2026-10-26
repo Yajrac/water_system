@@ -1359,6 +1359,24 @@ html body :is(.pager-controls .btn, .step-navigation-button, .customer-step-navi
   gap: 6px;
   font-weight: 600;
 }
+#adminPasswordForm .password-visibility-toggle {
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  min-height: 32px;
+  width: fit-content;
+  cursor: pointer;
+}
+#adminPasswordForm #showAdminPasswords {
+  flex: 0 0 16px;
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  padding: 0;
+  accent-color: var(--color-primary, #0783b5);
+}
 .admin-form input,
 .admin-form select,
 .admin-form textarea,
