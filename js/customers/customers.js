@@ -3,8 +3,122 @@ const customerImportDialog = document.getElementById('customerImportDialog');
 let customerLoadVersion = 0;
 let searchTimer;
 let importingCustomers = false;
+let deletingCustomers = false;
+let visibleCustomers = [];
+const selectedCustomers = new Set();
+
+function updateCustomerSelection() {
+  const all = document.getElementById('selectAllCustomers');
+  all.disabled = deletingCustomers || !visibleCustomers.length;
+  all.checked = visibleCustomers.length > 0 && selectedCustomers.size === visibleCustomers.length;
+  all.indeterminate = selectedCustomers.size > 0 && !all.checked;
+  const button = document.getElementById('deleteSelectedCustomers');
+  button.disabled = deletingCustomers || !selectedCustomers.size;
+  button.textContent = deletingCustomers ? 'Deleting...' : 'Delete selected (' + selectedCustomers.size + ')';
+  const icon = document.createElement('i');
+  icon.className = 'bi bi-trash';
+  icon.setAttribute('aria-hidden', 'true');
+  button.prepend(icon);
+}
+
+async function removeCustomerRecords(customers) {
+  if (deletingCustomers || !customers.length) return;
+  deletingCustomers = true;
+  updateCustomerSelection();
+  try {
+    const preview = document.createElement('div');
+    preview.className = 'customer-delete-preview';
+    const list = document.createElement('div');
+    list.className = 'customer-delete-table-wrap';
+    const table = document.createElement('table');
+    table.className = 'customer-delete-table';
+    const head = table.createTHead().insertRow();
+    for (const title of ['Name', 'Account number']) {
+      const th = document.createElement('th');
+      th.scope = 'col';
+      th.textContent = title;
+      head.appendChild(th);
+    }
+    const rows = table.createTBody();
+    const extraRows = [];
+    for (const [index, customer] of customers.entries()) {
+      const item = rows.insertRow();
+      const name = item.insertCell();
+      name.textContent = customer.name;
+      const account = item.insertCell();
+      account.textContent = customer.account;
+      if (index >= 3) {
+        item.hidden = true;
+        extraRows.push(item);
+      }
+    }
+    list.appendChild(table);
+    if (extraRows.length) {
+      const toggle = document.createElement('button');
+      toggle.type = 'button';
+      toggle.className = 'customer-delete-show-more';
+      toggle.textContent = 'Show more (' + extraRows.length + ' more)';
+      toggle.setAttribute('aria-expanded', 'false');
+      toggle.addEventListener('click', () => {
+        const expanded = toggle.getAttribute('aria-expanded') !== 'true';
+        extraRows.forEach((row) => { row.hidden = !expanded; });
+        toggle.setAttribute('aria-expanded', String(expanded));
+        toggle.textContent = expanded ? 'Show less' : 'Show more (' + extraRows.length + ' more)';
+      });
+      list.appendChild(toggle);
+    }
+    const label = document.createElement('label');
+    const expected = customers.length === 1 ? String(customers[0].account) : 'DELETE';
+    const prompt = document.createElement('span');
+    prompt.textContent = 'To confirm, type ';
+    const code = document.createElement('strong');
+    code.textContent = expected;
+    prompt.appendChild(code);
+    label.appendChild(prompt);
+    const input = document.createElement('input');
+    input.required = true;
+    input.autocomplete = 'off';
+    input.spellcheck = false;
+    input.placeholder = customers.length === 1 ? 'Enter account number' : 'Type DELETE';
+    input.addEventListener('input', () => input.setCustomValidity(input.value === expected ? '' : 'Enter ' + expected + ' exactly.'));
+    input.setCustomValidity('Enter ' + expected + ' exactly.');
+    label.appendChild(input);
+    const warning = document.createElement('p');
+    warning.className = 'customer-delete-warning';
+    warning.textContent = 'All linked records, including bills, payments, meters, applications, feedback and consumer logins, will be removed. Dashboard and report totals will change.';
+    const warningIcon = document.createElement('i');
+    warningIcon.className = 'bi bi-exclamation-triangle';
+    warningIcon.setAttribute('aria-hidden', 'true');
+    warning.prepend(warningIcon);
+    preview.append(list, warning, label);
+    if (!(await confirmAction(customers.length === 1 ? 'Delete customer?' : 'Delete ' + customers.length + ' customers?',
+      'Permanently remove ' + (customers.length === 1 ? 'this customer' : 'these customers') + ' and their records. This cannot be undone.',
+      'Delete customers', preview))) return;
+    const result = await CustomerAPI.remove(customers.map((customer) => String(customer.id)));
+    customerPagination.page = 1;
+    await loadCustomers();
+    await showNotice('Customers deleted successfully', result.count + ' customer(s) and their related records were permanently deleted.');
+  } catch (error) {
+    await showNotice('Could not delete customers', error.message);
+  } finally {
+    deletingCustomers = false;
+    updateCustomerSelection();
+  }
+}
+
+document.getElementById('selectAllCustomers').addEventListener('change', (event) => {
+  if (deletingCustomers) return;
+  selectedCustomers.clear();
+  if (event.target.checked) visibleCustomers.forEach((customer) => selectedCustomers.add(String(customer.id)));
+  document.querySelectorAll('.customer-select').forEach((checkbox) => { checkbox.checked = selectedCustomers.has(checkbox.value); });
+  updateCustomerSelection();
+});
+document.getElementById('deleteSelectedCustomers').addEventListener('click', () =>
+  removeCustomerRecords(visibleCustomers.filter((customer) => selectedCustomers.has(String(customer.id)))));
 
 function renderCustomerRows(customers) {
+  visibleCustomers = customers;
+  selectedCustomers.clear();
   const body = document.getElementById('customerRows');
   body.replaceChildren();
   customers.forEach((customer) => {
@@ -14,8 +128,20 @@ function renderCustomerRows(customers) {
         ', ' +
         [customer.firstName, customer.middleName].filter(Boolean).join(' ')
       : customer.name;
-    AdminUI.customer(row, { ...customer, name: displayName });
-    AdminUI.cell(row, customer.barangay, 'Barangay');
+    const checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+    checkbox.className = 'customer-select';
+    checkbox.value = String(customer.id);
+    checkbox.setAttribute('aria-label', 'Select ' + displayName + ' ' + customer.account);
+    checkbox.addEventListener('change', () => {
+      if (deletingCustomers) { checkbox.checked = selectedCustomers.has(checkbox.value); return; }
+      if (checkbox.checked) selectedCustomers.add(checkbox.value); else selectedCustomers.delete(checkbox.value);
+      updateCustomerSelection();
+    });
+    AdminUI.cell(row, '', 'Select').appendChild(checkbox);
+    AdminUI.cell(row, customer.account, 'Account number').className = 'customer-account';
+    AdminUI.cell(row, displayName, 'Customer name').className = 'customer-name';
+    AdminUI.cell(row, customer.barangay.replace(/^Barangay\s+/i, 'Brgy. '), 'Barangay');
     AdminUI.cell(row, customer.contact, 'Contact');
     AdminUI.cell(row, customer.reading + ' m\u00b3', 'Meter reading');
     const status = document.createElement('span');
@@ -59,16 +185,31 @@ function renderCustomerRows(customers) {
       link.appendChild(image);
       actions.appendChild(link);
     }
+    const remove = document.createElement('button');
+    remove.type = 'button';
+    remove.className = 'btn action-delete';
+    remove.title = 'Delete customer';
+    remove.setAttribute('aria-label', 'Delete ' + displayName);
+    const trash = document.createElement('i');
+    trash.className = 'bi bi-trash';
+    trash.setAttribute('aria-hidden', 'true');
+    remove.appendChild(trash);
+    remove.addEventListener('click', () => removeCustomerRecords([customer]));
+    actions.appendChild(remove);
     AdminUI.cell(row, '', 'Actions').appendChild(actions);
   });
-  AdminUI.empty(body, 6, 'No database customers match your filters.');
+  AdminUI.empty(body, 8, 'No database customers match your filters.');
+  updateCustomerSelection();
 }
 
 async function loadCustomers() {
+  visibleCustomers = [];
+  selectedCustomers.clear();
+  updateCustomerSelection();
   const version = ++customerLoadVersion;
   const body = document.getElementById('customerRows');
   body.setAttribute('aria-busy', 'true');
-  if (!body.children.length) AdminUI.loading(body, 6, 'Loading customers...');
+  if (!body.children.length) AdminUI.loading(body, 8, 'Loading customers...');
   document.getElementById('retryCustomers').hidden = true;
   try {
     const result = await CustomerAPI.list({
@@ -91,7 +232,7 @@ async function loadCustomers() {
   } catch (error) {
     if (version !== customerLoadVersion) return;
     body.replaceChildren();
-    AdminUI.empty(body, 6, error.message);
+    AdminUI.empty(body, 8, error.message);
     document.getElementById('customerCount').textContent = 'Could not load customers';
     document.getElementById('retryCustomers').hidden = false;
     customerPagination.update(0);

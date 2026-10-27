@@ -1,5 +1,10 @@
 const CustomerAPI = {
   barangays: [],
+  remove(ids) {
+    return ids.length === 1
+      ? AdminAPI.request('/customers/' + encodeURIComponent(ids[0]), { method: 'DELETE' })
+      : AdminAPI.request('/customers/delete-selected', { method: 'POST', body: { ids } });
+  },
   async loadBarangays() {
     this.barangays = await AdminAPI.request('/barangays');
     return this.barangays;

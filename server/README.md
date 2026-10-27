@@ -1,5 +1,26 @@
 # Water System database
 
+## Permanent customer deletion
+
+Customer Management supports a Delete action per row and checkboxes with Delete
+selected. Select all applies only to the current page; loading another page or
+changing filters clears selection. Confirmation lists selected names/accounts and
+requires the account number for one customer or `DELETE` for multiple customers.
+
+Admin-only `DELETE /api/v1/customers/:id` and
+`POST /api/v1/customers/delete-selected` (`{ "ids": ["1", "2"] }`, maximum 100)
+permanently remove the selected customers, applications/checklists/estimates,
+meters/readings, bills, payments, late-fee assessments, feedback, announcement
+recipient links, notification state and linked consumer logins. Financial totals
+in dashboards and reports decrease accordingly. Existing consumer sessions stop
+working. Admin audit history is retained and a deletion event records each account.
+Shared announcements, barangays, billing setups, office settings and admins remain.
+Missing selections or any delete/audit failure roll back the whole batch. No schema
+migration is required; migrations through 021 must already be applied.
+
+Back up the production database before using this permanent deletion feature.
+Deploy both the backend and updated frontend; preserve the VPS API configuration.
+
 Node.js 22 or newer. The migration files reproduce the 18 tables entered manually
 in phpMyAdmin. Database commands manage schema history and the office seed.
 No admin account, sample customers or passwords are seeded by migrations.

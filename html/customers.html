@@ -257,11 +257,17 @@
                 </select></label
               >
             </div>
+            <div class="customer-selection-toolbar">
+              <span>Select customers using the checkboxes below.</span>
+              <button type="button" class="btn action-delete" id="deleteSelectedCustomers" disabled>Delete selected (0)</button>
+            </div>
             <div class="table-scroll customers-table">
               <table class="mobile-summary-table mobile-summary-customers">
                 <thead>
                   <tr>
-                    <th>Customer</th>
+                    <th><input type="checkbox" id="selectAllCustomers" aria-label="Select all customers on this page" disabled /></th>
+                    <th>Account number</th>
+                    <th>Customer name</th>
                     <th>Barangay</th>
                     <th>Contact</th>
                     <th>Meter reading</th>

@@ -1,4 +1,16 @@
 /* Plain form and table layout shared by the admin pages. */
+.customers-table .customer-select {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  cursor: pointer;
+}
+#selectAllCustomers {
+  width: 18px;
+  height: 18px;
+  vertical-align: middle;
+  margin: 0;
+}
 .billing-dates {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -45,7 +57,7 @@
   }
   .mobile-summary-customers
     tr
-    > :not(:nth-child(1)):not(:nth-child(5)):not(:nth-child(6)):not([colspan]),
+    > :not(:nth-child(1)):not(:nth-child(2)):not(:nth-child(3)):not(:nth-child(8)):not([colspan]),
   .mobile-summary-balances
     tr
     > :not(:nth-child(1)):not(:nth-child(5)):not(:nth-child(6)):not([colspan]),

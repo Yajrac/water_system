@@ -1,4 +1,11 @@
 import * as service from '../services/customer.service.js';
+import { deleteCustomers } from '../services/customer-delete.service.js';
+export async function remove(req, res) {
+  res.json({ success: true, data: await deleteCustomers({ ids: [req.params.id] }, req.user.id) });
+}
+export async function removeSelected(req, res) {
+  res.json({ success: true, data: await deleteCustomers(req.body, req.user.id) });
+}
 export async function previewImport(req, res) {
   res.json({ success: true, data: await service.previewCustomerImport(req.body) });
 }
