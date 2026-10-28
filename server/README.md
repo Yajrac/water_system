@@ -1,5 +1,15 @@
 # Water System database
 
+Complete customer imports (meter number, installation date and all three document
+checks complete) automatically become Installed and Active, even when the workbook
+has Approved/Inactive values. Explicitly Disconnected connections retain their
+status. Incomplete records retain the existing import validation/status rules;
+missing meter/date pairs and invalid dates are rejected in review. Billing still
+requires the current barangay setup and saved consumption. Imported credentials
+remain temporary submitter-number passwords with a required first-login change.
+This change requires no database migration and does not update previously imported
+customers automatically.
+
 ## Permanent customer deletion
 
 Customer Management supports a Delete action per row and checkboxes with Delete

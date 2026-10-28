@@ -406,7 +406,7 @@ document.getElementById('importForm').addEventListener('submit', async (event) =
         ready +
           ' ready · ' +
           preview.rejectedCount +
-          ' rejected. Only ready rows will be saved. Saved status, dates, meter details and document checks from the file will be preserved. The submitter number will be the temporary password, requiring a change at first login.' +
+          ' rejected. Only ready rows will be saved. Complete installations with all document checks become Installed and Active automatically; explicitly disconnected records stay disconnected. The submitter number will be the temporary password, requiring a change at first login.' +
           (newAreas.length
             ? ' Registering: ' + newAreas.join(', ') + '.'
             : ' All barangays are already registered.'),

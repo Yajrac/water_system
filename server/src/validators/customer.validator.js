@@ -188,6 +188,14 @@ export function validateCustomer(body, { existing = null, importing = false } = 
       throw new AppError('Invalid document checklist.', 400);
     result[key] = importing && body[key] === undefined ? true : Boolean(body[key]);
   }
+  // Complete imported installation records are ready for billing immediately.
+  // Preserve explicitly disconnected records when restoring an exported workbook.
+  if (importing && result.meterNumber && result.dateInstalled &&
+      checks.every((key) => result[key]) && result.connectionStatus !== 'Disconnected') {
+    result.serviceStatus = 'Installed';
+    result.connectionStatus = 'Active';
+    result.dateApproved = body.dateApproved || result.dateInstalled;
+  }
   if (result.dateApproved && result.dateApproved < result.dateApplied)
     throw new AppError('Approval date cannot precede application.', 400);
   if (importing && result.connectionStatus === 'Active' && result.serviceStatus !== 'Installed')

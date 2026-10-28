@@ -22,6 +22,26 @@ const input = {
   contractReceived: true,
 };
 
+test('complete imports become Installed and Active without changing manual registration', () => {
+  const complete = { ...input, account: 'IMPORT-COMPLETE', serviceStatus: 'Approved',
+    connectionStatus: 'Inactive', dateApplied: '2025-01-01', dateApproved: '2025-01-02',
+    dateInstalled: '2025-01-03', meterNumber: 'IMPORT-METER',
+    acknowledgementReceived: true, reading: '12.000' };
+  const imported = validateCustomer(complete, { importing: true });
+  assert.equal(imported.serviceStatus, 'Installed');
+  assert.equal(imported.connectionStatus, 'Active');
+  assert.equal(imported.dateInstalled, '2025-01-03');
+  assert.equal(imported.reading, '12.000');
+  const omitted = { ...complete };
+  delete omitted.serviceStatus;
+  delete omitted.connectionStatus;
+  assert.equal(validateCustomer(omitted, { importing: true }).serviceStatus, 'Installed');
+  assert.equal(validateCustomer({ ...complete, contractReceived: false }, { importing: true }).serviceStatus, 'Approved');
+  assert.equal(validateCustomer({ ...complete, serviceStatus: 'Installed', connectionStatus: 'Disconnected' }, { importing: true }).connectionStatus, 'Disconnected');
+  assert.throws(() => validateCustomer({ ...complete, meterNumber: '' }, { importing: true }), { statusCode: 400 });
+  assert.equal(validateCustomer(input).serviceStatus, 'Approved');
+});
+
 test('bulk import preserves explicit status and checks, with Approved defaults for legacy files', () => {
   const body = {
     ...input,

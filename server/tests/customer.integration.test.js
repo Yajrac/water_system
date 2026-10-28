@@ -804,6 +804,29 @@ test(
 
 
 
+      {
+      const automaticInstall = {
+        ...body, account: 'AUTO-INSTALLED-IMPORT', username: 'auto.installed.import',
+        submitterNumber: 'TEMP-AUTO-IMPORT', serviceStatus: 'Approved', connectionStatus: 'Inactive',
+        meterNumber: 'AUTO-INSTALLED-METER', dateApplied: today, dateApproved: today,
+        dateInstalled: today, certificateReceived: true, contractReceived: true,
+        acknowledgementReceived: true, barangayId: '1',
+      };
+      delete automaticInstall.password;
+      const autoPreview = await request('/customers/import/preview', 'POST', { customers: [automaticInstall] });
+      assert.equal(autoPreview.data.count, 1, JSON.stringify(autoPreview));
+      const autoSaved = await request('/customers/import', 'POST', { customers: [automaticInstall], reviewRevision: autoPreview.data.revision });
+      assert.equal(autoSaved.status, 201, JSON.stringify(autoSaved));
+      const autoCustomer = (await request('/customers?search=AUTO-INSTALLED-IMPORT')).data.customers[0];
+      assert.equal(autoCustomer.serviceStatus, 'Installed');
+      assert.equal(autoCustomer.connectionStatus, 'Active');
+      const autoLogin = await request('/auth/login', 'POST', { username: automaticInstall.username, password: automaticInstall.submitterNumber });
+      assert.equal(autoLogin.status, 200, JSON.stringify(autoLogin));
+      assert.equal(autoLogin.data.user.mustChangePassword, true);
+      const autoEntries = await request('/meter-entries?setupId=' + setup.data.id);
+      assert.equal(autoEntries.status, 200, JSON.stringify(autoEntries));
+      assert.ok(autoEntries.data.customers.some((row) => row.id === autoCustomer.id));
+      }
       // Delete a billed customer only after all preceding financial assertions.
       assert.equal((await request('/customers/' + customer.id, 'DELETE', undefined, '')).status, 401);
       assert.equal((await request('/customers/' + customer.id, 'DELETE', undefined, ownerToken)).status, 403);
