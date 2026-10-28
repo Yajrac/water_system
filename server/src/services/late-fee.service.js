@@ -61,7 +61,7 @@ export async function loadLateFeeData(customerIds, connection = pool) {
   const marks = customerIds.map(() => '?').join(',');
   const [bills] = await connection.execute(`SELECT id, customer_id AS customerId,
     CAST(total_amount AS CHAR) AS total, DATE_FORMAT(due_date, '%Y-%m-%d') AS due,
-    DATE_FORMAT(generated_on, '%Y-%m-%d') AS generated FROM bills WHERE customer_id IN (${marks})`, customerIds);
+    DATE_FORMAT(generated_on, '%Y-%m-%d') AS \`generated\` FROM bills WHERE customer_id IN (${marks})`, customerIds);
   const [payments] = await connection.execute(`SELECT p.bill_id AS billId, CAST(p.amount AS CHAR) AS amount,
     DATE_FORMAT(CONVERT_TZ(p.paid_at, '+00:00', '+08:00'), '%Y-%m-%d') AS day
     FROM payments p JOIN bills b ON b.id = p.bill_id WHERE b.customer_id IN (${marks})`, customerIds);
