@@ -51,6 +51,8 @@ AdminAuth.ready.then((user) => {
     AdminAuth.sessionError ||
     (reason === 'password-changed'
       ? 'Password changed successfully. Sign in with your new password.'
+      : reason === 'idle'
+      ? 'You were signed out after 8 hours of inactivity. Please sign in again.'
       : reason === 'expired'
       ? 'Your session has expired. Please sign in again.'
       : reason === 'unavailable'

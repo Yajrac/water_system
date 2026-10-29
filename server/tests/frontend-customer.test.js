@@ -406,33 +406,10 @@ test('customer list renders the server page without slicing it a second time and
   assert.equal(flags[0].children[1].textContent, 'Temporary password');
   assert.equal(pager.total, 13);
   assert.equal(get('totalCustomers').textContent, 13);
-  checkboxes[0].checked = true;
-  checkboxes[0].events.change();
-  assert.equal(get('deleteSelectedCustomers').textContent, 'Delete selected (1)');
-  assert.equal(get('selectAllCustomers').indeterminate, true);
-  get('selectAllCustomers').checked = true;
-  get('selectAllCustomers').events.change({ target: get('selectAllCustomers') });
-  assert.equal(get('deleteSelectedCustomers').textContent, 'Delete selected (3)');
-  assert.ok(checkboxes.every((checkbox) => checkbox.checked));
-  assert.equal(get('selectAllCustomers').indeterminate, false);
-  await vm.runInContext('loadCustomers()', context);
-  assert.equal(get('deleteSelectedCustomers').disabled, true);
   failure = true;
   await vm.runInContext('loadCustomers()', context);
   assert.equal(body.rows.length, 0);
   assert.equal(get('retryCustomers').hidden, false);
-});
-
-test('customer deletion API sends only the selected IDs and uses DELETE for a single row', async () => {
-  const calls = [];
-  const context = vm.createContext({ AdminAPI: { request: async (...args) => { calls.push(args); return { count: 1 }; } } });
-  vm.runInContext(apiSource, context);
-  await vm.runInContext("CustomerAPI.remove(['11'])", context);
-  await vm.runInContext("CustomerAPI.remove(['11', '12'])", context);
-  assert.equal(calls[0][0], '/customers/11');
-  assert.equal(calls[0][1].method, 'DELETE');
-  assert.equal(calls[1][0], '/customers/delete-selected');
-  assert.deepEqual(Array.from(calls[1][1].body.ids), ['11', '12']);
 });
 
 test('empty customer exports show a modal without downloading a workbook', async () => {

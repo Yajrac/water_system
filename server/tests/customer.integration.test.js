@@ -827,29 +827,9 @@ test(
       assert.equal(autoEntries.status, 200, JSON.stringify(autoEntries));
       assert.ok(autoEntries.data.customers.some((row) => row.id === autoCustomer.id));
       }
-      // Delete a billed customer only after all preceding financial assertions.
-      assert.equal((await request('/customers/' + customer.id, 'DELETE', undefined, '')).status, 401);
-      assert.equal((await request('/customers/' + customer.id, 'DELETE', undefined, ownerToken)).status, 403);
-      const beforeDelete = (await request('/customers/' + customer.id)).data.customer;
-      await control.query(`CREATE TRIGGER reject_customer_delete_audit BEFORE INSERT ON activity_logs
-        FOR EACH ROW BEGIN IF NEW.action = 'delete' AND NEW.entity_type = 'customer' THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'injected delete audit failure'; END IF; END`);
-      assert.equal((await request('/customers/' + customer.id, 'DELETE')).status, 500);
+      assert.equal((await request('/customers/' + customer.id, 'DELETE')).status, 404);
+      assert.equal((await request('/customers/delete-selected', 'POST', { ids: [customer.id] })).status, 404);
       assert.equal((await request('/customers/' + customer.id)).status, 200);
-      const [[remainingBills]] = await control.execute('SELECT COUNT(*) AS total FROM bills WHERE customer_id=?', [customer.id]);
-      assert.ok(Number(remainingBills.total) > 0);
-      await control.query('DROP TRIGGER reject_customer_delete_audit');
-      const deleted = await request('/customers/' + customer.id, 'DELETE');
-      assert.equal(deleted.status, 200, JSON.stringify(deleted));
-      assert.equal(deleted.data.count, 1);
-      assert.equal((await request('/customers/' + customer.id)).status, 404);
-      const [[deletedLogin]] = await control.execute('SELECT COUNT(*) AS total FROM users WHERE id=?', [beforeDelete.userId]);
-      assert.equal(Number(deletedLogin.total), 0);
-      assert.equal((await request('/auth/me', 'GET', undefined, ownerToken)).status, 401);
-      const batchIds = [reviewedConnection.data.id];
-      assert.equal((await request('/customers/delete-selected', 'POST', { ids: [...batchIds, '18446744073709551615'] })).status, 409);
-      assert.equal((await request('/customers/' + batchIds[0])).status, 200);
-      assert.equal((await request('/customers/delete-selected', 'POST', { ids: batchIds })).status, 200);
     } finally {
       if (server) await new Promise((resolve) => server.close(resolve));
       if (pool) await pool.end();

@@ -103,6 +103,64 @@ const token =
   '.signature';
 const key = 'pwss-admin-access-token';
 
+test('expired access renews during session verification without redirecting a valid admin', async () => {
+  const expired = 'header.' + Buffer.from(JSON.stringify({ exp: 1 })).toString('base64url') + '.signature';
+  const app = browser({ page: 'customers.html', stored: { [key]: expired, 'pwss-admin-refresh-token': 'renewable' },
+    respond: (url) => ({ body: { success: true, data: url.endsWith('/auth/refresh')
+      ? { user, accessToken: token, refreshToken: 'renewed' } : { user } } }),
+  });
+  assert.equal((await app.auth.ready).role, 'admin');
+  assert.equal(app.storage.get(key), token);
+  assert.equal(app.redirects.length, 0);
+});
+
+test('8 hours idle ends the browser session before making protected requests', async () => {
+  const app = browser({ page: 'customers.html', stored: { [key]: token,
+    'pwss-admin-refresh-token': 'renewable', 'pwss-admin-last-activity': String(Date.now() - 8 * 60 * 60 * 1000 - 1) } });
+  assert.equal(await app.auth.ready, null);
+  assert.equal(app.requests.length, 0);
+  assert.equal(app.storage.has(key), false);
+  assert.equal(app.storage.has('pwss-admin-refresh-token'), false);
+  assert.ok(app.redirects.some((url) => url.includes('reason=idle')));
+});
+
+test('background renewal preserves the last interaction time', async () => {
+  const last = String(Date.now() - 60 * 60 * 1000);
+  const app = browser({ page: 'customers.html', stored: { [key]: token,
+    'pwss-admin-refresh-token': 'renewable', 'pwss-admin-last-activity': last },
+    respond: (url) => ({ body: { success: true, data: url.endsWith('/auth/refresh')
+      ? { user, accessToken: token, refreshToken: 'renewed' } : { user } } }),
+  });
+  await app.auth.ready;
+  await app.auth.renewSession();
+  assert.equal(app.storage.get('pwss-admin-last-activity'), last);
+  app.auth.recordActivity();
+  assert.ok(Number(app.storage.get('pwss-admin-last-activity')) > Number(last));
+});
+
+test('a 401 retries once after renewal; a renewal network failure preserves credentials', async () => {
+  for (const offline of [false, true]) {
+    let protectedCalls = 0;
+    const app = browser({ stored: { [key]: token, 'pwss-admin-refresh-token': 'renewable' },
+      respond: (url) => {
+        if (url.endsWith('/auth/me')) return { body: { success: true, data: { user } } };
+        if (url.endsWith('/auth/refresh')) return offline ? new Error('offline') : { body: { success: true, data: { user, accessToken: token, refreshToken: 'renewed' } } };
+        protectedCalls++;
+        return protectedCalls === 1 ? { status: 401, body: { success: false } } : { body: { success: true, data: { ok: true } } };
+      },
+    });
+    await app.auth.ready;
+    if (offline) {
+      await assert.rejects(app.api.request('/customers'));
+      assert.equal(app.storage.get(key), token);
+      assert.equal(protectedCalls, 1);
+    } else {
+      assert.equal((await app.api.request('/customers')).ok, true);
+      assert.equal(protectedCalls, 2);
+    }
+  }
+});
+
 test('legacy demo session cannot grant frontend access', async () => {
   const app = browser({ page: 'reports.html', stored: { 'pwss-admin-session': 'active' } });
   assert.equal(await app.auth.ready, null);

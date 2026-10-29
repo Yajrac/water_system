@@ -230,11 +230,18 @@
       entries.set(customer.id, saved);
       dirty = false;
       get('ledgerEntryStatus').textContent = 'Saved';
-      render();
-      await showNotice(
-        'Entry saved successfully',
-        customer.name + ' meter entry was saved to the database.',
-      );
+      const index = customers.findIndex((item) => item.id === customer.id);
+      const ordered = [...customers.slice(index + 1), ...customers.slice(0, index)];
+      const next = ordered.find((item) => !entries.has(item.id));
+      saving = false;
+      if (next) {
+        get('ledgerSearch').value = '';
+        selectCustomer(next.id);
+        AdminUI.message(customer.name + ' entry saved. Next consumer: ' + next.name + '.');
+      } else {
+        render();
+        AdminUI.message('All consumer entries are saved. You can now generate bills.');
+      }
     } catch (error) {
       get('ledgerEntryStatus').textContent = 'Entry not saved';
       await showNotice('Entry not saved', error.message);
@@ -243,6 +250,7 @@
       setFieldsDisabled(false);
       get('changeLedgerSetup').disabled = false;
       render();
+      if (!dirty && selectedId !== customer.id) form.elements.consumption.focus();
     }
   });
   function loadSetupFields() {

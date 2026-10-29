@@ -3,11 +3,42 @@ const AdminAuth = {
   sessionError: '',
   checking: null,
   expiryTimer: null,
+  idleTimer: null,
+  idleExpired: false,
+  idleKey: 'pwss-admin-last-activity',
+  idleLimitMs: 8 * 60 * 60 * 1000,
+  checkIdle() {
+    if (!AdminAPI.getToken() && !localStorage.getItem('pwss-admin-refresh-token')) return true;
+    const last = Number(localStorage.getItem(this.idleKey));
+    if (last > 0 && Date.now() - last >= this.idleLimitMs) {
+      this.clear();
+      this.idleExpired = true;
+      this.redirectToLogin('idle');
+      return false;
+    }
+    if (!last) localStorage.setItem(this.idleKey, String(Date.now()));
+    return true;
+  },
+  scheduleIdle() {
+    clearTimeout(this.idleTimer);
+    if (!this.checkIdle() || !AdminAPI.getToken()) return;
+    const last = Number(localStorage.getItem(this.idleKey));
+    this.idleTimer = setTimeout(() => this.scheduleIdle(), Math.max(1, this.idleLimitMs - (Date.now() - last)));
+  },
+  recordActivity() {
+    if (!this.checkIdle() || !AdminAPI.getToken()) return;
+    const last = Number(localStorage.getItem(this.idleKey));
+    if (Date.now() - last < 30000) return;
+    localStorage.setItem(this.idleKey, String(Date.now()));
+    this.scheduleIdle();
+  },
   loggedIn() {
     return Boolean(this.user && AdminAPI.getToken());
   },
   clear() {
     clearTimeout(this.expiryTimer);
+    clearTimeout(this.idleTimer);
+    localStorage.removeItem(this.idleKey);
     sessionStorage.removeItem(AdminAPI.tokenKey);
     localStorage.removeItem(AdminAPI.tokenKey);
     localStorage.removeItem('pwss-admin-refresh-token');
@@ -40,6 +71,7 @@ const AdminAuth = {
   },
   renewing: null,
   async renewSession() {
+    if (!this.checkIdle()) throw new AdminApiError('Session ended after 8 hours of inactivity.', 401);
     if (this.renewing) return this.renewing;
     const refreshToken = localStorage.getItem('pwss-admin-refresh-token');
     if (!refreshToken) return;
@@ -57,6 +89,7 @@ const AdminAuth = {
     try { await this.renewing; } finally { this.renewing = null; }
   },
   async verifySession() {
+    if (!this.checkIdle()) return null;
     // AdminAPI renews expiring credentials before authenticated requests.
     if (!AdminAPI.getToken() && localStorage.getItem('pwss-admin-refresh-token')) await this.renewSession();
     const token = AdminAPI.getToken();
@@ -67,13 +100,14 @@ const AdminAuth = {
     if (this.checking) return this.checking;
     this.checking = (async () => {
       const result = await AdminAPI.request('/auth/me');
-      if (AdminAPI.getToken() !== token) return null;
+      if (!AdminAPI.getToken()) return null;
       if (result?.user?.role !== 'admin') {
         this.clear();
         throw new AdminApiError('This account does not have admin access.', 403);
       }
       this.user = result.user;
-      this.scheduleExpiry(token);
+      this.scheduleExpiry(AdminAPI.getToken());
+      this.scheduleIdle();
       return this.user;
     })();
     try {
@@ -95,10 +129,13 @@ const AdminAuth = {
       throw new AdminApiError('The server returned an unexpected login response.');
     }
     this.clear();
+    this.idleExpired = false;
     localStorage.setItem(AdminAPI.tokenKey, result.accessToken);
     if (result.refreshToken) localStorage.setItem('pwss-admin-refresh-token', result.refreshToken);
     this.user = result.user;
+    localStorage.setItem(this.idleKey, String(Date.now()));
     this.scheduleExpiry(result.accessToken);
+    this.scheduleIdle();
     return this.user;
   },
   async logout() {
@@ -137,6 +174,7 @@ const AdminAuth = {
   redirectToLogin(reason = '') {
     if (isPublicAuthPage) return;
     const query = new URLSearchParams({ next: currentAuthPage + location.search });
+    if (this.idleExpired) reason = 'idle';
     if (reason) query.set('reason', reason);
     location.replace('login.html?' + query);
   },
@@ -368,6 +406,9 @@ window.addEventListener('pageshow', (event) => {
 document.addEventListener('visibilitychange', () => {
   if (!document.hidden && !isPublicAuthPage) requireAdminSession({ background: true });
 });
+for (const activity of ['pointerdown', 'keydown', 'touchstart', 'scroll']) {
+  document.addEventListener(activity, () => AdminAuth.recordActivity(), { passive: true, capture: true });
+}
 AdminAuth.ready = requireAdminSession();
 
 window.addEventListener('storage', (event) => {

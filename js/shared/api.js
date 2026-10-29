@@ -11,12 +11,15 @@ const AdminAPI = {
   getToken() {
     return localStorage.getItem(this.tokenKey) || sessionStorage.getItem(this.tokenKey);
   },
-  async request(path, { method = 'GET', body, authenticated = true } = {}) {
+  async request(path, { method = 'GET', body, authenticated = true, retryAuth = true } = {}) {
     if (location.protocol === 'file:') {
       throw new AdminApiError('Open the admin website with Live Server, then sign in again.');
     }
     if (!path.startsWith('/') || path.startsWith('//')) {
       throw new Error('API paths must start with a single slash.');
+    }
+    if (authenticated && typeof AdminAuth !== 'undefined' && !AdminAuth.checkIdle()) {
+      throw new AdminApiError('Session ended after 8 hours of inactivity.', 401);
     }
     if (authenticated && typeof AdminAuth !== 'undefined' && localStorage.getItem('pwss-admin-refresh-token')) {
       const current = this.getToken();
@@ -43,6 +46,16 @@ const AdminAPI = {
         signal: controller.signal,
       });
       const payload = await response.json().catch(() => null);
+      if (response.status === 401 && token && retryAuth && typeof AdminAuth !== 'undefined' &&
+          localStorage.getItem('pwss-admin-refresh-token')) {
+        try {
+          await AdminAuth.renewSession();
+        } catch (error) {
+          if (error.status === 401) window.dispatchEvent(new CustomEvent('admin:unauthorized', { detail: { token } }));
+          throw error;
+        }
+        return await this.request(path, { method, body, authenticated, retryAuth: false });
+      }
       if (response.status === 401 && token) {
         window.dispatchEvent(new CustomEvent('admin:unauthorized', { detail: { token } }));
       }

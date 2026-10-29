@@ -223,7 +223,7 @@
               <span id="customerCount" class="directory-count" aria-live="polite"></span
               ><button type="button" class="btn" id="retryCustomers" hidden>Retry loading</button>
             </div>
-            <div class="customer-directory-toolbar">
+            <div class="customer-directory-toolbar" id="customerToolbar">
               <label class="payment-history-search"
                 >Search customers<span class="search-control"
                   ><svg viewBox="0 0 24 24" aria-hidden="true">
@@ -236,6 +236,8 @@
                     type="search" /></span
               ></label>
 
+              <button type="button" class="btn customer-filter-toggle" id="toggleCustomerFilters" aria-expanded="false" aria-controls="customerFilterFields"><i class="bi bi-funnel" aria-hidden="true"></i><span id="customerFilterLabel">Filters</span></button>
+              <div class="customer-filter-fields" id="customerFilterFields">
               <label
                 >Barangay<select id="barangayFilter" class="admin-filter">
                   <option value="">All barangays</option>
@@ -256,21 +258,21 @@
                   <option>Commercial</option>
                 </select></label
               >
-            </div>
-            <div class="customer-selection-toolbar">
-              <span>Select customers using the checkboxes below.</span>
-              <button type="button" class="btn action-delete" id="deleteSelectedCustomers" disabled>Delete selected (0)</button>
+                <div class="customer-filter-actions">
+                  <button type="button" class="btn" id="clearCustomerFilters">Clear</button>
+                  <button type="button" class="btn btn-primary" id="applyCustomerFilters">Apply filters</button>
+                </div>
+              </div>
             </div>
             <div class="table-scroll customers-table">
               <table class="mobile-summary-table mobile-summary-customers">
                 <thead>
                   <tr>
-                    <th><input type="checkbox" id="selectAllCustomers" aria-label="Select all customers on this page" disabled /></th>
-                    <th>Account number</th>
-                    <th>Customer name</th>
+                    <th><span class="customer-heading-full">Account number</span><span class="customer-heading-short" aria-hidden="true">Account</span></th>
+                    <th><span class="customer-heading-full">Customer name</span><span class="customer-heading-short" aria-hidden="true">Name</span></th>
                     <th>Barangay</th>
                     <th>Contact</th>
-                    <th>Meter reading</th>
+                    <th><span class="customer-heading-full">Meter reading</span><span class="customer-heading-short" aria-hidden="true">Reading</span></th>
                     <th>Status</th>
                     <th>Actions</th>
                   </tr>

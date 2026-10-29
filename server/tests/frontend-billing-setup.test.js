@@ -7,7 +7,7 @@ const source = await readFile(
   new URL('../../js/billing/billing-ledger.js', import.meta.url),
   'utf8',
 );
-async function browser(fail = false, failSave = false) {
+async function browser(fail = false, failSave = false, customerCount = 1) {
   const nodes = new Map();
   const node = () => ({
     value: '',
@@ -19,6 +19,7 @@ async function browser(fail = false, failSave = false) {
     },
     setAttribute() {},
     reset() {},
+    focus() { this.focused = true; },
     querySelectorAll: () => [],
     querySelector() {
       return get('submitSetup');
@@ -75,26 +76,26 @@ async function browser(fail = false, failSave = false) {
             const saved = {
               ...options.body,
               id: '10',
-              customerId: '2',
+              customerId: options.body.customerId,
               current: '500.000',
               status: 'Saved',
               revision: 'a'.repeat(64),
             };
-            meterEntries = [saved];
+            meterEntries = [...meterEntries.filter((entry) => entry.customerId !== saved.customerId), saved];
             return saved;
           }
           return {
             setup: stored,
-            customers: [
+            customers: Array.from({ length: customerCount }, (_, index) => (
               {
-                id: '2',
-                meterId: '4',
-                name: 'Ana Reyes',
-                account: 'PWSS-001',
+                id: String(2 + index),
+                meterId: String(4 + index),
+                name: index === 0 ? 'Ana Reyes' : 'Consumer ' + index,
+                account: 'PWSS-00' + (index + 1),
                 previous: '400.000',
                 suggestedLate: '10.00',
-              },
-            ],
+              }
+            )),
             entries: meterEntries,
           };
         }
@@ -234,4 +235,37 @@ test('bill generation requires review and sends only the server preview revision
   await app.get('generateLedgerBills').events.click();
   assert.equal(generated, 1);
   assert.match(app.notices.at(-1)[0], /Bills generated successfully/);
+});
+
+test('successful entry saves advance across unsaved consumers, wrap skipped entries and unlock generation only at completion', async () => {
+  const app = await browser(false, false, 3);
+  const form = app.get('ledgerEntryForm');
+  // Start with the second consumer, leaving the first unsaved.
+  app.get('ledgerConsumers').children[1].events.click();
+  for (const [expectedNext, completed] of [['Consumer 2', 1], ['Ana Reyes', 2], ['Ana Reyes', 3]]) {
+    form.elements.consumption.value = '10';
+    form.events.input();
+    await form.events.submit({ preventDefault() {} });
+    assert.equal(app.get('ledgerSelected').textContent, expectedNext);
+    assert.equal(app.get('draftCount').textContent, completed + ' / 3 completed');
+    assert.equal(app.get('generateLedgerBills').disabled, completed !== 3);
+    if (completed < 3) {
+      assert.equal(form.elements.consumption.value, '');
+      assert.equal(form.elements.consumption.focused, true);
+      assert.equal(app.get('ledgerEntryStatus').textContent, 'Unsaved entry');
+    }
+  }
+  assert.equal(app.notices.length, 0, 'saving readings requires no extra success-modal click');
+});
+
+test('failed entry save does not advance to another consumer', async () => {
+  const app = await browser(false, true, 2);
+  const form = app.get('ledgerEntryForm');
+  form.elements.consumption.value = '15';
+  form.events.input();
+  await form.events.submit({ preventDefault() {} });
+  assert.equal(app.get('ledgerSelected').textContent, 'Ana Reyes');
+  assert.equal(form.elements.consumption.value, '15');
+  assert.equal(app.get('draftCount').textContent, '0 / 2 completed');
+  assert.equal(app.get('generateLedgerBills').disabled, true);
 });

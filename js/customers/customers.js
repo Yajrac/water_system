@@ -3,122 +3,32 @@ const customerImportDialog = document.getElementById('customerImportDialog');
 let customerLoadVersion = 0;
 let searchTimer;
 let importingCustomers = false;
-let deletingCustomers = false;
-let visibleCustomers = [];
-const selectedCustomers = new Set();
-
-function updateCustomerSelection() {
-  const all = document.getElementById('selectAllCustomers');
-  all.disabled = deletingCustomers || !visibleCustomers.length;
-  all.checked = visibleCustomers.length > 0 && selectedCustomers.size === visibleCustomers.length;
-  all.indeterminate = selectedCustomers.size > 0 && !all.checked;
-  const button = document.getElementById('deleteSelectedCustomers');
-  button.disabled = deletingCustomers || !selectedCustomers.size;
-  button.textContent = deletingCustomers ? 'Deleting...' : 'Delete selected (' + selectedCustomers.size + ')';
-  const icon = document.createElement('i');
-  icon.className = 'bi bi-trash';
-  icon.setAttribute('aria-hidden', 'true');
-  button.prepend(icon);
+const customerFilterIds = ['barangayFilter', 'customerStatusFilter', 'customerTypeFilter'];
+let appliedCustomerFilters = {};
+let customerFiltersOpen = false;
+function setCustomerFiltersOpen(open) {
+  customerFiltersOpen = open;
+  document.getElementById('customerToolbar').setAttribute('data-filters-open', String(open));
+  document.getElementById('toggleCustomerFilters').setAttribute('aria-expanded', String(open));
 }
-
-async function removeCustomerRecords(customers) {
-  if (deletingCustomers || !customers.length) return;
-  deletingCustomers = true;
-  updateCustomerSelection();
-  try {
-    const preview = document.createElement('div');
-    preview.className = 'customer-delete-preview';
-    const list = document.createElement('div');
-    list.className = 'customer-delete-table-wrap';
-    const table = document.createElement('table');
-    table.className = 'customer-delete-table';
-    const head = table.createTHead().insertRow();
-    for (const title of ['Name', 'Account number']) {
-      const th = document.createElement('th');
-      th.scope = 'col';
-      th.textContent = title;
-      head.appendChild(th);
-    }
-    const rows = table.createTBody();
-    const extraRows = [];
-    for (const [index, customer] of customers.entries()) {
-      const item = rows.insertRow();
-      const name = item.insertCell();
-      name.textContent = customer.name;
-      const account = item.insertCell();
-      account.textContent = customer.account;
-      if (index >= 3) {
-        item.hidden = true;
-        extraRows.push(item);
-      }
-    }
-    list.appendChild(table);
-    if (extraRows.length) {
-      const toggle = document.createElement('button');
-      toggle.type = 'button';
-      toggle.className = 'customer-delete-show-more';
-      toggle.textContent = 'Show more (' + extraRows.length + ' more)';
-      toggle.setAttribute('aria-expanded', 'false');
-      toggle.addEventListener('click', () => {
-        const expanded = toggle.getAttribute('aria-expanded') !== 'true';
-        extraRows.forEach((row) => { row.hidden = !expanded; });
-        toggle.setAttribute('aria-expanded', String(expanded));
-        toggle.textContent = expanded ? 'Show less' : 'Show more (' + extraRows.length + ' more)';
-      });
-      list.appendChild(toggle);
-    }
-    const label = document.createElement('label');
-    const expected = customers.length === 1 ? String(customers[0].account) : 'DELETE';
-    const prompt = document.createElement('span');
-    prompt.textContent = 'To confirm, type ';
-    const code = document.createElement('strong');
-    code.textContent = expected;
-    prompt.appendChild(code);
-    label.appendChild(prompt);
-    const input = document.createElement('input');
-    input.required = true;
-    input.autocomplete = 'off';
-    input.spellcheck = false;
-    input.placeholder = customers.length === 1 ? 'Enter account number' : 'Type DELETE';
-    input.addEventListener('input', () => input.setCustomValidity(input.value === expected ? '' : 'Enter ' + expected + ' exactly.'));
-    input.setCustomValidity('Enter ' + expected + ' exactly.');
-    label.appendChild(input);
-    const warning = document.createElement('p');
-    warning.className = 'customer-delete-warning';
-    warning.textContent = 'All linked records, including bills, payments, meters, applications, feedback and consumer logins, will be removed. Dashboard and report totals will change.';
-    const warningIcon = document.createElement('i');
-    warningIcon.className = 'bi bi-exclamation-triangle';
-    warningIcon.setAttribute('aria-hidden', 'true');
-    warning.prepend(warningIcon);
-    preview.append(list, warning, label);
-    if (!(await confirmAction(customers.length === 1 ? 'Delete customer?' : 'Delete ' + customers.length + ' customers?',
-      'Permanently remove ' + (customers.length === 1 ? 'this customer' : 'these customers') + ' and their records. This cannot be undone.',
-      'Delete customers', preview))) return;
-    const result = await CustomerAPI.remove(customers.map((customer) => String(customer.id)));
-    customerPagination.page = 1;
-    await loadCustomers();
-    await showNotice('Customers deleted successfully', result.count + ' customer(s) and their related records were permanently deleted.');
-  } catch (error) {
-    await showNotice('Could not delete customers', error.message);
-  } finally {
-    deletingCustomers = false;
-    updateCustomerSelection();
-  }
+function applyCustomerFilters() {
+  appliedCustomerFilters = Object.fromEntries(customerFilterIds.map((id) => [id, document.getElementById(id).value]));
+  const count = Object.values(appliedCustomerFilters).filter(Boolean).length;
+  document.getElementById('customerFilterLabel').textContent = count ? 'Filters (' + count + ')' : 'Filters';
 }
-
-document.getElementById('selectAllCustomers').addEventListener('change', (event) => {
-  if (deletingCustomers) return;
-  selectedCustomers.clear();
-  if (event.target.checked) visibleCustomers.forEach((customer) => selectedCustomers.add(String(customer.id)));
-  document.querySelectorAll('.customer-select').forEach((checkbox) => { checkbox.checked = selectedCustomers.has(checkbox.value); });
-  updateCustomerSelection();
+document.getElementById('toggleCustomerFilters').addEventListener('click', () => setCustomerFiltersOpen(!customerFiltersOpen));
+document.getElementById('applyCustomerFilters').addEventListener('click', () => {
+  applyCustomerFilters();
+  setCustomerFiltersOpen(false);
+  resetCustomerPage();
 });
-document.getElementById('deleteSelectedCustomers').addEventListener('click', () =>
-  removeCustomerRecords(visibleCustomers.filter((customer) => selectedCustomers.has(String(customer.id)))));
-
+document.getElementById('clearCustomerFilters').addEventListener('click', () => {
+  customerFilterIds.forEach((id) => { document.getElementById(id).value = ''; });
+  applyCustomerFilters();
+  setCustomerFiltersOpen(false);
+  resetCustomerPage();
+});
 function renderCustomerRows(customers) {
-  visibleCustomers = customers;
-  selectedCustomers.clear();
   const body = document.getElementById('customerRows');
   body.replaceChildren();
   customers.forEach((customer) => {
@@ -128,18 +38,16 @@ function renderCustomerRows(customers) {
         ', ' +
         [customer.firstName, customer.middleName].filter(Boolean).join(' ')
       : customer.name;
-    const checkbox = document.createElement('input');
-    checkbox.type = 'checkbox';
-    checkbox.className = 'customer-select';
-    checkbox.value = String(customer.id);
-    checkbox.setAttribute('aria-label', 'Select ' + displayName + ' ' + customer.account);
-    checkbox.addEventListener('change', () => {
-      if (deletingCustomers) { checkbox.checked = selectedCustomers.has(checkbox.value); return; }
-      if (checkbox.checked) selectedCustomers.add(checkbox.value); else selectedCustomers.delete(checkbox.value);
-      updateCustomerSelection();
-    });
-    AdminUI.cell(row, '', 'Select').appendChild(checkbox);
-    AdminUI.cell(row, customer.account, 'Account number').className = 'customer-account';
+    const accountCell = AdminUI.cell(row, '', 'Account number');
+    accountCell.className = 'customer-account';
+    const accountButton = document.createElement('button');
+    accountButton.type = 'button';
+    accountButton.className = 'customer-account-reveal';
+    accountButton.textContent = customer.account;
+    accountButton.title = customer.account;
+    accountButton.setAttribute('aria-label', 'Show full account number for ' + displayName);
+    accountButton.addEventListener('click', () => showNotice('Account number', displayName + '\n' + customer.account));
+    accountCell.appendChild(accountButton);
     AdminUI.cell(row, displayName, 'Customer name').className = 'customer-name';
     AdminUI.cell(row, customer.barangay.replace(/^Barangay\s+/i, 'Brgy. '), 'Barangay');
     AdminUI.cell(row, customer.contact, 'Contact');
@@ -170,6 +78,24 @@ function renderCustomerRows(customers) {
     }
     const actions = document.createElement('div');
     actions.className = 'customer-row-actions';
+    const mobileMenu = document.createElement('div');
+    mobileMenu.className = 'customer-mobile-menu';
+    mobileMenu.id = 'customer-actions-' + customer.id;
+    mobileMenu.setAttribute('popover', 'auto');
+    const more = document.createElement('button');
+    more.type = 'button';
+    more.className = 'btn customer-more-actions';
+    more.setAttribute('popovertarget', mobileMenu.id);
+    more.setAttribute('aria-label', 'Actions for ' + displayName);
+    const moreIcon = document.createElement('i');
+    moreIcon.className = 'bi bi-three-dots-vertical';
+    moreIcon.setAttribute('aria-hidden', 'true');
+    more.appendChild(moreIcon);
+    more.addEventListener('click', () => {
+      const rect = more.getBoundingClientRect();
+      mobileMenu.style.left = Math.max(8, Math.min(rect.right - 160, window.innerWidth - 168)) + 'px';
+      mobileMenu.style.top = Math.max(8, Math.min(rect.bottom + 4, window.innerHeight - 112)) + 'px';
+    });
     for (const [label, page, icon, className] of [
       ['Edit', 'customer-form.html', 'pencil-square', 'action-edit'],
       ['View profile', 'customer-profile.html', 'eye', 'action-view'],
@@ -184,41 +110,31 @@ function renderCustomerRows(customers) {
       image.setAttribute('aria-hidden', 'true');
       link.appendChild(image);
       actions.appendChild(link);
+      const menuLink = document.createElement('a');
+      menuLink.href = link.href;
+      menuLink.textContent = label;
+      mobileMenu.appendChild(menuLink);
     }
-    const remove = document.createElement('button');
-    remove.type = 'button';
-    remove.className = 'btn action-delete';
-    remove.title = 'Delete customer';
-    remove.setAttribute('aria-label', 'Delete ' + displayName);
-    const trash = document.createElement('i');
-    trash.className = 'bi bi-trash';
-    trash.setAttribute('aria-hidden', 'true');
-    remove.appendChild(trash);
-    remove.addEventListener('click', () => removeCustomerRecords([customer]));
-    actions.appendChild(remove);
+    actions.append(more, mobileMenu);
     AdminUI.cell(row, '', 'Actions').appendChild(actions);
   });
-  AdminUI.empty(body, 8, 'No database customers match your filters.');
-  updateCustomerSelection();
+  AdminUI.empty(body, 7, 'No database customers match your filters.');
 }
 
 async function loadCustomers() {
-  visibleCustomers = [];
-  selectedCustomers.clear();
-  updateCustomerSelection();
   const version = ++customerLoadVersion;
   const body = document.getElementById('customerRows');
   body.setAttribute('aria-busy', 'true');
-  if (!body.children.length) AdminUI.loading(body, 8, 'Loading customers...');
+  if (!body.children.length) AdminUI.loading(body, 7, 'Loading customers...');
   document.getElementById('retryCustomers').hidden = true;
   try {
     const result = await CustomerAPI.list({
       page: customerPagination.page,
       limit: 10,
       search: document.getElementById('customerSearch').value.trim(),
-      barangayId: document.getElementById('barangayFilter').value,
-      status: document.getElementById('customerStatusFilter').value,
-      type: document.getElementById('customerTypeFilter').value,
+      barangayId: appliedCustomerFilters.barangayFilter || '',
+      status: appliedCustomerFilters.customerStatusFilter || '',
+      type: appliedCustomerFilters.customerTypeFilter || '',
     });
     if (version !== customerLoadVersion) return;
     customerPagination.page = result.pagination.page;
@@ -232,7 +148,7 @@ async function loadCustomers() {
   } catch (error) {
     if (version !== customerLoadVersion) return;
     body.replaceChildren();
-    AdminUI.empty(body, 8, error.message);
+    AdminUI.empty(body, 7, error.message);
     document.getElementById('customerCount').textContent = 'Could not load customers';
     document.getElementById('retryCustomers').hidden = false;
     customerPagination.update(0);
@@ -245,7 +161,11 @@ function resetCustomerPage() {
   loadCustomers();
 }
 for (const id of ['barangayFilter', 'customerStatusFilter', 'customerTypeFilter'])
-  document.getElementById(id).addEventListener('change', resetCustomerPage);
+  document.getElementById(id).addEventListener('change', () => {
+    if (typeof window !== 'undefined' && window.matchMedia('(max-width: 600px)').matches) return;
+    applyCustomerFilters();
+    resetCustomerPage();
+  });
 document.getElementById('customerSearch').addEventListener('input', () => {
   clearTimeout(searchTimer);
   customerLoadVersion++;
@@ -288,9 +208,9 @@ document.getElementById('exportCustomers').addEventListener('click', async () =>
     const filters = {
       limit: 100,
       search: document.getElementById('customerSearch').value.trim(),
-      barangayId: document.getElementById('barangayFilter').value,
-      status: document.getElementById('customerStatusFilter').value,
-      type: document.getElementById('customerTypeFilter').value,
+      barangayId: appliedCustomerFilters.barangayFilter || '',
+      status: appliedCustomerFilters.customerStatusFilter || '',
+      type: appliedCustomerFilters.customerTypeFilter || '',
     };
     const customers = [];
     let page = 1;
@@ -432,6 +352,7 @@ document.getElementById('importForm').addEventListener('submit', async (event) =
     document.getElementById('customerSearch').value = '';
     for (const id of ['barangayFilter', 'customerStatusFilter', 'customerTypeFilter'])
       document.getElementById(id).value = '';
+    applyCustomerFilters();
     customerPagination.page = 1;
     clearTimeout(searchTimer);
     try {

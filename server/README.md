@@ -1,5 +1,18 @@
 # Water System database
 
+## Admin browser session renewal
+
+The admin frontend renews short-lived access tokens and retries an unauthorized
+request once after renewal. Renewing during `/auth/me` verification no longer
+causes a false missing-user redirect. Connection errors preserve saved credentials.
+The browser signs out after eight hours without pointer, keyboard, touch or scroll
+activity, shared across tabs using local storage. Background API requests/renewals
+do not reset this timer. This is a browser inactivity policy; JWT validity and the
+server's account/password revocation checks remain enforced independently. Existing
+saved sessions without activity metadata start tracking on first use after update.
+Consumer sessions are unchanged. Deploy the updated shared API, auth and login JS
+together; no database migration or longer access-token lifetime is required.
+
 Complete customer imports (meter number, installation date and all three document
 checks complete) automatically become Installed and Active, even when the workbook
 has Approved/Inactive values. Explicitly Disconnected connections retain their
@@ -10,26 +23,14 @@ remain temporary submitter-number passwords with a required first-login change.
 This change requires no database migration and does not update previously imported
 customers automatically.
 
-## Permanent customer deletion
+## Customer records and billing entry navigation
 
-Customer Management supports a Delete action per row and checkboxes with Delete
-selected. Select all applies only to the current page; loading another page or
-changing filters clears selection. Confirmation lists selected names/accounts and
-requires the account number for one customer or `DELETE` for multiple customers.
-
-Admin-only `DELETE /api/v1/customers/:id` and
-`POST /api/v1/customers/delete-selected` (`{ "ids": ["1", "2"] }`, maximum 100)
-permanently remove the selected customers, applications/checklists/estimates,
-meters/readings, bills, payments, late-fee assessments, feedback, announcement
-recipient links, notification state and linked consumer logins. Financial totals
-in dashboards and reports decrease accordingly. Existing consumer sessions stop
-working. Admin audit history is retained and a deletion event records each account.
-Shared announcements, barangays, billing setups, office settings and admins remain.
-Missing selections or any delete/audit failure roll back the whole batch. No schema
-migration is required; migrations through 021 must already be applied.
-
-Back up the production database before using this permanent deletion feature.
-Deploy both the backend and updated frontend; preserve the VPS API configuration.
+Customer Management has no single or bulk delete operation. Customer DELETE and
+bulk-delete API endpoints are unavailable; use connection status updates to retain
+customer and financial history. No records are deleted by this change.
+After a successful Save Consumer Entry, billing selects the next unsaved customer
+in the barangay, wrapping to earlier unsaved entries. When all entries are saved,
+Generate Bills becomes available. Failed saves keep the current customer/input.
 
 Node.js 22 or newer. The migration files reproduce the 18 tables entered manually
 in phpMyAdmin. Database commands manage schema history and the office seed.
