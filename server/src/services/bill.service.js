@@ -45,6 +45,9 @@ export function createBillService({ database = pool, model = { ...meters, ...bil
             'Save all eligible customer meter entries before generating bills.',
             409,
           );
+        const oldBasis = typeof entry.lateFeeBasis === 'string' ? JSON.parse(entry.lateFeeBasis) : entry.lateFeeBasis;
+        if (oldBasis?.length)
+          throw new AppError('Late-fee policy changed. Review the Late fee field and save this entry again before generating.', 409);
         if (
           String(entry.meterId) !== String(customer.meterId) ||
           scaled(entry.previous, 3) !== scaled(customer.previous, 3) ||

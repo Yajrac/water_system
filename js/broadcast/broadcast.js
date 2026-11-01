@@ -1,6 +1,19 @@
 const noticeForm = document.getElementById('noticeForm');
 const audienceSelect = document.getElementById('noticeAudience');
 const targetSelect = document.getElementById('noticeTarget');
+const customerSearch = document.getElementById('noticeCustomerSearch');
+const customerOptions = document.getElementById('noticeCustomerOptions');
+const customerHint = document.getElementById('noticeCustomerHint');
+const customerChoices = new Map();
+function customerChoiceLabel(customer) {
+  return [customer.name, customer.account, customer.submitterNumber, customer.username]
+    .filter(Boolean).join(' — ') + ' [ID ' + customer.id + ']';
+}
+function selectCustomerChoice() {
+  targetSelect.value = customerChoices.get(customerSearch.value) || '';
+  customerSearch.setCustomValidity(targetSelect.value ? '' : 'Choose a customer from the suggestions.');
+  showRecipientCount();
+}
 let noticeCustomers = [], noticeAreas = [], noticeSaving = false, noticeReady = false;
 function selectedRecipients() {
   if (audienceSelect.value === 'all') return noticeCustomers;
@@ -13,11 +26,24 @@ function showRecipientCount() {
 function changeAudience() {
   const audience = audienceSelect.value;
   document.getElementById('noticeTargetLabel').hidden = audience === 'all';
-  targetSelect.required = audience !== 'all';
+  targetSelect.required = audience === 'barangay';
+  targetSelect.hidden = audience === 'customer';
+  customerSearch.hidden = audience !== 'customer';
+  customerSearch.required = audience === 'customer';
+  customerHint.hidden = audience !== 'customer';
+  customerSearch.value = '';
+  customerSearch.setCustomValidity('');
+  customerChoices.clear();
+  customerOptions.replaceChildren();
   targetSelect.replaceChildren();
   if (audience !== 'all') targetSelect.add(new Option('Select recipient', ''));
   if (audience === 'barangay') noticeAreas.forEach((area) => targetSelect.add(new Option(area.name, String(area.id))));
-  if (audience === 'customer') noticeCustomers.forEach((customer) => targetSelect.add(new Option(customer.account + ' - ' + customer.name, String(customer.id))));
+  if (audience === 'customer') noticeCustomers.forEach((customer) => {
+    const label = customerChoiceLabel(customer);
+    customerChoices.set(label, String(customer.id));
+    targetSelect.add(new Option(label, String(customer.id)));
+    customerOptions.append(new Option(label, label));
+  });
   showRecipientCount();
 }
 async function showNotices() {
@@ -54,6 +80,8 @@ noticeForm.addEventListener('submit', async (event) => {
 });
 audienceSelect.addEventListener('change',changeAudience);
 targetSelect.addEventListener('change',showRecipientCount);
+customerSearch.addEventListener('input',selectCustomerChoice);
+customerSearch.addEventListener('change',selectCustomerChoice);
 noticeForm.inert=true;
 AdminAuth.ready.then(async (user)=>{
   if (!user) return;

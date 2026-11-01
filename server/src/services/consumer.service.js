@@ -74,8 +74,8 @@ export async function ownFinances(userId, query = {}) {
       DATE_FORMAT(CONVERT_TZ(p.paid_at,'+00:00','+08:00'),'%Y-%m-%d %H:%i') AS date,
       CAST(b.previous_reading AS CHAR) AS previous,CAST(b.current_reading AS CHAR) AS current,
       CAST(b.consumption AS CHAR) AS consumption,b.bill_number AS billNumber,
-      CAST(b.total_amount-COALESCE((SELECT SUM(pr.amount) FROM payments pr WHERE pr.bill_id=p.bill_id AND pr.id<p.id),0) AS CHAR) AS balanceBefore,
-      CAST(GREATEST(0,b.total_amount-COALESCE((SELECT SUM(pr.amount) FROM payments pr WHERE pr.bill_id=p.bill_id AND pr.id<=p.id),0)) AS CHAR) AS balanceAfter
+      CAST(COALESCE(p.bill_total_at_payment,b.total_amount)-COALESCE((SELECT SUM(pr.amount) FROM payments pr WHERE pr.bill_id=p.bill_id AND pr.id<p.id),0) AS CHAR) AS balanceBefore,
+      CAST(GREATEST(0,COALESCE(p.bill_total_at_payment,b.total_amount)-COALESCE((SELECT SUM(pr.amount) FROM payments pr WHERE pr.bill_id=p.bill_id AND pr.id<=p.id),0)) AS CHAR) AS balanceAfter
       FROM payments p JOIN bills b ON b.id=p.bill_id WHERE b.customer_id=?
       ORDER BY p.paid_at DESC,p.id DESC LIMIT 10 OFFSET ${(paymentsPage - 1) * limit}`,
       [id],

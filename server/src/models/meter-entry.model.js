@@ -1,5 +1,4 @@
 import { pool } from '../database/pool.js';
-import { loadLateFeeData, customerLateFee } from '../services/late-fee.service.js';
 
 export async function findSetup(id, connection = pool, lock = false) {
   const [rows] = await connection.execute(
@@ -28,8 +27,7 @@ export async function listConsumers(setup, connection = pool) {
     ORDER BY c.last_name, c.first_name, c.id`,
     [setup.barangayId, setup.month + '-01'],
   );
-  const feeData = await loadLateFeeData(rows.map((row) => String(row.id)), connection);
-  return rows.map((row) => ({ ...row, suggestedLate: customerLateFee(feeData, row.id).amount }));
+  return rows;
 }
 
 export async function lockConsumer(id, connection) {
@@ -80,15 +78,13 @@ export async function findEntry(details, connection) {
 }
 
 export async function saveEntry(details, consumer, actorId, existing, connection) {
-  const data = await loadLateFeeData([String(consumer.id)], connection);
-  const { basis, amount: suggestedLate } = customerLateFee(data, consumer.id);
   const values = [
     consumer.previous,
     details.consumption,
     details.connectionCharge,
     details.late,
     details.other,
-    JSON.stringify(basis),
+    null,
     actorId,
   ];
   if (existing) {
@@ -113,7 +109,7 @@ export async function saveEntry(details, consumer, actorId, existing, connection
       actorId,
       existing ? 'meter_entry.updated' : 'meter_entry.created',
       saved.id,
-      consumer.account + ' | consumption ' + details.consumption + ' m3 | late fee ' + details.late + ' | suggested ' + suggestedLate,
+      consumer.account + ' | consumption ' + details.consumption + ' m3 | late fee ' + details.late,
     ],
   );
   return saved;

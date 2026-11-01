@@ -168,7 +168,7 @@ test('meter entry sends consumption to API, reloads saved rows and preserves inp
     const app = await browser(false, failSave);
     app.get('ledgerConsumers').children[0].events.click();
     const form = app.get('ledgerEntryForm');
-    assert.equal(form.elements.late.value, '10.00');
+    assert.equal(form.elements.late.value, '0');
     form.elements.late.value = '5.00';
     form.elements.consumption.value = '100';
     form.events.input();

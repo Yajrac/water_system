@@ -67,7 +67,8 @@ function fixture(options = {}) {
   };
   return {
     calls,
-    service: createPaymentService({ model, database: { getConnection: async () => connection } }),
+    service: createPaymentService({ model, database: { getConnection: async () => connection },
+      fees: { accrueBill: async () => ({ changed: false, day: today() }) } }),
   };
 }
 

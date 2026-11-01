@@ -43,21 +43,33 @@ columns; back up the existing database before applying it. The three document
 checklist flags remain. Keep migration 014 unchanged so existing migration
 checksums stay valid. New databases run 014 and then 020 in sequence.
 
-Migration `021_create_late_fee_assessments.sql` adds late-fee period tracking.
-Meter Entry suggests 10% of unpaid charges every seven Philippine calendar days
-from each bill's due date (first charge on due date + 7), rounding each increment
-to cents. Unbilled increments compound; previously billed unpaid penalties keep
-their source bill's clock. Payments settle ordinary charges before carried
-penalties in assessment order, using the Philippine payment date. This allocation
-is used for suggestions only; recorded payment totals are unchanged.
+Migration `021_create_late_fee_assessments.sql` is the historical Meter Entry
+suggestion policy. Keep it unchanged; migration `022_create_automatic_bill_late_fees.sql`
+supersedes that behavior. Back up the database, stop the old API, apply pending
+migrations, deploy the updated billing JS and backend, and restart the service.
 
-The existing Late fee field remains editable. Saving approves its displayed
-amount, including zero; saved entries retain that approved amount on reload.
-Generation adds it to the new bill and records the assessed periods atomically,
-including waived periods. Old bills are not silently rewritten by a background
-job. A conflicting assessed period blocks generation and requires resaving the
-entry. Legacy manual late fees have no historical period metadata and remain
-ordinary charges; do not assume they cover previously assessed periods.
+Unpaid generated bills now accrue 10% on the remaining balance (including prior
+penalties) at midnight Philippine time on due date + 1, and every 7 days after
+that. A bill due October 28 with an unpaid PHP100 balance becomes PHP110 on
+October 29, PHP121 on November 5 and PHP133.10 on November 12. Each increment is
+rounded half up to cents. Payments before a boundary reduce its base; the payment
+endpoint synchronizes fees before accepting funds. A stale balance returns 409
+and requires a fresh payment review. Existing fully paid bills are not reopened.
+
+The API worker checks every minute, including startup and missed periods after
+downtime. Authenticated financial reads also synchronize due fees (consumer
+requests are scoped to their linked customer). Bill locks, unique period events
+and atomic total/checkpoint updates prevent double charging across workers,
+refreshes and payments. Errors roll back the assessment transaction and are logged.
+Automatic events are recorded in `bill_late_fee_events`.
+
+Meter Entry no longer suggests charges for old bills. Its Late fee field remains
+an editable manual initial charge on the new bill. Old saved entries with a
+nonempty suggestion basis must be reviewed and resaved before generation. Existing
+approved/waived legacy periods remain covered, and existing charges are not moved
+between bills. Historical manual fees without period metadata cannot be inferred;
+review those separately before deployment. Payment snapshots preserve old receipt
+totals and balances when a later penalty is added to the same bill.
 
 ## API authentication
 

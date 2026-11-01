@@ -30,7 +30,8 @@ export async function insertPayment(details, actorId, connection) {
     'OR-' + today().replaceAll('-', '') + '-' + randomBytes(10).toString('hex').toUpperCase();
   await connection.execute(
     `INSERT INTO payments (bill_id, collected_by, receipt_number, request_key, amount,
-    payment_method, reference_number, remarks, paid_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, UTC_TIMESTAMP())`,
+    payment_method, reference_number, remarks, paid_at, bill_total_at_payment, bill_late_fee_at_payment)
+    SELECT ?, ?, ?, ?, ?, ?, ?, ?, UTC_TIMESTAMP(), b.total_amount, b.late_fee FROM bills b WHERE b.id = ?`,
     [
       details.billId,
       actorId,
@@ -40,6 +41,7 @@ export async function insertPayment(details, actorId, connection) {
       details.method,
       details.reference || null,
       details.remarks || null,
+      details.billId,
     ],
   );
   const [[row]] = await connection.execute('SELECT CAST(LAST_INSERT_ID() AS CHAR) AS id');
@@ -65,8 +67,9 @@ export async function getReceipt(id, connection = pool) {
     CAST(b.previous_reading AS CHAR) AS previous, CAST(b.current_reading AS CHAR) AS current,
     CAST(b.consumption AS CHAR) AS consumption, CAST(b.rate_per_cubic_meter AS CHAR) AS ratePerCubic,
     CAST(b.water_charge AS CHAR) AS water, CAST(b.connection_charge AS CHAR) AS connection,
-    CAST(b.late_fee AS CHAR) AS late, CAST(b.other_charge AS CHAR) AS other, CAST(b.total_amount AS CHAR) AS total,
-    b.total_amount - COALESCE((SELECT SUM(pr.amount) FROM payments pr WHERE pr.bill_id = p.bill_id AND pr.id < p.id), 0) AS balanceBefore
+    CAST(COALESCE(p.bill_late_fee_at_payment,b.late_fee) AS CHAR) AS late, CAST(b.other_charge AS CHAR) AS other,
+    CAST(COALESCE(p.bill_total_at_payment,b.total_amount) AS CHAR) AS total,
+    COALESCE(p.bill_total_at_payment,b.total_amount) - COALESCE((SELECT SUM(pr.amount) FROM payments pr WHERE pr.bill_id = p.bill_id AND pr.id < p.id), 0) AS balanceBefore
     FROM payments p JOIN bills b ON b.id = p.bill_id JOIN customers c ON c.id = b.customer_id
     JOIN barangays br ON br.id = b.barangay_id JOIN users u ON u.id = p.collected_by WHERE p.id = ?`,
     [id],

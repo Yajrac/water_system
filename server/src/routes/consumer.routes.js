@@ -1,10 +1,11 @@
 import { Router } from 'express';
+import { syncLateFees } from '../middleware/sync-late-fees.js';
 import { rateLimit } from 'express-rate-limit';
 import { authenticate } from '../middleware/authenticate.js';
 import { requireRole } from '../middleware/require-role.js';
 import * as service from '../services/consumer.service.js';
 const router = Router();
-router.use(authenticate, requireRole('consumer'));
+router.use(authenticate, requireRole('consumer'), syncLateFees);
 router.get('/profile', async (req, res) =>
   res.json({ success: true, data: await service.ownProfile(req.user.id) }),
 );

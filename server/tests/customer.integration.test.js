@@ -827,6 +827,40 @@ test(
       assert.equal(autoEntries.status, 200, JSON.stringify(autoEntries));
       assert.ok(autoEntries.data.customers.some((row) => row.id === autoCustomer.id));
       }
+      // Automatic fees update real existing bills and preserve receipt snapshots.
+      // All changes below are confined to this disposable database.
+      await control.execute(`UPDATE bills SET due_date = DATE_SUB(?, INTERVAL 8 DAY) WHERE id = ?`, [today, billId]);
+      const settled = await request('/bills?billId=' + billId);
+      assert.equal(settled.data.bills[0].total, '14.00', JSON.stringify(settled));
+      assert.equal(settled.data.bills[0].status, 'Paid');
+      await control.execute(`UPDATE bills SET water_charge = 100, total_amount = 100, late_fee = 0 WHERE id = ?`, [billId]);
+      await control.execute(`UPDATE payments SET paid_at = DATE_SUB(UTC_TIMESTAMP(), INTERVAL 20 DAY) WHERE bill_id = ?`, [billId]);
+      const accrued = await Promise.all(Array.from({ length: 3 }, () => request('/bills?billId=' + billId)));
+      for (const result of accrued) {
+        assert.equal(result.status, 200, JSON.stringify(result));
+        assert.equal(result.data.bills[0].total, '118.06');
+        assert.equal(result.data.bills[0].late, '18.06');
+        assert.equal(result.data.bills[0].balance, '104.06');
+      }
+      const [[periods]] = await control.execute('SELECT COUNT(*) AS count FROM bill_late_fee_events WHERE bill_id = ?', [billId]);
+      assert.equal(Number(periods.count), 2);
+      const stableReceipt = await request('/payments/' + paid.data.payment.id);
+      assert.equal(stableReceipt.data.bill.total, '14.00');
+      assert.equal(stableReceipt.data.payment.balanceBefore, '14.00');
+      assert.equal(stableReceipt.data.payment.balanceAfter, '10.00');
+      const stalePayment = await request('/payments', 'POST', { ...pay, expectedBalance: '86.00', requestKey: randomBytes(16).toString('hex') });
+      assert.equal(stalePayment.status, 409);
+      const freshPayment = await request('/payments', 'POST', { ...pay, expectedBalance: '104.06', requestKey: randomBytes(16).toString('hex') });
+      assert.equal(freshPayment.status, 200, JSON.stringify(freshPayment));
+      assert.equal(freshPayment.data.bill.total, '118.06');
+      const { automaticLateFees } = await import('../src/services/automatic-late-fee.service.js');
+      const futureDay = new Date(Date.parse(today + 'T00:00:00Z') + 7 * 86400000).toISOString().slice(0, 10);
+      await automaticLateFees.accrueBill(billId, futureDay);
+      const stableNewReceipt = await request('/payments/' + freshPayment.data.payment.id);
+      assert.equal(stableNewReceipt.data.bill.total, '118.06');
+      assert.equal(stableNewReceipt.data.payment.balanceBefore, '104.06');
+      assert.equal(stableNewReceipt.data.payment.balanceAfter, '100.06');
+
       assert.equal((await request('/customers/' + customer.id, 'DELETE')).status, 404);
       assert.equal((await request('/customers/delete-selected', 'POST', { ids: [customer.id] })).status, 404);
       assert.equal((await request('/customers/' + customer.id)).status, 200);

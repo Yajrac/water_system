@@ -1,10 +1,11 @@
 import { Router } from 'express';
+import { syncLateFees } from '../middleware/sync-late-fees.js';
 import * as controller from '../controllers/customer.controller.js';
 import { authenticate } from '../middleware/authenticate.js';
 import { requireRole } from '../middleware/require-role.js';
 
 const router = Router();
-router.use(authenticate, requireRole('admin'));
+router.use(authenticate, requireRole('admin'), syncLateFees);
 router.get('/', controller.list);
 router.post('/', controller.create);
 router.post('/check-duplicate', controller.duplicate);

@@ -4,6 +4,7 @@ import { AppError } from '../utils/app-error.js';
 import { scaled } from '../utils/decimal.js';
 import { today, customerId } from '../validators/customer.validator.js';
 import { validatePayment, validatePaymentQuery } from '../validators/payment.validator.js';
+import { automaticLateFees } from './automatic-late-fee.service.js';
 
 function money(value) {
   return (value / 100n).toString() + '.' + (value % 100n).toString().padStart(2, '0');
@@ -60,7 +61,7 @@ function receiptView(result) {
   };
 }
 
-export function createPaymentService({ database = pool, model = paymentModel } = {}) {
+export function createPaymentService({ database = pool, model = paymentModel, fees = automaticLateFees } = {}) {
   return {
     list: (query) => model.listPayments(validatePaymentQuery(query)),
     async receipt(id) {
@@ -69,11 +70,15 @@ export function createPaymentService({ database = pool, model = paymentModel } =
     },
     async save(body, actorId) {
       const details = validatePayment(body);
+      // Commit due fees independently so a stale payment review cannot roll
+      // them back. Recheck the Philippine day after acquiring the bill lock.
+      const synced = await fees.accrueBill(details.billId);
       const connection = await database.getConnection();
       try {
         await connection.beginTransaction();
         const bill = await model.lockBill(details.billId, connection);
         if (!bill) throw new AppError('Bill not found.', 404);
+        if (synced.day !== today()) throw new AppError('The calendar date changed. Reload the bill before paying.', 409);
         const previous = await model.findRequest(details.requestKey, connection);
         let id;
         if (previous) {

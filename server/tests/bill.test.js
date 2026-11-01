@@ -99,6 +99,7 @@ test('preview writes nothing; generation atomically commits bills, meter changes
 test('missing entries, stale preview, billed accounts and changed meters cannot generate', async () => {
   const preview = await fixture().service.preview({ setupId: '1' });
   for (const options of [
+    { entry: { lateFeeBasis: JSON.stringify([{ sourceBillId: '1', amount: '10.00' }]) } },
     { missing: true },
     { empty: true },
     { billed: true },

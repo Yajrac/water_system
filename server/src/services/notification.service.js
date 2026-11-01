@@ -13,7 +13,9 @@ export async function listNotices() {
 export async function recipientOptions() {
   const [rows] = await pool.query(`SELECT c.id,c.account_number AS account,
     CONCAT_WS(' ',c.last_name,c.first_name,NULLIF(c.middle_name,'')) AS name,
+    c.submitter_number AS submitterNumber,u.username,
     c.barangay_id AS barangayId FROM customers c
+    LEFT JOIN users u ON u.id=c.user_id
     WHERE EXISTS(SELECT 1 FROM customer_applications a WHERE a.customer_id=c.id
       AND a.id=(SELECT MAX(id) FROM customer_applications WHERE customer_id=c.id)
       AND a.status IN ('Approved','Installed')) ORDER BY c.last_name,c.first_name`);
