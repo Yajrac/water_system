@@ -23,12 +23,11 @@ async function showFeedback(){
     feedbackPager.update(result.pagination.total);body.replaceChildren();
     for(const entry of result.feedback){
       const row=body.insertRow();AdminUI.customer(row,{id:entry.customerId,name:entry.name,account:entry.account});
-      const dateCell=AdminUI.cell(row,feedbackRelativeDate(entry.date),'Date');
-      dateCell.dataset.feedbackDate=entry.date;dateCell.title=entry.date;
-      dateCell.setAttribute('aria-label',feedbackRelativeDate(entry.date)+', '+entry.date);
+      AdminUI.cell(row,entry.date,'Date');
       AdminUI.cell(row,entry.category,'Category');
       AdminUI.cell(row,(entry.message||'').slice(0,100),'Feedback');
-      const status=AdminUI.cell(row,entry.status,'Status');status.style.color=['New','Resolved'].includes(entry.status)?'#15803d':'#b45309';
+      const status=AdminUI.cell(row,feedbackRelativeDate(entry.date),'Status');
+      status.dataset.feedbackDate=entry.date;status.title=entry.date;
       const actions=AdminUI.cell(row,'','View');const button=document.createElement('button');
       button.type='button';button.className='btn action-view';button.title='View feedback';button.setAttribute('aria-label','View feedback');
       const icon=document.createElement('i');icon.className='bi bi-eye';icon.setAttribute('aria-hidden','true');button.appendChild(icon);
@@ -42,7 +41,7 @@ async function viewFeedback(entry){
   try{
     const preview=document.createElement('section'),message=document.createElement('p');message.textContent=entry.message||'';
     preview.appendChild(message);
-    const notice=showNotice('Customer feedback',entry.name+' | '+entry.category+' | '+entry.date,preview);
+    const notice=showNotice('Customer feedback',entry.name+' | '+entry.category+' | '+entry.date+' | '+entry.status,preview);
     try {
       await AdminAPI.request('/feedback/'+encodeURIComponent(entry.id)+'/read',{method:'POST'});
       window.dispatchEvent(new Event('feedback-read'));

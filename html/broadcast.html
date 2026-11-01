@@ -18,6 +18,7 @@
     <script src="../js/shared/theme.js"></script>
     <link rel="stylesheet" href="../css/shared/shared.css" />
     <link rel="stylesheet" href="../css/shared/admin.css" />
+    <link rel="stylesheet" href="../css/broadcast/recipient-picker.css" />
     <link rel="stylesheet" href="../css/shared/back-button.css" />
     <link rel="stylesheet" href="../css/shared/modals.css" />
     <link rel="stylesheet" href="../css/shared/responsive-cards.css" />
@@ -202,10 +203,11 @@
                   </select></label
                 ><label id="noticeTargetLabel" hidden
                   >Target<select name="target" id="noticeTarget"></select>
-                  <input id="noticeCustomerSearch" type="text" list="noticeCustomerOptions"
+                  <input id="noticeCustomerSearch" type="text" role="combobox"
+                    aria-autocomplete="list" aria-controls="noticeCustomerOptions" aria-expanded="false"
                     placeholder="Search name, username, account or submitter number"
                     autocomplete="off" hidden />
-                  <datalist id="noticeCustomerOptions"></datalist>
+                  <div id="noticeCustomerOptions" role="listbox" aria-label="Matching customers" hidden></div>
                   <small id="noticeCustomerHint" hidden>Type to search, then choose a customer from the suggestions.</small></label
                 ><label class="wide"
                   >Message<textarea name="message" rows="4" required maxlength="2000"></textarea>

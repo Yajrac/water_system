@@ -9,25 +9,34 @@ test('recipient suggestions identify customers and reject edited or arbitrary ta
   const get = (id) => {
     if (!nodes.has(id)) nodes.set(id, {
       value: '', addEventListener() {},
+      setAttribute() {}, removeAttribute() {}, replaceChildren() {}, append() {},
       setCustomValidity(message) { this.validity = message; },
     });
     return nodes.get(id);
   };
   const context = vm.createContext({
-    document: { getElementById: get },
+    document: { getElementById: get, createElement: () => ({setAttribute(){},append(){},addEventListener(){}}) },
     AdminAuth: { ready: { then() {} } },
   });
   vm.runInContext(source, context);
   const label = vm.runInContext(`customerChoiceLabel({id:12,name:'Juan Cruz',
     account:'ACC-12',submitterNumber:'SUB-44',username:'juan44'})`, context);
   for (const field of ['Juan Cruz', 'ACC-12', 'SUB-44', 'juan44']) assert.ok(label.includes(field));
+  assert.ok(!label.includes('[ID '));
   context.label = label;
-  vm.runInContext(`noticeCustomers=[{id:12}]; audienceSelect.value='customer';
-    customerChoices.set(label,'12'); customerSearch.value=label; selectCustomerChoice()`, context);
+  vm.runInContext(`noticeCustomers=[{id:12,name:'Juan Cruz',account:'ACC-12',submitterNumber:'SUB-44',username:'juan44'}]; audienceSelect.value='customer';
+    chooseCustomer(noticeCustomers[0])`, context);
   assert.equal(get('noticeTarget').value, '12');
+  assert.equal(get('noticeCustomerSearch').value, 'Juan Cruz');
   assert.equal(get('recipientCount').textContent, '1 customers selected');
   vm.runInContext(`customerSearch.value='Juan'; selectCustomerChoice()`, context);
   assert.equal(get('noticeTarget').value, '');
   assert.ok(get('noticeCustomerSearch').validity);
   assert.equal(get('recipientCount').textContent, '0 customers selected');
+  assert.equal(get('noticeCustomerOptions').hidden, false);
+  for(const query of ['Juan','cruz','CRUZ JUAN','SUB-44','juan44','ACC-12']) {
+    context.query=query;
+    assert.equal(vm.runInContext('matchingCustomers(noticeCustomers,query).length',context),1);
+  }
+  assert.equal(vm.runInContext("matchingCustomers(noticeCustomers,'missing').length",context),0);
 });
