@@ -87,14 +87,24 @@ async function loadReport() {
     ]);
     reportReady = true;
     accountReportPager.page = consumptionReportPager.page = 1;
-    document.getElementById('reportSummary').textContent =
-      data.summary.bills +
-      ' bills | Total: ' +
-      WaterStore.money(data.summary.total) +
-      ' | Paid toward these bills: ' +
-      WaterStore.money(data.summary.paid) +
-      ' | Outstanding: ' +
-      WaterStore.money(data.summary.balance);
+    const summary = document.getElementById('reportSummary');
+    summary.replaceChildren();
+    for (const [label, value, description, iconName] of [
+      ['Bills', data.summary.bills, 'Bills in selected report', 'file-earmark-text'],
+      ['Total', WaterStore.money(data.summary.total), 'Total billed amount', 'receipt'],
+      ['Paid', WaterStore.money(data.summary.paid), 'Payments toward these bills', 'cash-stack'],
+      ['Outstanding', WaterStore.money(data.summary.balance), 'Remaining unpaid amount', 'wallet2'],
+    ]) {
+      const card = document.createElement('div'); card.className = 'record-card';
+      const top = document.createElement('div'); top.className = 'record-card-top';
+      const heading = document.createElement('h3'); heading.textContent = label;
+      const icon = document.createElement('i'); icon.className = 'bi bi-' + iconName;
+      icon.setAttribute('aria-hidden', 'true'); top.append(heading, icon);
+      const amount = document.createElement('strong'); amount.textContent = value;
+      if (label !== 'Bills') amount.className = 'money-value';
+      const caption = document.createElement('p'); caption.textContent = description;
+      card.append(top, amount, caption); summary.appendChild(card);
+    }
     reportMessage.textContent = '';
     document.getElementById('printReport').disabled = false;
     showReport();

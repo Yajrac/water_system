@@ -29,6 +29,8 @@ function applyTheme(theme) {
   if (button) {
     const label = button.querySelector('.sidebar-tool-label') || button;
     label.textContent = theme === 'dark' ? 'Light mode' : 'Dark mode';
+    const icon = button.querySelector('.bi');
+    if (icon) icon.className = 'bi bi-' + (theme === 'dark' ? 'sun' : 'moon-stars');
     button.setAttribute('aria-pressed', String(theme === 'dark'));
     button.setAttribute(
       'aria-label',

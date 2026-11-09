@@ -329,3 +329,16 @@
     min-width: 580px;
   }
 }
+#summary .record-card {
+  transition: transform 180ms ease-out, border-color 180ms ease-out;
+}
+@media (hover: hover) and (pointer: fine) {
+  #summary .record-card:hover {
+    transform: translateY(-3px);
+    border-color: var(--color-primary, #0785bb);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  #summary .record-card { transition: none; }
+  #summary .record-card:hover { transform: none; }
+}

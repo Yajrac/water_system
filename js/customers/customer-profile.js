@@ -43,7 +43,7 @@ function renderCustomerProfile() {
     image.height = 88;
     avatar.replaceChildren(image);
     const status = document.getElementById('profileStatus');
-    status.textContent = WaterStore.isRegistered(customer) ? 'Registered' : 'Pending application';
+    status.textContent = customer.serviceStatus || 'Pending';
     status.className =
       'customer-status ' + (WaterStore.isRegistered(customer) ? 'is-registered' : 'is-pending');
     const activity = document.createElement('span');
@@ -62,7 +62,14 @@ function renderCustomerProfile() {
       'btn ' + (WaterStore.isActive(customer) ? 'action-deactivate' : 'action-view');
     toggle.textContent = WaterStore.isActive(customer) ? 'Deactivate account' : 'Activate account';
 
-    document.querySelector('.profile-actions').appendChild(toggle);
+    if (customer.serviceStatus === 'Installed') document.querySelector('.profile-actions').appendChild(toggle);
+    else {
+      const shortcut = document.createElement('a');
+      shortcut.className = 'btn action-edit';
+      shortcut.href = 'customer-form.html?id=' + encodeURIComponent(customer.id) + '&step=installation';
+      shortcut.textContent = customer.serviceStatus === 'Approved' ? 'Complete installation' : 'Review application';
+      document.querySelector('.profile-actions').appendChild(shortcut);
+    }
     toggle.addEventListener('click', async () => {
       toggle.disabled = true;
       const active = WaterStore.isActive(customer);

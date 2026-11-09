@@ -1,6 +1,7 @@
 import { pool } from '../database/pool.js';
 import { AppError } from '../utils/app-error.js';
 import { validateFeedback } from '../validators/feedback.validator.js';
+import { requireInstalledConsumer } from './consumer-access.service.js';
 
 async function linkedCustomer(userId, connection = pool) {
   const [[customer]] = await connection.execute('SELECT id FROM customers WHERE user_id=?', [
@@ -20,10 +21,21 @@ export async function ownProfile(userId) {
     FROM customers c JOIN barangays b ON b.id=c.barangay_id WHERE c.id=?`,
     [id],
   );
-  return row;
+  const [[application]] = await pool.execute(`SELECT a.status AS applicationStatus,
+    DATE_FORMAT(a.date_applied,'%Y-%m-%d') AS dateApplied,
+    DATE_FORMAT(a.date_approved,'%Y-%m-%d') AS dateApproved,
+    d.certificate_received AS certificateReceived,d.contract_received AS contractReceived,
+    d.acknowledgement_received AS acknowledgementReceived,
+    e.installation_fee AS installationFee,e.setback_length AS setbackLength,e.setback_rate AS setbackRate,
+    e.reinstallation_fee AS reinstallationFee,e.violation_fee AS violationFee
+    FROM customer_applications a LEFT JOIN application_documents d ON d.application_id=a.id
+    LEFT JOIN application_estimates e ON e.application_id=a.id
+    WHERE a.customer_id=? ORDER BY a.id DESC LIMIT 1`, [id]);
+  return { ...row, ...application, fullAccess: application?.applicationStatus === 'Installed' };
 }
 
 export async function ownFinances(userId, query = {}) {
+  await requireInstalledConsumer(userId);
   const pageValue = (value) => {
     const page = Number(value || 1);
     if (!Number.isInteger(page) || page < 1 || page > 1000000)
@@ -101,6 +113,7 @@ export async function ownFinances(userId, query = {}) {
   }
 }
 export async function submitFeedback(userId, body) {
+  await requireInstalledConsumer(userId);
   const feedback = validateFeedback(body);
   const connection = await pool.getConnection();
   try {
@@ -134,6 +147,7 @@ const feedbackSelect = `SELECT t.id,t.customer_id AS customerId,t.category,t.sta
   (SELECT message FROM feedback_messages m WHERE m.thread_id=t.id AND m.sender_id=c.user_id ORDER BY m.id LIMIT 1) AS message
   FROM feedback_threads t JOIN customers c ON c.id=t.customer_id`;
 export async function ownFeedback(userId) {
+  await requireInstalledConsumer(userId);
   const id = await linkedCustomer(userId);
   const [rows] = await pool.execute(
     feedbackSelect + ' WHERE t.customer_id=? ORDER BY t.id DESC LIMIT 100',

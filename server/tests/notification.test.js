@@ -11,4 +11,7 @@ test('notification validation trims messages and requires supported targeting an
     assert.throws(()=>validateNotice({...notice,...changed}), error=>error.statusCode===400);
   }
   assert.equal(validateNotice({...notice,audience:'customer',target:'12',status:'Draft'}).target,'12');
+  assert.deepEqual(validateNotice({...notice,audience:'customer',targets:['12','13','12']}).targets,['12','13']);
+  for(const targets of [[],['0'],['1 OR 1=1'],[12],Array(1001).fill('12'),['18446744073709551616']])
+    assert.throws(()=>validateNotice({...notice,audience:'customer',targets}),{statusCode:400});
 });

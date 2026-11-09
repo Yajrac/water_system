@@ -578,6 +578,7 @@ test('profile loads database fields and activation uses the API instead of brows
     gender: 'Female',
     active: true,
     connectionStatus: 'Active',
+    serviceStatus: 'Installed',
     reading: 400,
     revision: 'version',
   };
@@ -622,6 +623,14 @@ test('profile loads database fields and activation uses the API instead of brows
   assert.equal(changed[0].revision, 'version');
   assert.equal(changed[1], 'Inactive');
   assert.equal(reloaded, true);
+  for (const serviceStatus of ['Pending','Approved']) {
+    customer.serviceStatus=serviceStatus;
+    get('actions').children=[];
+    vm.runInContext('renderCustomerProfile()',context);
+    const shortcut=get('actions').children[0];
+    assert.equal(shortcut.textContent,serviceStatus==='Pending'?'Review application':'Complete installation');
+    assert.match(shortcut.href,/step=installation/);
+  }
 });
 
 

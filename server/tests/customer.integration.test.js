@@ -111,8 +111,12 @@ test(
         username: 'ana.reyes',
         password,
       };
-      const added = await request('/customers', 'POST', body);
-      assert.equal(added.status, 201, JSON.stringify(added));
+      const approved = await request('/customers', 'POST', {...body,serviceStatus:'Approved'});
+      assert.equal(approved.status,201,JSON.stringify(approved));
+      const added = await request('/customers/'+approved.data.id,'PUT',{
+        ...body,password:'',revision:approved.data.revision,
+      });
+      assert.equal(added.status, 200, JSON.stringify(added));
       const customer = added.data;
       for (const contact of ['09123456789', '9123456789', '+639123456789']) {
         const checked = await request('/customers/check-duplicate', 'POST', { ...body, contact });
@@ -156,7 +160,7 @@ test(
       assert.ok(feed.data.some(item=>item.body===noticeBody.message));
       assert.ok(!feed.data.some(item=>item.body==='Private draft'));
       assert.ok(feed.data.some(item=>item.category==='Application'));
-      assert.equal((await request('/notifications','POST',{...noticeBody,target:'9999999'})).status,400);
+      assert.equal((await request('/notifications','POST',{...noticeBody,target:'9999999'})).status,409);
 
       assert.equal(
         (await request('/customers', 'GET', undefined, login.data.accessToken)).status,
@@ -621,7 +625,7 @@ test(
       assert.equal(mine.data[0].message,'Test low water pressure');
       assert.equal(mine.data[0].internal_notes,undefined);
       const notMine=await request('/consumer/feedback','GET',undefined,nextLogin.data.accessToken);
-      assert.equal(notMine.data.length,0);
+      assert.equal(notMine.status,403);
       assert.equal((await request('/consumer/feedback','POST',{category:'Other',message:'x',customerId:'1'},ownerToken)).status,400);
       assert.equal((await request('/feedback','GET',undefined,ownerToken)).status,403);
       const feedbackList=await request('/feedback?status=New');
@@ -672,11 +676,7 @@ test(
       assert.equal(receipts[1].method,'Bank transfer');
       assert.equal(receipts[1].reference,'BANK-TEST');
       const emptyFinances=await request('/consumer/finances','GET',undefined,nextLogin.data.accessToken);
-      assert.equal(emptyFinances.status,200);
-      assert.deepEqual(emptyFinances.data.bills,[]);
-      assert.deepEqual(emptyFinances.data.payments,[]);
-      assert.equal(emptyFinances.data.latestBill,null);
-      assert.equal(Number(emptyFinances.data.summary.balance),0);
+      assert.equal(emptyFinances.status,403);
       const later=await request('/consumer/finances?billsPage=2&paymentsPage=2','GET',undefined,ownerToken);
       assert.equal(later.data.bills.length,0);
       assert.equal(later.data.payments.length,0);
@@ -757,7 +757,7 @@ test(
       assert.equal((await request('/customers/check-duplicate','POST',separateConnection)).data.exists,true);
       assert.equal((await request('/customers','POST',separateConnection)).status,409);
       assert.equal((await request('/customers','POST',{...separateConnection,duplicateReviewed:'true'})).status,400);
-      const reviewedConnection = await request('/customers','POST',{...separateConnection,duplicateReviewed:true});
+      const reviewedConnection = await request('/customers','POST',{...separateConnection,serviceStatus:'Approved',duplicateReviewed:true});
       assert.equal(reviewedConnection.status,201,JSON.stringify(reviewedConnection));
       assert.equal((await request('/customers','POST',{...separateConnection,duplicateReviewed:true})).status,409);
 
@@ -861,6 +861,44 @@ test(
       assert.equal(stableNewReceipt.data.payment.balanceBefore, '104.06');
       assert.equal(stableNewReceipt.data.payment.balanceAfter, '100.06');
 
+      // A logged-in applicant stays limited until the reviewed installation commits.
+      const applicantBody = {...body,firstName:'Pending',lastName:'Applicant',username:'pending.applicant',
+        contact:'09987654321',serviceStatus:'Pending',meterNumber:'',dateInstalled:'',reading:'0'};
+      const applicant = await request('/customers','POST',applicantBody);
+      assert.equal(applicant.status,201,JSON.stringify(applicant));
+      const applicantLogin = await request('/auth/login','POST',{username:applicantBody.username,password});
+      assert.equal(applicantLogin.status,200);
+      const applicantToken=applicantLogin.data.accessToken;
+      assert.equal((await request('/consumer/profile','GET',undefined,applicantToken)).data.fullAccess,false);
+      assert.equal((await request('/consumer/finances','GET',undefined,applicantToken)).status,403);
+      assert.equal((await request('/consumer/feedback','POST',{category:'Other',message:'Not installed'},applicantToken)).status,403);
+      assert.equal((await request('/notifications/mine','GET',undefined,applicantToken)).status,200);
+      assert.equal((await request('/customers/'+applicant.data.id+'/status','PATCH',{
+        status:'Inactive',reason:'Not installed',revision:applicant.data.revision})).status,409);
+      const installedBody={...applicantBody,password:'',serviceStatus:'Installed',meterNumber:'APPLICANT-METER',dateInstalled:today};
+      assert.equal((await request('/customers/'+applicant.data.id,'PUT',{
+        ...installedBody,revision:applicant.data.revision})).status,409);
+      const applicantApproved=await request('/customers/'+applicant.data.id,'PUT',{
+        ...applicantBody,password:'',serviceStatus:'Approved',revision:applicant.data.revision});
+      assert.equal(applicantApproved.status,200,JSON.stringify(applicantApproved));
+      assert.equal((await request('/consumer/finances','GET',undefined,applicantToken)).status,403);
+      const applicantInstalled=await request('/customers/'+applicant.data.id,'PUT',{
+        ...installedBody,revision:applicantApproved.data.revision});
+      assert.equal(applicantInstalled.status,200,JSON.stringify(applicantInstalled));
+      assert.equal((await request('/consumer/profile','GET',undefined,applicantToken)).data.fullAccess,true);
+      assert.equal((await request('/consumer/finances','GET',undefined,applicantToken)).status,200);
+
+      const selectedNotice={type:'Announcement',audience:'customer',targets:[customer.id,applicant.data.id],message:'Selected customers only',status:'Published'};
+      const selectedPublished=await request('/notifications','POST',selectedNotice);
+      assert.equal(selectedPublished.status,201,JSON.stringify(selectedPublished));
+      assert.equal(selectedPublished.data.recipients,2);
+      assert.equal((await request('/notifications','POST',{...selectedNotice,type:'Due date'})).status,409);
+      const duePublished=await request('/notifications','POST',{...selectedNotice,type:'Due date',targets:[customer.id,customer.id]});
+      assert.equal(duePublished.status,201,JSON.stringify(duePublished));
+      assert.equal(duePublished.data.recipients,1);
+      const allDue=await request('/notifications','POST',{...selectedNotice,type:'Due date',audience:'all'});
+      assert.equal(allDue.status,201,JSON.stringify(allDue));
+      assert.equal(allDue.data.recipients,1);
       assert.equal((await request('/customers/' + customer.id, 'DELETE')).status, 404);
       assert.equal((await request('/customers/delete-selected', 'POST', { ids: [customer.id] })).status, 404);
       assert.equal((await request('/customers/' + customer.id)).status, 200);

@@ -1,9 +1,12 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { createContext, createElement, useContext, useCallback, useEffect, useRef, useState, type PropsWithChildren } from 'react';
 import { useSession } from '../session/SessionProvider';
 import { consumerRequest } from '../session/api';
 export type ConsumerProfile = { id:string; name:string; firstName:string; account:string; submitter:string;
-  customerType:string; status:string; address:string; contact:string; meter:string; gender?:string };
-export function useConsumerProfile() {
+  customerType:string; status:string; address:string; contact:string; meter:string; gender?:string;
+  applicationStatus?:string; fullAccess?:boolean; dateApplied?:string; dateApproved?:string;
+  certificateReceived?:number; contractReceived?:number; acknowledgementReceived?:number;
+  installationFee?:string; setbackLength?:string; setbackRate?:string; reinstallationFee?:string; violationFee?:string };
+function useProfileState() {
   const { accessToken } = useSession();
   const [profile,setProfile]=useState<ConsumerProfile|null>(null);
   const [error,setError]=useState('');
@@ -22,4 +25,14 @@ export function useConsumerProfile() {
   useEffect(()=>{const timer=setTimeout(()=>{setProfile(null);void reload();},0);
     return()=>{clearTimeout(timer);invalidate();};},[reload,invalidate]);
   return {profile,error,busy,reload};
+}
+const ProfileContext = createContext<ReturnType<typeof useProfileState> | null>(null);
+export function ConsumerProfileProvider({children}: PropsWithChildren) {
+  const value = useProfileState();
+  return createElement(ProfileContext.Provider, {value}, children);
+}
+export function useConsumerProfile() {
+  const value = useContext(ProfileContext);
+  if (!value) throw new Error('Consumer profile provider is missing.');
+  return value;
 }

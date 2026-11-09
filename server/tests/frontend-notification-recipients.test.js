@@ -3,40 +3,21 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import vm from 'node:vm';
 
-test('recipient suggestions identify customers and reject edited or arbitrary targets', async () => {
-  const source = await readFile(new URL('../../js/broadcast/broadcast.js', import.meta.url), 'utf8');
-  const nodes = new Map();
-  const get = (id) => {
-    if (!nodes.has(id)) nodes.set(id, {
-      value: '', addEventListener() {},
-      setAttribute() {}, removeAttribute() {}, replaceChildren() {}, append() {},
-      setCustomValidity(message) { this.validity = message; },
-    });
-    return nodes.get(id);
-  };
-  const context = vm.createContext({
-    document: { getElementById: get, createElement: () => ({setAttribute(){},append(){},addEventListener(){}}) },
-    AdminAuth: { ready: { then() {} } },
-  });
-  vm.runInContext(source, context);
-  const label = vm.runInContext(`customerChoiceLabel({id:12,name:'Juan Cruz',
-    account:'ACC-12',submitterNumber:'SUB-44',username:'juan44'})`, context);
-  for (const field of ['Juan Cruz', 'ACC-12', 'SUB-44', 'juan44']) assert.ok(label.includes(field));
-  assert.ok(!label.includes('[ID '));
-  context.label = label;
-  vm.runInContext(`noticeCustomers=[{id:12,name:'Juan Cruz',account:'ACC-12',submitterNumber:'SUB-44',username:'juan44'}]; audienceSelect.value='customer';
-    chooseCustomer(noticeCustomers[0])`, context);
-  assert.equal(get('noticeTarget').value, '12');
-  assert.equal(get('noticeCustomerSearch').value, 'Juan Cruz');
-  assert.equal(get('recipientCount').textContent, '1 customers selected');
-  vm.runInContext(`customerSearch.value='Juan'; selectCustomerChoice()`, context);
-  assert.equal(get('noticeTarget').value, '');
-  assert.ok(get('noticeCustomerSearch').validity);
-  assert.equal(get('recipientCount').textContent, '0 customers selected');
-  assert.equal(get('noticeCustomerOptions').hidden, false);
-  for(const query of ['Juan','cruz','CRUZ JUAN','SUB-44','juan44','ACC-12']) {
-    context.query=query;
-    assert.equal(vm.runInContext('matchingCustomers(noticeCustomers,query).length',context),1);
-  }
-  assert.equal(vm.runInContext("matchingCustomers(noticeCustomers,'missing').length",context),0);
+test('recipient checklist preserves selections through search and filters paid customers',async()=>{
+ const nodes=new Map();
+ const node=()=>({value:'',elements:{type:{value:'Announcement',addEventListener(){}}},addEventListener(){},replaceChildren(){},append(){}});
+ const get=id=>{if(!nodes.has(id))nodes.set(id,node());return nodes.get(id);};
+ const context=vm.createContext({document:{getElementById:get,createElement:node},AdminAuth:{ready:{then(){}}}});
+ vm.runInContext(await readFile(new URL('../../js/broadcast/broadcast.js',import.meta.url),'utf8'),context);
+ vm.runInContext(`noticeCustomers=[{id:1,name:'Juan Cruz',account:'A1',balance:'20',due:'2026-11-01'},
+ {id:2,name:'Ana Reyes',account:'A2',balance:'0'},{id:3,name:'Pedro Cruz',account:'A3',balance:'5'}];
+ audienceSelect.value='customer';selectedCustomerIds.add('1');selectedCustomerIds.add('2');`,context);
+ assert.equal(vm.runInContext('selectedRecipients().length',context),2);
+ assert.equal(vm.runInContext("matchingCustomers(noticeCustomers,'CRUZ JUAN').length",context),1);
+ vm.runInContext("customerSearch.value='Pedro'",context);
+ assert.equal(vm.runInContext('selectedRecipients().length',context),2);
+ vm.runInContext("noticeForm.elements.type.value='Due date'",context);
+ assert.equal(vm.runInContext('selectedRecipients().length',context),1);
+ vm.runInContext("audienceSelect.value='all'",context);
+ assert.equal(vm.runInContext('selectedRecipients().length',context),2);
 });

@@ -11,7 +11,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Public+Sans:wght@400;500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
       rel="stylesheet"
     />
 
@@ -179,9 +179,18 @@
             </button>
           </div>
           <p id="pageMessage" role="status" tabindex="-1"></p>
-          <p id="reportSummary" aria-live="polite"></p>
-          <section class="panel">
-            <div class="panel-header"><h2>Report filters</h2></div>
+          <div id="reportSummary" aria-live="polite" aria-label="Report summary"></div>
+          <div class="panel report-workspace">
+          <section class="panel report-filter-panel">
+            <div class="panel-header report-filter-header">
+              <div><h2>Report filters</h2><p>Choose the accounts and billing period to review.</p></div>
+              <div class="report-header-actions">
+                <button class="btn" id="refreshReport" type="button">
+                  <i class="bi bi-arrow-clockwise" aria-hidden="true"></i> Refresh
+                </button>
+                <button class="btn btn-primary" id="printReport" type="button" disabled>View report</button>
+              </div>
+            </div>
             <div class="admin-body">
               <div class="inline-record-toolbar">
                 <label class="payment-history-search"
@@ -210,12 +219,6 @@
                     </select></label
                   >
                 </div>
-              </div>
-              <div class="admin-actions">
-                <button class="btn" id="refreshReport" type="button">
-                  <i class="bi bi-arrow-clockwise" aria-hidden="true"></i> Refresh
-                </button>
-                <button class="btn" id="printReport" disabled>View report</button>
               </div>
             </div>
           </section>
@@ -260,10 +263,6 @@
           >
             <div class="panel-header"><h2>Consumption by barangay</h2></div>
             <div class="admin-body">
-              <p>
-                Sorted by total billed consumption. Average usage is included so barangays with more
-                customers can be compared fairly.
-              </p>
               <div class="table-scroll">
                 <table class="mobile-summary-table mobile-summary-consumption">
                   <thead>
@@ -284,6 +283,7 @@
               ></nav>
             </div>
           </section>
+          </div>
         </main>
       </div>
     </div>

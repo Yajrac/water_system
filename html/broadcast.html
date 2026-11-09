@@ -11,7 +11,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Public+Sans:wght@400;500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
       rel="stylesheet"
     />
 
@@ -186,7 +186,8 @@
               <p>
                 Publish messages directly to customer in-app notifications.
               </p>
-              <form id="noticeForm" class="admin-form">
+              <form id="noticeForm" class="notice-layout">
+                <div class="admin-form notice-compose">
                 <label
                   >Notice type<select name="type">
                     <option>Due date</option>
@@ -199,21 +200,35 @@
                   >Audience<select name="audience" id="noticeAudience">
                     <option value="all">All customers</option>
                     <option value="barangay">Barangay</option>
-                    <option value="customer">Specific customer</option>
+                    <option value="customer" selected>Select customers</option>
                   </select></label
-                ><label id="noticeTargetLabel" hidden
-                  >Target<select name="target" id="noticeTarget"></select>
-                  <input id="noticeCustomerSearch" type="text" role="combobox"
-                    aria-autocomplete="list" aria-controls="noticeCustomerOptions" aria-expanded="false"
-                    placeholder="Search name, username, account or submitter number"
-                    autocomplete="off" hidden />
-                  <div id="noticeCustomerOptions" role="listbox" aria-label="Matching customers" hidden></div>
-                  <small id="noticeCustomerHint" hidden>Type to search, then choose a customer from the suggestions.</small></label
-                ><label class="wide"
+                >
+
+                <label class="wide"
                   >Message<textarea name="message" rows="4" required maxlength="2000"></textarea>
                 </label>
                 <p id="recipientCount" class="wide"></p>
                 <div class="wide"><button type="submit" class="btn btn-primary"><i class="bi bi-send" aria-hidden="true"></i>Publish notification</button></div>
+                </div>
+                <div id="noticeRecipientPanel" class="notice-recipient-panel" hidden>
+                <div id="noticeBarangayPicker" class="recipient-picker" hidden>
+                  <h3>Select barangay</h3>
+                  <label id="noticeTargetLabel" for="noticeTarget">Barangay</label>
+                  <select name="target" id="noticeTarget"></select>
+                  <p class="recipient-area-help">The notification will reach eligible customers in the selected barangay.</p>
+                </div>
+                <div id="noticeCustomerPicker" class="recipient-picker" role="group" aria-labelledby="recipientPickerTitle" hidden>
+                  <h3 id="recipientPickerTitle">Select customers</h3>
+                  <label for="noticeCustomerSearch">Search customers</label>
+                  <input id="noticeCustomerSearch" type="search" placeholder="Name, account, username or submitter number" autocomplete="off" />
+                  <div class="recipient-picker-actions">
+                    <button type="button" class="btn" id="selectMatchingCustomers">Select all matches</button>
+                    <button type="button" class="btn" id="clearSelectedCustomers">Clear selection</button>
+                  </div>
+                  <p id="noticeCustomerHint" aria-live="polite"></p>
+                  <div id="noticeCustomerOptions" class="recipient-checklist"></div>
+                </div>
+                </div>
               </form>
             </div>
           </section>

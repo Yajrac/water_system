@@ -40,7 +40,7 @@ export function customerView(row) {
     .join(' ');
   customer.active = customer.connectionStatus === 'Active';
   customer.serviceStatus ||= 'Pending';
-  customer.registrationStatus = customer.serviceStatus === 'Pending' ? 'Application' : 'Registered';
+  customer.registrationStatus = ['Approved','Installed'].includes(customer.serviceStatus) ? 'Registered' : 'Application';
   const amounts = [
     'reading',
     'initialReading',

@@ -22,6 +22,12 @@ const input = {
   contractReceived: true,
 };
 
+test('application statuses are limited to Pending, Approved and Installed', () => {
+  assert.equal(validateCustomer({...input,serviceStatus:'Pending'}).dateApproved,'');
+  for(const serviceStatus of ['Rejected','Cancelled'])
+    assert.throws(()=>validateCustomer({...input,serviceStatus}),{statusCode:400});
+});
+
 test('complete imports become Installed and Active without changing manual registration', () => {
   const complete = { ...input, account: 'IMPORT-COMPLETE', serviceStatus: 'Approved',
     connectionStatus: 'Inactive', dateApplied: '2025-01-01', dateApproved: '2025-01-02',

@@ -471,3 +471,22 @@ Migration 019 provides persisted notification read state. Consumer-only POST
 routes and the delivery worker were removed; notifications are in-app only.
 The migration remains unchanged because it has already been applied locally;
 its unused device/delivery tables do not start any background service.
+
+### Application progress and mobile access
+
+Application statuses remain Pending, Approved and Installed. No new migration is
+required for this access-control update. Existing customer records are preserved.
+
+New manual applications start Pending. Save approval before completing an
+installation; customer row/profile shortcuts open the existing Installation step.
+The installation uses the existing transaction, meter uniqueness checks and
+revision protection. Bulk imports retain their established installation rules.
+Connection status actions are permitted only for Installed applications.
+
+Consumer login remains available before installation. Profile and in-app
+notifications remain accessible, while finances and feedback APIs require the
+latest application to be Installed. The updated mobile app shows application
+progress, requirements, installation estimate, and hides
+financial/feedback tabs until Installed. Refresh application progress to unlock
+access after installation. Build a new Android app for these mobile UI changes;
+older apps also receive the server-side access restrictions.

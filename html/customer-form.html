@@ -11,7 +11,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Public+Sans:wght@400;500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
       rel="stylesheet"
     />
 
@@ -173,6 +173,10 @@
             <div class="admin-body">
               <form id="customerForm" novalidate>
                 <div class="customer-step-header">
+                  <div class="water-step-summary">
+                    <span id="customerStepSummary" aria-live="polite"></span>
+                    <progress id="customerStepProgress" max="5" value="1" aria-label="Application progress"></progress>
+                  </div>
                   <ol
                     class="customer-step-track"
                     id="customerStepTrack"

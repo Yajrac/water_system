@@ -97,11 +97,13 @@ function renderCustomerRows(customers) {
       mobileMenu.style.top = Math.max(8, Math.min(rect.bottom + 4, window.innerHeight - 112)) + 'px';
     });
     for (const [label, page, icon, className] of [
-      ['Edit', 'customer-form.html', 'pencil-square', 'action-edit'],
+      [customer.serviceStatus === 'Pending' ? 'Review application' : customer.serviceStatus === 'Approved' ? 'Complete installation' : 'Edit', 'customer-form.html', 'pencil-square', 'action-edit'],
       ['View profile', 'customer-profile.html', 'eye', 'action-view'],
     ]) {
       const link = document.createElement('a');
       link.href = page + '?id=' + encodeURIComponent(customer.id);
+      if (page === 'customer-form.html' && customer.serviceStatus !== 'Installed')
+        link.href += '&step=installation';
       link.className = 'btn ' + className;
       link.title = label;
       link.setAttribute('aria-label', label + ' ' + displayName);

@@ -372,7 +372,7 @@ const sidebarTheme = document.getElementById('themeToggle');
   label.className = 'sidebar-tool-label';
   label.textContent = button.textContent;
   button.replaceChildren(
-    sidebarIcon(button === logoutButton ? 'box-arrow-right' : 'moon-stars'),
+    sidebarIcon(button === logoutButton ? 'box-arrow-right' : document.documentElement.dataset.theme === 'dark' ? 'sun' : 'moon-stars'),
     label,
   );
   button.setAttribute(

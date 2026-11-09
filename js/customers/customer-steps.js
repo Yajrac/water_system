@@ -4,12 +4,16 @@ const previousCustomerStep = document.getElementById('previousCustomerStep');
 const nextCustomerStep = document.getElementById('nextCustomerStep');
 let currentCustomerStep = 0;
 const customerStepLabels = ['Applicant', 'Installation', 'Estimate', 'Verification', 'App account'];
+const customerStepIcons = ['person', 'speedometer2', 'calculator', 'clipboard-check', 'phone'];
 const customerStepTrack = document.getElementById('customerStepTrack');
 const customerStepMarkers = customerSteps.map((section, index) => {
   const marker = document.createElement('li');
   const number = document.createElement('span');
   number.className = 'step-number';
-  number.textContent = index + 1;
+  const icon = document.createElement('i');
+  icon.className = 'bi bi-' + customerStepIcons[index];
+  icon.setAttribute('aria-hidden', 'true');
+  number.appendChild(icon);
   const label = document.createElement('span');
   label.className = 'step-label';
   label.textContent = customerStepLabels[index];
@@ -25,8 +29,14 @@ function showCustomerStep(index, focus = true) {
     marker.classList.toggle('is-complete', position < index);
     if (position === index) marker.setAttribute('aria-current', 'step');
     else marker.removeAttribute('aria-current');
-    marker.querySelector('.step-number').textContent = position < index ? '\u2713' : position + 1;
+    marker.setAttribute('aria-label', 'Step ' + (position + 1) + ': ' + customerStepLabels[position] +
+      (position < index ? ', completed' : position === index ? ', current' : ', upcoming'));
+    marker.querySelector('.step-number i').className = 'bi bi-' +
+      (position < index ? 'check-lg' : customerStepIcons[position]);
   });
+  document.getElementById('customerStepSummary').textContent =
+    'Step ' + (index + 1) + ' of ' + customerSteps.length + ' · ' + customerStepLabels[index];
+  document.getElementById('customerStepProgress').value = index + 1;
   customerSteps.forEach((section, position) => {
     section.hidden = position !== index;
   });
@@ -64,11 +74,12 @@ function customerStepError(field) {
   if (field.name === 'address' && !/^Purok [1-7]$/.test(value)) return 'Select a valid purok.';
   if (field.name === 'barangay' && !CustomerAPI.barangays.some((item) => item.name === value))
     return 'Select a registered barangay.';
-  if (field.name === 'serviceStatus' && !['Approved', 'Installed'].includes(value))
-    return 'Select Approved or Installed to register the customer.';
-  if (field.name === 'dateApproved' && !value) return 'Enter the approval date.';
+  if (field.name === 'serviceStatus' && !['Pending', 'Approved', 'Installed'].includes(value))
+    return 'Select a valid application status.';
+  if (field.name === 'dateApproved' && ['Approved','Installed'].includes(fields.serviceStatus.value) && !value) return 'Enter the approval date.';
   if (
     field.name === 'approvedBy' &&
+    ['Approved','Installed'].includes(fields.serviceStatus.value) &&
     (!/^[\p{L}\p{M} .,'-]+$/u.test(value) || !/\p{L}/u.test(value))
   )
     return 'Enter the approver name using letters and name punctuation.';
@@ -84,7 +95,7 @@ function customerStepError(field) {
     (!Validation.date(value) || value > WaterStore.today())
   )
     return 'Enter a valid date that is not in the future.';
-  if (field.name === 'dateApproved' && value < fields.dateApplied.value)
+  if (field.name === 'dateApproved' && value && value < fields.dateApplied.value)
     return 'Approval date cannot be before the application date.';
   if (
     field.name === 'dateInstalled' &&

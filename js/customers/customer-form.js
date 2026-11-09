@@ -245,8 +245,11 @@ function openCustomer(customer) {
   if (!customer) {
     customerForm.elements.dateApplied.value = WaterStore.today();
     customerForm.elements.dateApproved.value = customerForm.elements.dateApplied.value;
-    customerForm.elements.serviceStatus.value = 'Approved';
+    customerForm.elements.serviceStatus.value = 'Pending';
+    customerForm.elements.dateApproved.value = '';
   }
+  const installedOption = Array.from(customerForm.elements.serviceStatus.options || []).find(option => option.value === 'Installed');
+  if (installedOption) installedOption.disabled = !customer || customer.serviceStatus === 'Pending';
   // Meter readings are changed through billing after the first bill is generated.
   customerForm.elements.reading.disabled = Boolean(
     customer && (customer.hasBills || customer.hasMeterEntries),
@@ -258,6 +261,7 @@ function openCustomer(customer) {
 
 function registrationReady() {
   const fields = customerForm.elements;
+  if (fields.serviceStatus.value === 'Pending') return true;
   if (!fields.dateApproved.value || !fields.approvedBy.value.trim()) return false;
   if (fields.serviceStatus.value === 'Pending') return false;
   if (fields.serviceStatus.value === 'Installed') {
@@ -267,15 +271,17 @@ function registrationReady() {
 }
 function updateRegistrationButtons() {
   const status = customerForm.elements.serviceStatus.value;
+  const requiresApproval = ['Approved','Installed'].includes(status);
+  if (!requiresApproval) registrationFields.forEach(name => customerForm.elements[name].setCustomValidity(''));
   conditionalLabels.forEach((label) => {
     const required =
-      status !== 'Pending' && (!installationFields.includes(label.name) || status === 'Installed');
+      requiresApproval && (!installationFields.includes(label.name) || status === 'Installed');
     label.node.textContent = label.text.trimEnd() + ' ';
     label.marker.hidden = !required;
   });
   const existing = customerRecords.customers.find((customer) => customer.id === editingCustomerId);
   const alreadyRegistered = existing && WaterStore.isRegistered(existing);
-  registerCustomerButton.textContent = alreadyRegistered
+  registerCustomerButton.textContent = !requiresApproval ? 'Save application' : alreadyRegistered
     ? 'Save registered customer'
     : 'Register customer';
   registerCustomerButton.disabled = customerFormLoading || savingCustomer;
@@ -335,7 +341,7 @@ customerForm.addEventListener('submit', async (event) => {
   };
   const savedCustomer = customerRecords.customers.find((item) => item.id === editingCustomerId);
   customer.contact = '+63' + customer.contact;
-  customer.registrationStatus = 'Registered';
+  customer.registrationStatus = input.serviceStatus === 'Pending' ? 'Pending' : 'Registered';
   customer.installationTotal = installationTotal();
   customer.account = savedCustomer?.account || 'Assigned on save';
   customer.applicationNumber = savedCustomer?.applicationNumber || 'Assigned on save';
@@ -448,6 +454,9 @@ async function loadCustomerForm() {
     customerFormLoading = false;
     customerForm.inert = false;
     openCustomer(requested?.customer || null);
+    if (new URLSearchParams(location.search).get('step') === 'installation') {
+      showCustomerStep(1);
+    }
     AdminUI.message('');
   } catch (error) {
     AdminUI.message(error.message + ' Reload this page to try again.');
@@ -541,7 +550,7 @@ function updateApplicationDateDisplays() {
 
 customerForm.elements.serviceStatus.addEventListener('change', () => {
   if (
-    customerForm.elements.serviceStatus.value !== 'Pending' &&
+    ['Approved','Installed'].includes(customerForm.elements.serviceStatus.value) &&
     !customerForm.elements.dateApproved.value
   ) {
     customerForm.elements.dateApproved.value = WaterStore.today();

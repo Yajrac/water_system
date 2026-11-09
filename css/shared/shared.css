@@ -39,8 +39,8 @@
   --shadow-sm: 0 1px 2px rgba(8, 36, 48, 0.06);
   --shadow-md: 0 6px 20px -6px rgba(8, 36, 48, 0.14);
 
-  --font-display: 'Manrope', 'Segoe UI', sans-serif;
-  --font-body: 'Public Sans', 'Segoe UI', sans-serif;
+  --font-display: 'Inter', 'Segoe UI', sans-serif;
+  --font-body: 'Inter', 'Segoe UI', sans-serif;
 
   --sidebar-w: 264px;
 }

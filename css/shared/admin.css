@@ -1605,6 +1605,20 @@ tbody tr:hover {
   box-shadow: var(--shadow-sm);
   min-width: 0;
 }
+/* Shared summary-card feedback across admin pages. */
+.main-content :is(.record-card, .customer-metric, .ledger-summary-card, .profile-summary > div, .payment-history-summary > div) {
+  transition: transform 180ms ease-out, border-color 180ms ease-out;
+}
+@media (hover: hover) and (pointer: fine) {
+  .main-content :is(.record-card, .customer-metric, .ledger-summary-card, .profile-summary > div, .payment-history-summary > div):hover {
+    transform: translateY(-3px);
+    border-color: var(--color-primary, #0785bb);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .main-content :is(.record-card, .customer-metric, .ledger-summary-card, .profile-summary > div, .payment-history-summary > div) { transition: none; }
+  .main-content :is(.record-card, .customer-metric, .ledger-summary-card, .profile-summary > div, .payment-history-summary > div):hover { transform: none; }
+}
 .record-card-top {
   display: flex;
   align-items: flex-start;
@@ -1694,6 +1708,68 @@ tbody tr:hover {
 }
 html[data-page='reports'] .filter-row {
   grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+html[data-page='reports'] .report-workspace > .panel {
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+html[data-page='reports'] .report-workspace {
+  overflow: hidden;
+}
+html[data-page='reports'] .report-workspace > .section-tab-panel {
+  border-top: 1px solid var(--color-border);
+}
+html[data-page='reports'] .report-filter-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 24px;
+}
+html[data-page='reports'] .report-filter-header p {
+  margin-top: 4px;
+  font-size: .8rem;
+  color: var(--color-ink-muted);
+}
+html[data-page='reports'] .report-header-actions { display: flex; gap: 10px; flex-shrink: 0; }
+html[data-page='reports'] .report-filter-panel > .admin-body { padding: 20px 24px; }
+html[data-page='reports'] .report-filter-panel .inline-record-toolbar {
+  margin: 0;
+  gap: 16px;
+  align-items: end;
+}
+html[data-page='reports'] .report-workspace > .section-tab-panel > .panel-header {
+  padding: 14px 24px;
+  background: var(--color-surface);
+}
+html[data-page='reports'] .report-workspace > .section-tab-panel > .panel-header h2 { font-size: 1rem; }
+html[data-page='reports'] .report-workspace > .section-tab-panel > .admin-body { padding: 8px 24px 18px; }
+@media (max-width: 600px) {
+  html[data-page='reports'] .report-filter-header { flex-wrap: wrap; padding: 16px; }
+  html[data-page='reports'] .report-filter-panel > .admin-body,
+  html[data-page='reports'] .report-workspace > .section-tab-panel > .admin-body { padding: 16px; }
+  html[data-page='reports'] .report-workspace > .section-tab-panel > .panel-header { padding: 14px 16px; }
+}
+html[data-page='reports'] .consumption-report-note {
+  margin: 0 0 18px;
+  max-width: 78ch;
+  color: var(--color-ink-muted);
+  font-size: .85rem;
+  line-height: 1.6;
+}
+html[data-page='reports'] #reportSummary:not(:empty) {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  margin: 0 0 18px;
+}
+@media (max-width: 900px) {
+  html[data-page='reports'] #reportSummary:not(:empty) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 480px) {
+  html[data-page='reports'] #reportSummary:not(:empty) { grid-template-columns: minmax(0, 1fr); }
 }
 .sidebar-tools {
   padding: 12px 16px;
@@ -2200,7 +2276,7 @@ textarea:focus-visible,
 
 /* Tabular, ledger-style digits for currency amounts. */
 :root {
-  --font-money: 'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
+  --font-money: 'Inter', 'Segoe UI', sans-serif;
 }
 .money-value,
 .record-card strong.money-value,
@@ -2845,4 +2921,27 @@ html[data-theme='dark'] body :is(.pager-controls .btn, .step-navigation-button):
     font-size: 0.8rem; text-decoration: none; box-sizing: border-box;
   }
   .mobile-record-actions .mobile-record-action-label { display: inline !important; }
+}
+/* Compact desktop spacing for laptop-sized viewports. */
+@media (min-width: 901px) and (max-width: 1600px), (min-width: 901px) and (max-height: 900px) {
+  html.theme-teal { font-size: 14px; }
+  html.theme-teal:not(.sidebar-compact) { --sidebar-w: 238px; }
+  html.theme-teal body { font-size: 14px; }
+  html.theme-teal .main-content { padding: 26px 28px; }
+  html.theme-teal .sidebar-brand { padding: 20px 18px; }
+  html.theme-teal .sidebar-menu-item { padding: 11px 14px; font-size: .9rem; gap: 12px; }
+  html.theme-teal .admin-page-header h1,
+  html.theme-teal .page-header h1 { font-size: 1.8rem; }
+  html.theme-teal .customer-page-header { margin-bottom: 18px; }
+  html.theme-teal .customer-page-header p { font-size: .92rem; }
+  html.theme-teal .customer-overview { gap: 12px; margin-bottom: 20px; }
+  html.theme-teal .customer-metric { padding: 16px; gap: 12px; }
+  html.theme-teal .customer-metric strong { font-size: 1.65rem; }
+  html.theme-teal .metric-symbol { width: 38px; height: 38px; }
+  html.theme-teal .customer-directory .panel-header { padding: 16px 20px; }
+  html.theme-teal .customer-filter-bar { padding: 16px 20px; gap: 14px; }
+  html.theme-teal .record-card { padding: 16px; }
+  html.theme-teal .admin-body { padding: 18px 20px; }
+  html.theme-teal .customer-add-button { padding: 9px 14px; }
+  html.theme-teal .admin-header-actions .btn { padding: 9px 13px; font-size: .88rem; }
 }

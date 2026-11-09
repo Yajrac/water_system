@@ -100,6 +100,9 @@ async function writeApplication(
       409,
     );
   }
+  if (!imported && (!existing || existing.serviceStatus !== 'Installed') &&
+      existing?.serviceStatus !== 'Approved' && details.serviceStatus === 'Installed')
+    throw new AppError('Approve the application before completing installation.', 409);
   const connectionStatus =
     (imported && details.connectionStatus) ||
     (details.serviceStatus === 'Installed' && (!existing || existing.serviceStatus !== 'Installed')
@@ -348,6 +351,8 @@ export async function changeCustomerStatus(id, body, actorId) {
   return transaction(async (connection) => {
     const existing = customerView(await model.findCustomer(id, connection, true));
     if (!existing) throw new AppError('Customer not found.', 404);
+    if (existing.serviceStatus !== 'Installed')
+      throw new AppError('Connection actions are available only after installation.', 409);
     if (body.revision !== existing.revision)
       throw new AppError('Customer status changed. Reload before trying again.', 409);
     if (body.status === 'Active' && (existing.serviceStatus !== 'Installed' || !existing.meterId)) {

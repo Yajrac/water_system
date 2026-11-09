@@ -25,6 +25,7 @@ export default function ProfileScreen() {
           </View>
         </View>
         <Detail label="Account number" value={customer.account} />
+        <Detail label="Application status" value={customer.applicationStatus || 'Pending'} />
         <Detail label="Submitter number" value={customer.submitter} />
         <Detail label="Service address" value={customer.address} />
         <Detail label="Mobile number" value={customer.contact} />

@@ -1,10 +1,17 @@
-import { Tabs } from 'expo-router';
+import { Tabs, useFocusEffect } from 'expo-router';
+import { useCallback } from 'react';
+import { ConsumerProfileProvider, useConsumerProfile } from '@/features/profile/useConsumerProfile';
 import { Icon, type IconName } from '@/components/consumer/Icon';
 import { colors } from '@/theme/tokens';
 import { useNotifications } from '@/features/notifications/NotificationProvider';
 
 export default function ConsumerTabs() {
+  return <ConsumerProfileProvider><ConsumerTabContent /></ConsumerProfileProvider>;
+}
+function ConsumerTabContent() {
   const { unread } = useNotifications();
+  const { profile, reload } = useConsumerProfile();
+  useFocusEffect(useCallback(() => { void reload(); }, [reload]));
   return (
     <Tabs
       screenOptions={{
@@ -30,6 +37,7 @@ export default function ConsumerTabs() {
           name={tab.name}
           options={{
             title: tab.label,
+            href: ['bills','payments','feedback'].includes(tab.name) && !profile?.fullAccess ? null : undefined,
             tabBarBadge:
               tab.name === 'announcements' && unread ? (unread > 99 ? '99+' : unread) : undefined,
             tabBarBadgeStyle: { backgroundColor: '#dc2626', color: '#ffffff' },

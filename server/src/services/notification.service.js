@@ -2,6 +2,11 @@ import { validateNotice } from '../validators/notification.validator.js';
 import { pool } from '../database/pool.js';
 import { AppError } from '../utils/app-error.js';
 
+const outstandingBills = `SELECT b.customer_id,CAST(SUM(GREATEST(0,b.total_amount-COALESCE(p.paid,0))) AS CHAR) AS balance,
+  MIN(CASE WHEN b.total_amount>COALESCE(p.paid,0) THEN b.due_date END) AS due
+  FROM bills b LEFT JOIN (SELECT bill_id,SUM(amount) AS paid FROM payments GROUP BY bill_id) p ON p.bill_id=b.id
+  GROUP BY b.customer_id`;
+
 export async function listNotices() {
   const [rows] = await pool.query(`SELECT a.id, a.title AS type, a.message, a.status,
     a.audience, DATE_FORMAT(a.created_at, '%Y-%m-%d') AS date,
@@ -14,11 +19,12 @@ export async function recipientOptions() {
   const [rows] = await pool.query(`SELECT c.id,c.account_number AS account,
     CONCAT_WS(' ',c.last_name,c.first_name,NULLIF(c.middle_name,'')) AS name,
     c.submitter_number AS submitterNumber,u.username,
-    c.barangay_id AS barangayId FROM customers c
+    c.barangay_id AS barangayId,COALESCE(debt.balance,'0') AS balance,DATE_FORMAT(debt.due,'%Y-%m-%d') AS due
+    FROM customers c LEFT JOIN (${outstandingBills}) debt ON debt.customer_id=c.id
     LEFT JOIN users u ON u.id=c.user_id
     WHERE EXISTS(SELECT 1 FROM customer_applications a WHERE a.customer_id=c.id
       AND a.id=(SELECT MAX(id) FROM customer_applications WHERE customer_id=c.id)
-      AND a.status IN ('Approved','Installed')) ORDER BY c.last_name,c.first_name`);
+      AND a.status IN ('Pending','Approved','Installed')) ORDER BY c.last_name,c.first_name`);
   return rows;
 }
 
@@ -27,19 +33,23 @@ export async function saveNotice(body, actorId) {
   const connection = await pool.getConnection();
   try {
     await connection.beginTransaction();
+    const targets = notice.audience === 'customer' ? notice.targets || [notice.target] : [];
     const filter =
       notice.audience === 'barangay'
         ? 'AND c.barangay_id=?'
         : notice.audience === 'customer'
-          ? 'AND c.id=?'
+          ? 'AND c.id IN (' + targets.map(()=>'?').join(',') + ')'
           : '';
     const [recipients] = await connection.execute(
-      `SELECT c.id FROM customers c
+      `SELECT c.id FROM customers c LEFT JOIN (${outstandingBills}) debt ON debt.customer_id=c.id
       WHERE EXISTS(SELECT 1 FROM customer_applications a WHERE a.customer_id=c.id
         AND a.id=(SELECT MAX(id) FROM customer_applications WHERE customer_id=c.id)
-        AND a.status IN ('Approved','Installed')) ${filter} FOR UPDATE`,
-      notice.audience === 'all' ? [] : [notice.target],
+        AND a.status IN ('Pending','Approved','Installed')) ${filter}
+        ${['Due date','Unpaid bill'].includes(notice.type) ? 'AND debt.balance > 0' : ''} FOR UPDATE`,
+      notice.audience === 'customer' ? targets : notice.audience === 'barangay' ? [notice.target] : [],
     );
+    if (targets.length && recipients.length !== targets.length)
+      throw new AppError('Some selected customers are no longer eligible. Refresh the recipient list before publishing.',409);
     if (!recipients.length) throw new AppError('No registered customers match this audience.', 400);
     const [result] = await connection.execute(
       `INSERT INTO announcements
@@ -85,7 +95,9 @@ export async function saveNotice(body, actorId) {
 }
 
 export async function consumerNotifications(userId) {
-  const [[customer]] = await pool.execute('SELECT id FROM customers WHERE user_id=?', [userId]);
+  const [[customer]] = await pool.execute(`SELECT c.id,
+    (SELECT status FROM customer_applications WHERE customer_id=c.id ORDER BY id DESC LIMIT 1) AS applicationStatus
+    FROM customers c WHERE user_id=?`, [userId]);
   if (!customer) throw new AppError('No customer profile is linked to this account.', 404);
   const id = customer.id;
   const [notices] = await pool.execute(
@@ -123,7 +135,7 @@ export async function consumerNotifications(userId) {
     [userId],
   );
   const keys = new Set(reads.map((row) => row.notification_key));
-  return [...notices, ...bills, ...payments, ...applications]
+  return [...notices, ...(customer.applicationStatus === 'Installed' ? [...bills, ...payments] : []), ...applications]
     .sort((a, b) => b.date.localeCompare(a.date))
     .slice(0, 100)
     .map((item) => ({ ...item, read: keys.has(item.id) }));

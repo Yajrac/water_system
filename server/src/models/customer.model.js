@@ -72,7 +72,7 @@ export async function listCustomers(filters) {
   }
   if (filters.status === 'inactive') conditions.push("c.connection_status <> 'Active'");
   if (filters.status === 'registered')
-    conditions.push("COALESCE(a.status, 'Pending') <> 'Pending'");
+    conditions.push("a.status IN ('Approved','Installed')");
   if (filters.status === 'pending') conditions.push("COALESCE(a.status, 'Pending') = 'Pending'");
   const where = conditions.length ? ' WHERE ' + conditions.join(' AND ') : '';
   const [[count]] = await pool.execute('SELECT COUNT(*) AS total ' + joins + where, values);
@@ -88,7 +88,7 @@ export async function listCustomers(filters) {
   );
   const [[summary]] = await pool.execute(
     `SELECT COUNT(*) AS total,
-    COALESCE(SUM(COALESCE(a.status, 'Pending') <> 'Pending'), 0) AS registered,
+    COALESCE(SUM(a.status IN ('Approved','Installed')), 0) AS registered,
     COALESCE(SUM(COALESCE(a.status, 'Pending') = 'Pending'), 0) AS pending` + joins,
   );
   return {
