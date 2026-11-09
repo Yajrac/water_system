@@ -477,8 +477,8 @@ its unused device/delivery tables do not start any background service.
 Application statuses remain Pending, Approved and Installed. No new migration is
 required for this access-control update. Existing customer records are preserved.
 
-New manual applications start Pending. Save approval before completing an
-installation; customer row/profile shortcuts open the existing Installation step.
+New manual applications start Pending. They can move directly to Installed when
+approval and installation details are complete; customer row/profile shortcuts open the existing Installation step.
 The installation uses the existing transaction, meter uniqueness checks and
 revision protection. Bulk imports retain their established installation rules.
 Connection status actions are permitted only for Installed applications.

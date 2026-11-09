@@ -100,9 +100,6 @@ async function writeApplication(
       409,
     );
   }
-  if (!imported && (!existing || existing.serviceStatus !== 'Installed') &&
-      existing?.serviceStatus !== 'Approved' && details.serviceStatus === 'Installed')
-    throw new AppError('Approve the application before completing installation.', 409);
   const connectionStatus =
     (imported && details.connectionStatus) ||
     (details.serviceStatus === 'Installed' && (!existing || existing.serviceStatus !== 'Installed')

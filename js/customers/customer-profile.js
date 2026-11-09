@@ -5,6 +5,32 @@ let profileCustomer = null;
 
 function profileDetails(containerId, rows) {
   const container = document.getElementById(containerId);
+  if (containerId === 'connectionDetails') {
+    for (const [title, labels] of [
+      ['Connection', ['Connection status','Service status','Disconnection reason','Nature of work']],
+      ['Meter', ['Meter number','Meter kind / size']],
+      ['Application dates', ['Date applied','Date approved','Date installed','Approved by']],
+    ]) {
+      const group = document.createElement('section'); group.className = 'profile-detail-group';
+      const heading = document.createElement('h3'); heading.textContent = title;
+      const list = document.createElement('dl'); list.className = 'profile-details';
+      for (const label of labels) {
+        const entry = rows.find(row => row[0] === label);
+        if (!entry) continue;
+        const item = document.createElement('div');
+        const term = document.createElement('dt'); term.textContent = label;
+        const description = document.createElement('dd'); description.textContent = entry[1] || 'Not recorded';
+        if (['Connection status','Service status'].includes(label)) {
+          const badge = document.createElement('span'); badge.textContent = description.textContent;
+          badge.className = 'profile-state-badge ' + (['Active','Installed'].includes(entry[1]) ? 'profile-state-active' : 'profile-state-pending');
+          description.replaceChildren(badge);
+        }
+        item.append(term, description); list.appendChild(item);
+      }
+      group.append(heading,list); container.appendChild(group);
+    }
+    return;
+  }
   rows.forEach(([label, value]) => {
     const item = document.createElement('div');
     const term = document.createElement('dt');
@@ -124,15 +150,6 @@ function renderCustomerProfile() {
     document.getElementById('profileBillCount').textContent = bills.length;
     document.getElementById('editProfile').href =
       'customer-form.html?id=' + encodeURIComponent(profileId);
-    const paymentLink = document.getElementById('profilePayments');
-    paymentLink.href = '#profilePaymentRows';
-    paymentLink.addEventListener('click', (event) => {
-      event.preventDefault();
-      selectProfileTab(
-        profileTabs.find((tab) => tab.getAttribute('aria-controls') === 'billingPanel'),
-      );
-      document.getElementById('profilePaymentRows').scrollIntoView({ block: 'center' });
-    });
     document.getElementById('profileApplication').href =
       'customer-application.html?id=' + encodeURIComponent(profileId);
     profileDetails('personalDetails', [
@@ -248,7 +265,6 @@ function addProfileIcon(selector) {
   const names = {
     '#editProfile': 'pencil-square',
     '#profileApplication': 'file-earmark-text',
-    '#profilePayments': 'clock-history',
     '.profile-summary > div:nth-child(1) span': 'wallet2',
     '.profile-summary > div:nth-child(2) span': 'check-circle-fill',
     '.profile-summary > div:nth-child(3) span': 'droplet-fill',
@@ -264,7 +280,6 @@ function addProfileIcon(selector) {
 }
 addProfileIcon('#editProfile');
 addProfileIcon('#profileApplication');
-addProfileIcon('#profilePayments');
 addProfileIcon('.profile-summary > div:nth-child(1) span');
 addProfileIcon('.profile-summary > div:nth-child(2) span');
 addProfileIcon('.profile-summary > div:nth-child(3) span');

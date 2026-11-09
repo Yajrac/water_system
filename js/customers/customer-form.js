@@ -248,8 +248,6 @@ function openCustomer(customer) {
     customerForm.elements.serviceStatus.value = 'Pending';
     customerForm.elements.dateApproved.value = '';
   }
-  const installedOption = Array.from(customerForm.elements.serviceStatus.options || []).find(option => option.value === 'Installed');
-  if (installedOption) installedOption.disabled = !customer || customer.serviceStatus === 'Pending';
   // Meter readings are changed through billing after the first bill is generated.
   customerForm.elements.reading.disabled = Boolean(
     customer && (customer.hasBills || customer.hasMeterEntries),

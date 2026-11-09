@@ -248,6 +248,36 @@ authGateStyle.textContent = `
   }
   .admin-session-loading p { margin: 0; }
   .admin-session-loading small { font-size: 13px; }
+  html.auth-pending.auth-session-error .admin-session-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    min-height: 260px;
+    padding: 32px 24px;
+    background: var(--color-surface, #fff);
+    color: var(--color-ink, #102f43);
+    border: 1px solid var(--color-border, #a3b9c8);
+    border-radius: 14px;
+    text-align: center;
+  }
+  html.auth-session-error .admin-session-label {
+    color: var(--color-ink, #102f43);
+    font-size: 1.15rem;
+    font-weight: 700;
+  }
+  html.auth-session-error .admin-session-hint {
+    color: var(--color-ink-muted, #38566b);
+    max-width: 48ch;
+    line-height: 1.6;
+  }
+  html.auth-session-error .admin-session-retry {
+    width: auto;
+    align-self: center;
+    padding: 12px 22px;
+    min-height: 44px;
+  }
   .admin-session-skeleton { display: grid; gap: 20px; width: 100%; }
   .admin-skeleton-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
   .admin-skeleton-block { height: 16px; }

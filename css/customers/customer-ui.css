@@ -1368,3 +1368,28 @@
   }
   .customer-filter-actions .btn { min-height: 44px; }
 }
+/* Compact customer profile information cards. */
+.profile-columns:has(.profile-info-card) { align-items: start; }
+.profile-info-card .panel-header h2 { display: flex; align-items: center; gap: 10px; font-size: 1rem; }
+.profile-info-card .panel-header h2 .bi { color: var(--color-primary); font-size: 1.15rem; }
+.profile-info-card .profile-details { display: block; padding: 4px 20px 12px; margin: 0; }
+.profile-info-card .profile-details > div {
+  display: grid; grid-template-columns: minmax(110px, 1fr) minmax(0, 1.4fr);
+  align-items: baseline; gap: 16px; padding: 12px 0;
+  border-bottom: 1px solid var(--color-border);
+}
+.profile-info-card .profile-details > div:last-child { border-bottom: 0; }
+.profile-info-card .profile-details dt { font-size: .8rem; color: var(--color-ink-muted); }
+.profile-info-card .profile-details dd { margin: 0; text-align: right; font-size: .85rem; font-weight: 600; overflow-wrap: anywhere; }
+.profile-detail-groups { padding: 6px 0; }
+.profile-detail-group + .profile-detail-group { border-top: 1px solid var(--color-border); }
+.profile-detail-group h3 { padding: 14px 20px 4px; font-size: .75rem; font-weight: 700; color: var(--color-primary-deep); }
+.profile-state-badge { display: inline-flex; padding: 4px 10px; border-radius: 20px; font-size: .75rem; border: 1px solid currentColor; }
+.profile-state-active { color: #126248; background: #e7f5ee; }
+.profile-state-pending { color: #805415; background: #fff3dc; }
+[data-theme='dark'] .profile-state-active { color: #a2e8c4; background: #133d30; }
+[data-theme='dark'] .profile-state-pending { color: #f5d495; background: #3c301b; }
+@media (max-width: 480px) {
+  .profile-info-card .profile-details { padding-inline: 14px; }
+  .profile-info-card .profile-details > div { grid-template-columns: minmax(95px, 1fr) minmax(0, 1.3fr); gap: 10px; }
+}

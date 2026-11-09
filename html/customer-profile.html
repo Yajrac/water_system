@@ -222,17 +222,7 @@
               >
                 <i class="bi bi-credit-card" aria-hidden="true"></i>Billing &amp; Payments
               </button>
-              <button
-                type="button"
-                role="tab"
-                id="documentsTab"
-                aria-controls="documentsPanel"
-                aria-selected="false"
-                tabindex="-1"
-              >
-                <i class="bi bi-folder2-open" aria-hidden="true"></i>Documents
-              </button>
-            </div>
+</div>
             <section
               id="overviewPanel"
               class="profile-tab-panel"
@@ -263,15 +253,23 @@
                 </div>
               </section>
               <div class="profile-columns">
-                <section class="panel">
-                  <div class="panel-header"><h2>Personal information</h2></div>
+                <div class="profile-personal-column">
+                <section class="panel profile-info-card">
+                  <div class="panel-header"><h2><i class="bi bi-person" aria-hidden="true"></i> Personal information</h2></div>
                   <dl id="personalDetails" class="profile-details"></dl>
                 </section>
-                <section class="panel">
-                  <div class="panel-header"><h2>Service connection</h2></div>
-                  <dl id="connectionDetails" class="profile-details"></dl>
+              <section class="panel profile-info-card overview-documents" aria-labelledby="overviewDocumentsTitle">
+                <div class="panel-header"><h2 id="overviewDocumentsTitle"><i class="bi bi-folder2-open" aria-hidden="true"></i> Documents and verification</h2></div>
+                <p id="documentSummary" class="customer-document-summary"></p>
+                <dl id="documentStatus" class="profile-details profile-documents"></dl>
+              </section>
+                </div>
+                <section class="panel profile-info-card">
+                  <div class="panel-header"><h2><i class="bi bi-droplet" aria-hidden="true"></i> Service connection</h2></div>
+                  <div id="connectionDetails" class="profile-detail-groups"></div>
                 </section>
               </div>
+
             </section>
             <section
               id="billingPanel"
@@ -284,7 +282,6 @@
               <section class="panel">
                 <div class="panel-header">
                   <h2>Recent bills</h2>
-                  <a class="btn" id="profilePayments">Payment history</a>
                 </div>
                 <div class="table-wrap">
                   <table>
@@ -318,19 +315,7 @@
                 </div>
               </section>
             </section>
-            <section
-              id="documentsPanel"
-              class="profile-tab-panel"
-              role="tabpanel"
-              aria-labelledby="documentsTab"
-              tabindex="0"
-              hidden
-            >
-              <section class="panel">
-                <div class="panel-header"><h2>Documents and verification</h2></div>
-                <p id="documentSummary" class="customer-document-summary"></p>
-                <dl id="documentStatus" class="profile-details profile-documents"></dl>
-              </section>
+
             </section>
           </div>
         </main>

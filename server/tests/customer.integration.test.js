@@ -877,7 +877,7 @@ test(
         status:'Inactive',reason:'Not installed',revision:applicant.data.revision})).status,409);
       const installedBody={...applicantBody,password:'',serviceStatus:'Installed',meterNumber:'APPLICANT-METER',dateInstalled:today};
       assert.equal((await request('/customers/'+applicant.data.id,'PUT',{
-        ...installedBody,revision:applicant.data.revision})).status,409);
+        ...installedBody,meterNumber:'',revision:applicant.data.revision})).status,400);
       const applicantApproved=await request('/customers/'+applicant.data.id,'PUT',{
         ...applicantBody,password:'',serviceStatus:'Approved',revision:applicant.data.revision});
       assert.equal(applicantApproved.status,200,JSON.stringify(applicantApproved));
@@ -899,6 +899,14 @@ test(
       const allDue=await request('/notifications','POST',{...selectedNotice,type:'Due date',audience:'all'});
       assert.equal(allDue.status,201,JSON.stringify(allDue));
       assert.equal(allDue.data.recipients,1);
+      const directBody={...applicantBody,firstName:'Direct',username:'direct.installation',contact:'09987654322'};
+      const directPending=await request('/customers','POST',directBody);
+      assert.equal(directPending.status,201,JSON.stringify(directPending));
+      const directInstalled=await request('/customers/'+directPending.data.id,'PUT',{
+        ...directBody,password:'',serviceStatus:'Installed',meterNumber:'DIRECT-METER',dateInstalled:today,revision:directPending.data.revision});
+      assert.equal(directInstalled.status,200,JSON.stringify(directInstalled));
+      assert.equal(directInstalled.data.serviceStatus,'Installed');
+      assert.equal(directInstalled.data.connectionStatus,'Active');
       assert.equal((await request('/customers/' + customer.id, 'DELETE')).status, 404);
       assert.equal((await request('/customers/delete-selected', 'POST', { ids: [customer.id] })).status, 404);
       assert.equal((await request('/customers/' + customer.id)).status, 200);

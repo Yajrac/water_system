@@ -67,6 +67,15 @@
   grid-template-columns: 1fr 1fr;
   gap: 22px;
 }
+@media (min-width: 1001px) {
+  .profile-columns > .profile-personal-column {
+    position: sticky;
+    top: 20px;
+    align-self: start;
+    max-height: calc(100dvh - 40px);
+    overflow-y: auto;
+  }
+}
 .profile-details {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -408,4 +417,25 @@
   height: 100%;
   object-fit: cover;
   border-radius: inherit;
+}
+
+.profile-personal-column { display: grid; gap: 18px; min-width: 0; align-self: start; }
+.profile-personal-column > .panel { margin: 0; }
+/* Comfortable table spacing and readable profile empty states. */
+#billingPanel > .panel .panel-header { padding: 18px 22px; }
+#billingPanel > .panel .panel-header h2 { font-size: 1rem; }
+#billingPanel .table-wrap { padding: 12px 20px 18px; }
+#billingPanel table { width: 100%; }
+#billingPanel table th { padding: 11px 14px; }
+#billingPanel table td { padding: 14px; }
+#billingPanel table td[colspan] {
+  padding: 32px 16px;
+  text-align: center;
+  color: var(--color-ink-muted);
+  background: var(--color-surface);
+  font-size: .85rem;
+}
+@media (max-width: 600px) {
+  #billingPanel .table-wrap { padding: 8px 12px 12px; }
+  #billingPanel > .panel .panel-header { padding: 16px; }
 }

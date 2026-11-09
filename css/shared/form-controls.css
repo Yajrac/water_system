@@ -19,8 +19,8 @@ html body textarea {
   border-radius: 7px;
 }
 html body :is(input, select, textarea):is(:focus, :focus-visible) {
-  outline: none;
-  outline-offset: 0;
+  outline: 2px solid var(--color-primary, #08679a);
+  outline-offset: 2px;
   box-shadow: none;
   border-color: var(--color-primary, #087fa3);
 }

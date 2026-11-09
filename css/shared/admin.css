@@ -1478,22 +1478,22 @@ dialog::backdrop {
   --radius-lg: 10px;
   --radius-md: 7px;
   color-scheme: light;
-  --color-bg: #eef7fc;
+  --color-bg: #e4edf4;
   --color-surface: #ffffff;
-  --color-ink: #15364d;
-  --color-ink-muted: #557389;
-  --color-ink-faint: #6d8798;
-  --color-primary: #087bb5;
+  --color-ink: #102f43;
+  --color-ink-muted: #38566b;
+  --color-ink-faint: #466174;
+  --color-primary: #08679a;
   --color-primary-deep: #075985;
-  --color-primary-light: #0b88c2;
-  --color-border: #d6e8f2;
-  --color-border-strong: #b4cfdf;
+  --color-primary-light: #0871a6;
+  --color-border: #a3b9c8;
+  --color-border-strong: #778e9f;
   --color-warning-bg: #fff4db;
   --sidebar-bg: #072c45;
   --sidebar-bg-hover: #104660;
-  --sidebar-active: #087bb5;
-  --sidebar-text: #b4d7e9;
-  --table-heading: #edf7fc;
+  --sidebar-active: #08679a;
+  --sidebar-text: #d3e8f4;
+  --table-heading: #d9e9f4;
   --row-hover: #f2f9fd;
   --card-tint: #e4f5ff;
   --card-icon: #087bb5;
@@ -1504,14 +1504,14 @@ dialog::backdrop {
   color-scheme: dark;
   --color-bg: #0b1824;
   --color-surface: #132838;
-  --color-ink: #e2f2fb;
-  --color-ink-muted: #a6c2d4;
-  --color-ink-faint: #8fadc0;
+  --color-ink: #f0f7fc;
+  --color-ink-muted: #c5dae8;
+  --color-ink-faint: #aec8d9;
   --color-primary: #38bdf8;
   --color-primary-deep: #7dd3fc;
   --color-primary-light: #64ceff;
-  --color-border: #284659;
-  --color-border-strong: #45657a;
+  --color-border: #56788f;
+  --color-border-strong: #7898ae;
   --color-warning-bg: #3a3021;
   --sidebar-bg: #07131e;
   --sidebar-bg-hover: #16364b;
@@ -2944,4 +2944,12 @@ html[data-theme='dark'] body :is(.pager-controls .btn, .step-navigation-button):
   html.theme-teal .admin-body { padding: 18px 20px; }
   html.theme-teal .customer-add-button { padding: 9px 14px; }
   html.theme-teal .admin-header-actions .btn { padding: 9px 13px; font-size: .88rem; }
+}
+
+/* Keep secondary text readable without reducing the whole control's opacity. */
+html body :is(input, textarea)::placeholder { color: var(--color-ink-muted); opacity: 1; }
+html body :is(input, select, textarea) { border-color: var(--color-border-strong); }
+html body :is(.btn, a, button):focus-visible {
+  outline: 3px solid var(--color-primary);
+  outline-offset: 3px;
 }
