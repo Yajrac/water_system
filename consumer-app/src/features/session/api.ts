@@ -1,5 +1,5 @@
 export class ConsumerApiError extends Error {
-  constructor(message: string, public status: number) { super(message); }
+  constructor(message: string, public status: number, public field?: 'username' | 'password', public retryAfterSeconds = 0) { super(message); }
 }
 let resolveSession: ((force?: boolean) => Promise<string | null>) | null = null;
 export function setSessionResolver(resolver: typeof resolveSession) { resolveSession = resolver; }
@@ -35,7 +35,10 @@ export async function consumerRequest<T>(path: string, body: unknown, token?: st
         : response.status === 404
           ? 'This service is currently unavailable. Please try again later.'
           : result?.message || 'Your request could not be completed. Please try again.';
-      throw new ConsumerApiError(message, response.status);
+      const retryAfter = Number(result?.retryAfterSeconds || response.headers.get('Retry-After') || 0);
+      throw new ConsumerApiError(message, response.status,
+        result?.field === 'username' || result?.field === 'password' ? result.field : undefined,
+        Number.isFinite(retryAfter) ? Math.max(0, retryAfter) : 0);
     }
     return result.data as T;
   } catch (error) {

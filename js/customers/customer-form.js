@@ -6,6 +6,7 @@ customerForm.inert = true;
 const registerCustomerButton = document.getElementById('registerCustomer');
 const printApplicationButton = document.getElementById('printApplication');
 document.getElementById('generateMeterNumber').addEventListener('click', async () => {
+  if (customerForm.elements.serviceStatus.value !== 'Installed') return;
   const field = customerForm.elements.meterNumber;
   if (field.value.trim() && !(await confirmAction(
     'Replace meter number?',
@@ -278,6 +279,13 @@ function updateRegistrationButtons() {
     label.marker.hidden = !required;
   });
   const existing = customerRecords.customers.find((customer) => customer.id === editingCustomerId);
+  for (const name of ['dateInstalled', 'meterNumber', 'meterKind', 'meterSize', 'reading']) {
+    const field = customerForm.elements[name];
+    field.disabled = status !== 'Installed' ||
+      (name === 'reading' && Boolean(existing?.hasBills || existing?.hasMeterEntries));
+    if (field.disabled) field.setCustomValidity('');
+  }
+  document.getElementById('generateMeterNumber').disabled = status !== 'Installed';
   const alreadyRegistered = existing && WaterStore.isRegistered(existing);
   registerCustomerButton.textContent = !requiresApproval ? 'Save application' : alreadyRegistered
     ? 'Save registered customer'

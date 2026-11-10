@@ -1,4 +1,5 @@
  import {
+  ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
   Modal,
@@ -79,23 +80,27 @@ export function Button({
   onPress,
   secondary = false,
   disabled = false,
+  loading = false,
 }: {
   label: string;
   onPress: () => void;
   secondary?: boolean;
   disabled?: boolean;
+  loading?: boolean;
 }) {
   return (
     <Pressable
       accessibilityRole="button"
-      disabled={disabled}
+      accessibilityState={{ disabled: disabled || loading, busy: loading }}
+      disabled={disabled || loading}
       onPress={onPress}
       style={({ pressed }) => [
         styles.button,
         secondary && styles.secondary,
-        (pressed || disabled) && { opacity: 0.65 },
+        (pressed || disabled || loading) && { opacity: 0.65 },
       ]}
     >
+      {loading ? <ActivityIndicator size="small" color={secondary ? colors.primary : '#fff'} /> : null}
       <Text style={[styles.buttonText, secondary && { color: colors.primary }]}>{label}</Text>
     </Pressable>
   );
@@ -195,6 +200,8 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   button: {
+    flexDirection: 'row',
+    gap: 8,
     minHeight: 46,
     borderRadius: 6,
     backgroundColor: colors.primary,

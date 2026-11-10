@@ -1,4 +1,6 @@
-import { randomBytes } from 'node:crypto';
+import { randomBytes, createHash } from 'node:crypto';
+import { pool } from '../database/pool.js';
+import { checkLoginAttempt } from './login-attempts.js';
 import jwt from 'jsonwebtoken';
 
 import { authConfig } from '../config/auth.js';
@@ -23,16 +25,15 @@ export async function loginUser(username, password) {
 
   const user = await findUserByLogin(username.trim());
 
-  const passwordMatches = await verifyPassword(user?.password_hash || dummyHash, password);
-
-  if (
-    !user ||
-    !passwordMatches ||
-    Number(user.is_active) !== 1 ||
-    !['admin', 'consumer'].includes(user.role)
-  ) {
-    throw new AppError('Invalid username or password.', 401);
-  }
+  const key = user ? 'user:' + user.id : 'name:' + createHash('sha256').update(username.trim().normalize('NFKC').toLowerCase()).digest('hex');
+  await checkLoginAttempt(pool, key, async () => {
+    const matches = await verifyPassword(user?.password_hash || dummyHash, password);
+    if (!user) return new AppError('Sorry, wrong username or account number.', 401, { field: 'username' });
+    if (Number(user.is_active) !== 1 || !['admin', 'consumer'].includes(user.role))
+      return new AppError('This account is unavailable. Please contact the PWSS office.', 403);
+    if (!matches) return new AppError('Sorry, wrong password.', 401, { field: 'password' });
+    return null;
+  });
 
   const accessToken = jwt.sign(
     { role: user.role, version: Number(user.auth_version || 0) },

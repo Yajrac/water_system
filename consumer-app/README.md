@@ -17,6 +17,14 @@ Scan the QR code with Expo Go. Keep your phone and computer on the same local ne
 
 ## Consumer login
 
+Apply server migration `024_create_login_attempts.sql` and deploy the updated
+backend for field-specific login errors and persistent account limits. Five
+consecutive failed attempts lock the account for five minutes; successful login
+resets the count. Username and account-number aliases share a limit. The app
+shows a server-provided countdown and disables Sign in during that period.
+The existing IP limiter also remains active. Closing the app does not clear
+the server lock; after reopening, another attempt retrieves the remaining time.
+
 Login now uses the Express API and accepts a consumer username or account number.
 The default public API is `https://water-system-1.onrender.com/api/v1`; override it
 with `EXPO_PUBLIC_API_URL` before starting Expo. A physical phone cannot use your

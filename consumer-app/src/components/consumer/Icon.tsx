@@ -11,6 +11,7 @@ const symbols = {
   feedback: { ios: 'bubble.left.and.bubble.right', android: 'forum', web: 'forum' },
   profile: { ios: 'person.crop.circle', android: 'account_circle', web: 'account_circle' },
   water: { ios: 'drop', android: 'water_drop', web: 'water_drop' },
+  lock: { ios: 'lock', android: 'lock', web: 'lock' },
   eye: { ios: 'eye', android: 'visibility', web: 'visibility' },
   eyeOff: { ios: 'eye.slash', android: 'visibility_off', web: 'visibility_off' },
   send: { ios: 'paperplane.fill', android: 'send', web: 'send' },

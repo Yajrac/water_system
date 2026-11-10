@@ -6,9 +6,11 @@ export function errorHandler(error, req, res, next) {
   }
 
   if (error instanceof AppError) {
+    if (error.details.retryAfterSeconds) res.set('Retry-After', String(error.details.retryAfterSeconds));
     return res.status(error.statusCode).json({
       success: false,
       message: error.message,
+      ...error.details,
     });
   }
 

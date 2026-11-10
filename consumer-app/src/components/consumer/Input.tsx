@@ -7,9 +7,15 @@ import { colors } from '@/theme/tokens';
 export function Input({
   label,
   action,
+  leadingIcon,
+  variant = 'default',
+  error,
   ...props
 }: TextInputProps & {
   label: string;
+  leadingIcon?: IconName;
+  variant?: 'default' | 'login';
+  error?: string;
   action?: { icon: IconName; label: string; onPress: () => void; active?: boolean };
 }) {
   const [focused, setFocused] = useState(false);
@@ -31,11 +37,20 @@ export function Input({
           onBlur={() => setFocused(false)}
           style={[
             styles.input,
+            variant === 'login' && styles.loginInput,
             focused && { borderColor: colors.primary },
+            variant === 'login' && focused && styles.loginFocused,
+            leadingIcon && { paddingLeft: 48 },
             props.multiline && { height: contentHeight, textAlignVertical: 'top' },
             action && { paddingRight: 48 },
+            Boolean(error) && { borderColor: '#b63a49', backgroundColor: '#fff7f8' },
           ]}
         />
+        {leadingIcon ? (
+          <View pointerEvents="none" style={styles.leadingIcon}>
+            <Icon name={leadingIcon} size={21} color={focused ? colors.primary : colors.muted} />
+          </View>
+        ) : null}
         {action ? (
           <Pressable
             accessibilityRole="button"
@@ -48,12 +63,16 @@ export function Input({
           </Pressable>
         ) : null}
       </View>
+      {error ? <Text accessibilityRole="alert" style={{ color: '#b63a49', fontSize: 12, lineHeight: 18 }}>{error}</Text> : null}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   group: { gap: 8 },
+  leadingIcon: { position: 'absolute', left: 15, top: 0, bottom: 0, justifyContent: 'center' },
+  loginInput: { minHeight: 56, borderRadius: 12, backgroundColor: '#f1f6f9', borderColor: '#e1eaf0', paddingVertical: 15, fontSize: 14 },
+  loginFocused: { backgroundColor: '#f5fcff', borderColor: '#087fa3' },
   action: {
     position: 'absolute',
     right: 1,

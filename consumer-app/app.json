@@ -4,13 +4,13 @@
     "slug": "consumer-app",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/consumer-icon.png",
+    "icon": "./assets/images/pwss-logo-round.png",
     "scheme": "consumerapp",
     "userInterfaceStyle": "light",
     "android": {
       "predictiveBackGestureEnabled": false,
       "package": "com.jaycaber.consumerapp",
-      "icon": "./assets/images/consumer-icon.png"
+      "icon": "./assets/images/pwss-logo-round.png"
     },
     "plugins": [
       "expo-router",
@@ -18,7 +18,7 @@
         "expo-splash-screen",
         {
           "backgroundColor": "#f3f7f9",
-          "image": "./assets/images/consumer-icon.png",
+          "image": "./assets/images/pwss-logo-round.png",
           "imageWidth": 76
         }
       ],
