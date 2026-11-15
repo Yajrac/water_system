@@ -4,16 +4,13 @@ const previousCustomerStep = document.getElementById('previousCustomerStep');
 const nextCustomerStep = document.getElementById('nextCustomerStep');
 let currentCustomerStep = 0;
 const customerStepLabels = ['Applicant', 'Installation', 'Estimate', 'Verification', 'App account'];
-const customerStepIcons = ['person', 'speedometer2', 'calculator', 'clipboard-check', 'phone'];
 const customerStepTrack = document.getElementById('customerStepTrack');
 const customerStepMarkers = customerSteps.map((section, index) => {
   const marker = document.createElement('li');
   const number = document.createElement('span');
   number.className = 'step-number';
-  const icon = document.createElement('i');
-  icon.className = 'bi bi-' + customerStepIcons[index];
-  icon.setAttribute('aria-hidden', 'true');
-  number.appendChild(icon);
+  number.setAttribute('aria-hidden', 'true');
+  number.textContent = String(index + 1);
   const label = document.createElement('span');
   label.className = 'step-label';
   label.textContent = customerStepLabels[index];
@@ -31,8 +28,9 @@ function showCustomerStep(index, focus = true) {
     else marker.removeAttribute('aria-current');
     marker.setAttribute('aria-label', 'Step ' + (position + 1) + ': ' + customerStepLabels[position] +
       (position < index ? ', completed' : position === index ? ', current' : ', upcoming'));
-    marker.querySelector('.step-number i').className = 'bi bi-' +
-      (position < index ? 'check-lg' : customerStepIcons[position]);
+    const number = marker.querySelector('.step-number');
+    if (position < index) number.innerHTML = '<i class="bi bi-check-lg"></i>';
+    else number.textContent = String(position + 1);
   });
   document.getElementById('customerStepSummary').textContent =
     'Step ' + (index + 1) + ' of ' + customerSteps.length + ' · ' + customerStepLabels[index];
