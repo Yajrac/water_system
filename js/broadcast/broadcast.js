@@ -14,7 +14,10 @@ function matchingCustomers(customers,query) {
   return customers.filter(customer=>words.every(word=>customerChoiceLabel(customer).toLocaleLowerCase().includes(word)));
 }
 function eligibleCustomers() {
-  return noticeCustomers.filter(customer=>!['Due date','Unpaid bill'].includes(noticeForm.elements.type.value) || Number(customer.balance)>0);
+  const type=noticeForm.elements.type.value;
+  // Overdue: unpaid balance past its due date (the server sets `overdue` using the Philippine date).
+  if(type==='Overdue') return noticeCustomers.filter(customer=>Number(customer.balance)>0 && Number(customer.overdue)===1);
+  return noticeCustomers.filter(customer=>!['Due date','Unpaid bill'].includes(type) || Number(customer.balance)>0);
 }
 function selectedRecipients() {
   return eligibleCustomers().filter(customer=>audienceSelect.value==='all' ||

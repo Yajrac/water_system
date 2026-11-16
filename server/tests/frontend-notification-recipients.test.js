@@ -21,3 +21,16 @@ test('recipient checklist preserves selections through search and filters paid c
  vm.runInContext("audienceSelect.value='all'",context);
  assert.equal(vm.runInContext('selectedRecipients().length',context),2);
 });
+
+test('overdue notices only list customers with a past-due unpaid balance',async()=>{
+ const node=()=>({value:'',elements:{type:{value:'Overdue',addEventListener(){}}},addEventListener(){},replaceChildren(){},append(){}});
+ const nodes=new Map();const get=id=>{if(!nodes.has(id))nodes.set(id,node());return nodes.get(id);};
+ const context=vm.createContext({document:{getElementById:get,createElement:node},AdminAuth:{ready:{then(){}}}});
+ vm.runInContext(await readFile(new URL('../../js/broadcast/broadcast.js',import.meta.url),'utf8'),context);
+ vm.runInContext(`noticeCustomers=[{id:1,name:'Past Due',balance:'50',overdue:1},
+ {id:2,name:'Not Yet Due',balance:'30',overdue:0},{id:3,name:'Paid',balance:'0',overdue:0}];
+ audienceSelect.value='all';`,context);
+ assert.equal(vm.runInContext('selectedRecipients().map(c=>c.id).join()',context),'1');
+ vm.runInContext("noticeForm.elements.type.value='Unpaid bill'",context);
+ assert.equal(vm.runInContext('selectedRecipients().length',context),2);
+});

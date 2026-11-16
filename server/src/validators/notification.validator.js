@@ -1,7 +1,7 @@
 import { AppError } from '../utils/app-error.js';
 
 export function validateNotice(body) {
-  const types = ['Due date', 'Unpaid bill', 'Disconnection', 'Reconnection', 'Announcement'];
+  const types = ['Due date', 'Unpaid bill', 'Overdue', 'Disconnection', 'Reconnection', 'Announcement'];
   if (!body || !types.includes(body.type) || !['all', 'barangay', 'customer'].includes(body.audience) ||
       !['Draft', 'Published'].includes(body.status) || typeof body.message !== 'string' ||
       !body.message.trim() || body.message.trim().length > 2000)

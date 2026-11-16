@@ -6,6 +6,8 @@ const outstandingBills = `SELECT b.customer_id,CAST(SUM(GREATEST(0,b.total_amoun
   MIN(CASE WHEN b.total_amount>COALESCE(p.paid,0) THEN b.due_date END) AS due
   FROM bills b LEFT JOIN (SELECT bill_id,SUM(amount) AS paid FROM payments GROUP BY bill_id) p ON p.bill_id=b.id
   GROUP BY b.customer_id`;
+// Earliest unpaid due date is before today's Philippine calendar date.
+const isOverdue = `debt.due < DATE(CONVERT_TZ(UTC_TIMESTAMP(),'+00:00','+08:00'))`;
 
 export async function listNotices() {
   const [rows] = await pool.query(`SELECT a.id, a.title AS type, a.message, a.status,
@@ -19,7 +21,8 @@ export async function recipientOptions() {
   const [rows] = await pool.query(`SELECT c.id,c.account_number AS account,
     CONCAT_WS(' ',c.last_name,c.first_name,NULLIF(c.middle_name,'')) AS name,
     c.submitter_number AS submitterNumber,u.username,
-    c.barangay_id AS barangayId,COALESCE(debt.balance,'0') AS balance,DATE_FORMAT(debt.due,'%Y-%m-%d') AS due
+    c.barangay_id AS barangayId,COALESCE(debt.balance,'0') AS balance,DATE_FORMAT(debt.due,'%Y-%m-%d') AS due,
+    COALESCE(debt.balance > 0 AND ${isOverdue}, 0) AS overdue
     FROM customers c LEFT JOIN (${outstandingBills}) debt ON debt.customer_id=c.id
     LEFT JOIN users u ON u.id=c.user_id
     WHERE EXISTS(SELECT 1 FROM customer_applications a WHERE a.customer_id=c.id
@@ -45,7 +48,8 @@ export async function saveNotice(body, actorId) {
       WHERE EXISTS(SELECT 1 FROM customer_applications a WHERE a.customer_id=c.id
         AND a.id=(SELECT MAX(id) FROM customer_applications WHERE customer_id=c.id)
         AND a.status IN ('Pending','Approved','Installed')) ${filter}
-        ${['Due date','Unpaid bill'].includes(notice.type) ? 'AND debt.balance > 0' : ''} FOR UPDATE`,
+        ${['Due date','Unpaid bill'].includes(notice.type) ? 'AND debt.balance > 0' : ''}
+        ${notice.type === 'Overdue' ? `AND debt.balance > 0 AND ${isOverdue}` : ''} FOR UPDATE`,
       notice.audience === 'customer' ? targets : notice.audience === 'barangay' ? [notice.target] : [],
     );
     if (targets.length && recipients.length !== targets.length)

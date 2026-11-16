@@ -230,6 +230,8 @@ export async function logConnection(connection, id, actorId, previousStatus, new
 export async function listConnectionRecords(filters,state) {
   const conditions = [];
   conditions.push("(c.connection_status IN ('Active','Inactive','Disconnected'))");
+  // Only installed service connections can be activated or disconnected; hide Pending/Approved applications.
+  conditions.push("a.status = 'Installed'");
   const values = [];
   if (state === 'open') conditions.push("c.connection_status IN ('Inactive','Disconnected')");
   else if (state !== 'all') {
