@@ -17,6 +17,9 @@ export const styles = StyleSheet.create({
   welcome: { flexDirection: 'row', alignItems: 'center', gap: 14 },
   welcomeTitle: { fontSize: 21, fontWeight: '700', color: colors.ink, marginVertical: 4 },
   avatar: { width: 48, height: 48, borderRadius: 24, borderWidth: 1, borderColor: colors.border },
+  disconnectedBanner: { gap: 6, padding: 16, borderRadius: 8, backgroundColor: '#fff0f2', borderWidth: 1, borderColor: '#f3c4cb', borderLeftWidth: 4, borderLeftColor: '#b63a49' },
+  disconnectedTitle: { fontSize: 15, lineHeight: 21, fontWeight: '700', color: '#9b2c3a' },
+  disconnectedText: { fontSize: 13, lineHeight: 20, color: '#7a2a35' },
   balanceCard: { padding: 20, backgroundColor: '#096f91', borderRadius: 8, gap: 16 },
   row: {
     flexDirection: 'row',

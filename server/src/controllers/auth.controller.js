@@ -1,6 +1,13 @@
 import { pool } from '../database/pool.js';
 import { loginUser, renewAdminSession } from '../services/auth.service.js';
 import { changeOwnPassword } from '../services/change-password.service.js';
+import { resetForgottenPassword } from '../services/forgot-password.service.js';
+
+export async function forgotPassword(req, res) {
+  const result = await resetForgottenPassword(req.body);
+  res.set('Cache-Control', 'no-store');
+  res.json({ success: true, data: result });
+}
 
 export async function changePassword(req, res) {
   await changeOwnPassword(req.user.id, req.body);

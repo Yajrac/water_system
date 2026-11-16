@@ -4,6 +4,7 @@ import {
   Image,
   KeyboardAvoidingView,
   Platform,
+  Pressable,
   ScrollView,
   StyleSheet,
   Text,
@@ -13,10 +14,13 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Input } from '@/components/consumer/Input';
 import { Button } from '@/components/consumer/ui';
 import { useSession } from './SessionProvider';
+import { ForgotPasswordForm } from './ForgotPasswordForm';
 import { colors } from '@/theme/tokens';
 
 export default function LoginScreen() {
   const { signIn, notice } = useSession();
+  const [forgotMode, setForgotMode] = useState(false);
+  const [resetNotice, setResetNotice] = useState('');
   const [busy, setBusy] = useState(false);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -52,6 +56,18 @@ export default function LoginScreen() {
                 <Text style={styles.eyebrow}>CONSUMER APP</Text>
               </View>
             </View>
+            {forgotMode ? (
+              <ForgotPasswordForm
+                onCancel={() => setForgotMode(false)}
+                onDone={(message) => {
+                  setForgotMode(false);
+                  setPassword('');
+                  setError('');
+                  setFieldErrors({});
+                  setResetNotice(message);
+                }}
+              />
+            ) : (
             <View style={styles.form}>
               <View style={styles.formHeading}>
                 <Text style={styles.title}>Welcome back</Text>
@@ -88,9 +104,18 @@ export default function LoginScreen() {
                 active: visible,
               }}
             />
-            {notice ? (
+            <Pressable
+              accessibilityRole="link"
+              onPress={() => { setResetNotice(''); setForgotMode(true); }}
+              disabled={busy}
+              hitSlop={8}
+              style={styles.forgotLink}
+            >
+              <Text style={styles.forgotText}>Forgot password?</Text>
+            </Pressable>
+            {notice || resetNotice ? (
               <Text accessibilityRole="alert" style={styles.notice}>
-                {notice}
+                {resetNotice || notice}
               </Text>
             ) : null}
             {error ? (
@@ -131,6 +156,7 @@ export default function LoginScreen() {
             />
               <Text style={styles.help}>Need help signing in? Contact the PWSS office.</Text>
             </View>
+            )}
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -158,4 +184,6 @@ const styles = StyleSheet.create({
   notice: { fontSize: 13, lineHeight: 20, color: '#187246', backgroundColor: colors.successTint, padding: 12, borderRadius: 6 },
   error: { fontSize: 13, lineHeight: 20, color: '#b63a49', backgroundColor: '#fff0f2', padding: 12, borderRadius: 6 },
   help: { fontSize: 11, lineHeight: 18, textAlign: 'center', color: colors.muted },
+  forgotLink: { alignSelf: 'flex-end', marginTop: -6, paddingVertical: 4 },
+  forgotText: { fontSize: 13, fontWeight: '600', color: colors.primary },
 });

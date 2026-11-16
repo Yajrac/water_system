@@ -117,6 +117,17 @@ export default function HomeScreen() {
           <Avatar active={customer?.status === 'Active'} gender={customer?.gender} />
         </Pressable>
       </View>
+      {customer?.status === 'Disconnected' && (
+        <View accessibilityRole="alert" style={styles.disconnectedBanner}>
+          <Text style={styles.disconnectedTitle}>
+            Service disconnected{customer.disconnectedOn ? ' since ' + customer.disconnectedOn : ''}
+          </Text>
+          <Text style={styles.disconnectedText}>
+            {balance > 0 ? 'Outstanding balance: ' + money(balance) + '. ' : ''}
+            You can still view your bills and payments. Contact the PWSS office for details and reconnection.
+          </Text>
+        </View>
+      )}
       <View style={styles.balanceCard}>
         <View style={styles.row}>
           <View>

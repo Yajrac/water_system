@@ -134,12 +134,36 @@ export async function consumerNotifications(userId) {
     FROM customer_applications WHERE customer_id=? ORDER BY id DESC LIMIT 20`,
     [id],
   );
+  // Disconnection / reconnection notices. The admin's reason is internal and never shown.
+  const [service] = await pool.execute(
+    `SELECT CONCAT('connection-',ev.id) AS id,
+    IF(ev.new_status='Disconnected','Service disconnected','Service reconnected') AS title,
+    IF(ev.new_status='Disconnected',
+      CONCAT('Your water service was disconnected on ',DATE_FORMAT(CONVERT_TZ(ev.effective_at,'+00:00','+08:00'),'%Y-%m-%d'),
+        '. You can still view your bills and payments in this app. Contact the PWSS office for details and reconnection.'),
+      CONCAT('Your water service was reconnected on ',DATE_FORMAT(CONVERT_TZ(ev.effective_at,'+00:00','+08:00'),'%Y-%m-%d'),'.')) AS body,
+    'Service' AS category,DATE_FORMAT(CONVERT_TZ(ev.effective_at,'+00:00','+08:00'),'%Y-%m-%d %H:%i:%s') AS date
+    FROM connection_events ev WHERE ev.customer_id=?
+      AND (ev.new_status='Disconnected' OR (ev.new_status='Active' AND ev.previous_status='Disconnected'))
+    ORDER BY ev.id DESC LIMIT 20`,
+    [id],
+  );
+  // Security notice so the owner learns about a Forgot password reset they did not make.
+  const [security] = await pool.execute(
+    `SELECT CONCAT('security-',id) AS id,'Password reset' AS title,
+    CONCAT('Your password was reset with Forgot password on ',
+      DATE_FORMAT(CONVERT_TZ(created_at,'+00:00','+08:00'),'%Y-%m-%d %h:%i %p'),
+      '. If this was not you, contact the PWSS office right away.') AS body,
+    'Security' AS category,DATE_FORMAT(CONVERT_TZ(created_at,'+00:00','+08:00'),'%Y-%m-%d %H:%i:%s') AS date
+    FROM activity_logs WHERE actor_id=? AND action='consumer.password_reset' ORDER BY id DESC LIMIT 20`,
+    [userId],
+  );
   const [reads] = await pool.execute(
     'SELECT notification_key FROM notification_reads WHERE user_id=?',
     [userId],
   );
   const keys = new Set(reads.map((row) => row.notification_key));
-  return [...notices, ...(customer.applicationStatus === 'Installed' ? [...bills, ...payments] : []), ...applications]
+  return [...notices, ...(customer.applicationStatus === 'Installed' ? [...bills, ...payments] : []), ...applications, ...service, ...security]
     .sort((a, b) => b.date.localeCompare(a.date))
     .slice(0, 100)
     .map((item) => ({ ...item, read: keys.has(item.id) }));

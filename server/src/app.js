@@ -22,6 +22,9 @@ import { env } from './config/env.js';
 const app = express();
 
 app.disable('x-powered-by');
+// One reverse proxy (Nginx) sits in front of the API; read the client IP from X-Forwarded-For
+// so login rate limits apply per user instead of to everyone behind 127.0.0.1.
+app.set('trust proxy', 1);
 app.use(helmet());
 
 app.use(

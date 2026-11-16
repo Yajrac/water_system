@@ -191,3 +191,11 @@ test('password changes invalidate tokens issued with an older account version', 
     { statusCode: 401 },
   );
 });
+
+test('API trusts exactly one reverse proxy so rate limits see the real client IP', async () => {
+  const { default: app } = await import('../src/app.js');
+  assert.equal(app.get('trust proxy'), 1);
+  // Hop 0 (Nginx) is trusted; anything further along X-Forwarded-For is not.
+  assert.equal(app.get('trust proxy fn')('127.0.0.1', 0), true);
+  assert.equal(app.get('trust proxy fn')('198.51.100.1', 1), false);
+});
