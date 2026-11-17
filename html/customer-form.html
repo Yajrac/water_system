@@ -338,12 +338,12 @@
                       >Approved by<input name="approvedBy" type="text" maxlength="120" /></label
                     ><label>Date installed<input name="dateInstalled" type="date" /></label
                     ><label
-                      >Meter number<span class="meter-number-control">
-                        <input name="meterNumber" type="text" maxlength="120" />
-                        <button type="button" class="btn" id="generateMeterNumber">
-                          <i class="bi bi-magic" aria-hidden="true"></i>Generate
-                        </button>
-                      </span></label
+                      >Meter number<input
+                        name="meterNumber"
+                        type="text"
+                        maxlength="120"
+                        placeholder="Number printed on the installed meter"
+                      /></label
                     ><label
                       >Initial / current meter reading (m³) <span class="required-marker">*</span
                       ><input
@@ -384,7 +384,8 @@
                         type="number"
                         min="0"
                         step="0.01"
-                        value="0" /></label
+                        value="2000"
+                        readonly /><small>Set by customer type: Residential ₱2,000, Commercial ₱2,500.</small></label
                     ><label
                       >Setback length / quantity<input
                         name="setbackLength"

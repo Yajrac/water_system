@@ -171,9 +171,28 @@ test('decimal estimates use exact integer arithmetic and reject out-of-range inp
     reinstallationFee: '0.20',
     violationFee: '0',
   });
-  assert.equal(installationTotal(result), 0.32);
+  // The submitted basic fee is replaced by the Residential standard (2000.00).
+  assert.equal(installationTotal(result), 2000.22);
+  assert.equal(installationTotal({ ...result, installationFee: '0.10' }), 0.32);
   assert.throws(() => decimal('10000000000', 2, 10, 'Fee'), { statusCode: 400 });
   assert.throws(() => decimal('1e3', 2, 10, 'Fee'), { statusCode: 400 });
+});
+
+test('basic installation fee follows customer type for manual saves', () => {
+  assert.equal(validateCustomer({ ...input, customerType: 'Residential', installationFee: '5' }).installationFee, '2000.00');
+  assert.equal(validateCustomer({ ...input, customerType: 'Commercial', installationFee: '5' }).installationFee, '2500.00');
+  const existing = { customerType: 'Residential', installationFee: '1500.00' };
+  assert.equal(validateCustomer({ ...input, customerType: 'Residential', revision: 'r1' }, { existing }).installationFee, '1500.00');
+  assert.equal(validateCustomer({ ...input, customerType: 'Commercial', revision: 'r1' }, { existing }).installationFee, '2500.00');
+});
+
+test('installed accounts need the typed meter number and installation date', () => {
+  const installed = validateCustomer({ ...input, serviceStatus: 'Installed', dateInstalled: today(), meterNumber: '87654321' });
+  assert.equal(installed.meterNumber, '87654321');
+  for (const missing of [{ meterNumber: '' }, { dateInstalled: '' }])
+    assert.throws(() => validateCustomer({
+      ...input, serviceStatus: 'Installed', dateInstalled: today(), meterNumber: '87654321', ...missing,
+    }), { statusCode: 400 });
 });
 
 test('query validation limits page size, search length and supported filters', () => {

@@ -31,6 +31,16 @@ function renderDashboardCharts(data) {
     details.append(summary, table);
     container.appendChild(details);
   }
+  const compactNumber = new Intl.NumberFormat('en', { notation: 'compact', maximumFractionDigits: 1 });
+  // Short axis/value labels: ₱12.5K for money, 1.2K m³ for volume.
+  const compactLabel = (id, value) =>
+    id === 'collectionsChart' ? '₱' + compactNumber.format(value) : compactNumber.format(value) + ' m³';
+  // Round the axis to 1, 2, 2.5 or 5 × 10ⁿ steps so ticks read as whole amounts.
+  function niceStep(raw) {
+    const power = 10 ** Math.floor(Math.log10(raw));
+    const scaled = raw / power;
+    return (scaled <= 1 ? 1 : scaled <= 2 ? 2 : scaled <= 2.5 ? 2.5 : scaled <= 5 ? 5 : 10) * power;
+  }
   function renderMonthlyChart(
     id,
     title,
@@ -39,8 +49,26 @@ function renderDashboardCharts(data) {
     line = false,
     labels = monthKeys.map(monthLabel),
     annualTotal = null,
+    emptyMessage = 'No records for these months yet.',
   ) {
     const container = document.getElementById(id);
+    if (!values.some((value) => value > 0)) {
+      const empty = document.createElement('div');
+      empty.className = 'chart-empty';
+      const heading = document.createElement('strong');
+      heading.textContent = emptyMessage;
+      const note = document.createElement('span');
+      note.textContent = 'The chart appears once records are saved.';
+      empty.append(heading, note);
+      container.appendChild(empty);
+      if (annualTotal) {
+        const total = document.createElement('p');
+        total.className = 'chart-period-total';
+        total.textContent = 'Year total: ' + format(annualTotal);
+        container.appendChild(total);
+      }
+      return;
+    }
     const availableWidth = Math.max(0, container.clientWidth - 44);
     const chartWidth = Math.max(
       560,
@@ -57,31 +85,31 @@ function renderDashboardCharts(data) {
       container.style.overflowX = 'auto';
     }
     svg.appendChild(chartNode('title', {}, title));
-    const defs = chartNode('defs');
-    const colors = [
-      ['#38d9ec', '#087bb5'],
-      ['#9292ff', '#5450cf'],
-      ['#fb83b2', '#ce3971'],
-    ];
-    colors.forEach(([top, bottom], index) => {
-      const gradient = chartNode('linearGradient', {
-        id: id + '-gradient-' + index,
-        x1: 0,
-        y1: 0,
-        x2: 0,
-        y2: 1,
+    // Monthly collections keep their colored bars: cyan, violet and pink in turn.
+    const gradientBars = id === 'collectionsChart';
+    if (gradientBars) {
+      const defs = chartNode('defs');
+      [
+        ['#38d9ec', '#087bb5'],
+        ['#9292ff', '#5450cf'],
+        ['#fb83b2', '#ce3971'],
+      ].forEach(([top, bottom], index) => {
+        const gradient = chartNode('linearGradient', { id: id + '-gradient-' + index, x1: 0, y1: 0, x2: 0, y2: 1 });
+        gradient.append(
+          chartNode('stop', { offset: '0%', 'stop-color': top }),
+          chartNode('stop', { offset: '100%', 'stop-color': bottom }),
+        );
+        defs.appendChild(gradient);
       });
-      gradient.append(
-        chartNode('stop', { offset: '0%', 'stop-color': top }),
-        chartNode('stop', { offset: '100%', 'stop-color': bottom }),
-      );
-      defs.appendChild(gradient);
-    });
-    svg.appendChild(defs);
-    const maximum = Math.max(...values, 1) * 1.2;
+      svg.appendChild(defs);
+    }
+    const peak = Math.max(...values);
+    const step = niceStep(peak / 5);
+    const tickCount = Math.max(2, Math.ceil((peak * 1.08) / step));
+    const maximum = step * tickCount;
     const points = [];
-    for (let tick = 0; tick <= 4; tick++) {
-      const y = 210 - tick * 45;
+    for (let tick = 0; tick <= tickCount; tick++) {
+      const y = 210 - (tick * 180) / tickCount;
       svg.appendChild(
         chartNode('line', { x1: 90, y1: y, x2: chartWidth - 20, y2: y, class: 'chart-grid' }),
       );
@@ -89,7 +117,7 @@ function renderDashboardCharts(data) {
         chartNode(
           'text',
           { x: 80, y: y + 4, 'text-anchor': 'end', class: 'chart-label' },
-          format((maximum * tick) / 4),
+          compactLabel(id, step * tick),
         ),
       );
     }
@@ -101,18 +129,22 @@ function renderDashboardCharts(data) {
         line ? 'circle' : 'rect',
         line
           ? { cx: x, cy: y, r: 5, class: 'chart-point' }
-          : { x: x - 19, y, width: 38, height: 210 - y, rx: 4, class: 'chart-bar' },
+          : { x: x - 18, y, width: 36, height: 210 - y, rx: 4, class: 'chart-bar' },
       );
-      if (!line) mark.setAttribute('fill', 'url(#' + id + '-gradient-' + (index % 3) + ')');
+      if (gradientBars && !line) {
+        mark.classList.add('chart-bar-gradient');
+        mark.style.fill = 'url(#' + id + '-gradient-' + (index % 3) + ')';
+      }
       mark.appendChild(chartNode('title', {}, labels[index] + ': ' + format(value)));
       svg.appendChild(mark);
-      svg.appendChild(
-        chartNode(
-          'text',
-          { x, y: y - 12, 'text-anchor': 'middle', class: 'chart-value' },
-          line ? Number(value.toFixed(1)) : Math.round(value).toLocaleString(),
-        ),
-      );
+      if (value > 0)
+        svg.appendChild(
+          chartNode(
+            'text',
+            { x, y: y - 9, 'text-anchor': 'middle', class: 'chart-value' },
+            compactLabel(id, value),
+          ),
+        );
       svg.appendChild(
         chartNode(
           'text',
@@ -132,12 +164,6 @@ function renderDashboardCharts(data) {
       (id === 'collectionsChart' ? 'Year total: ' : 'Six-month total: ') +
       format(annualTotal ?? values.reduce((sum, value) => sum + value, 0));
     container.appendChild(total);
-    if (!values.some((value) => value > 0)) {
-      const empty = document.createElement('p');
-      empty.className = 'chart-caption';
-      empty.textContent = 'No records for these months yet.';
-      container.appendChild(empty);
-    }
     chartTable(container, labels, values, format);
     if (id === 'consumptionChart') {
       container.chartResizeObserver?.disconnect();
@@ -146,7 +172,7 @@ function renderDashboardCharts(data) {
         if (Math.abs(container.clientWidth - initialWidth) < 2) return;
         container.chartResizeObserver.disconnect();
         container.replaceChildren();
-        renderMonthlyChart(id, title, values, format, line, labels);
+        renderMonthlyChart(id, title, values, format, line, labels, annualTotal, emptyMessage);
       });
       container.chartResizeObserver.observe(container);
     }
@@ -159,24 +185,29 @@ function renderDashboardCharts(data) {
     container.replaceChildren();
     container.style.overflowX = '';
     const offset = half * 6;
+    const rangeText = (half === 0 ? 'Jan – Jun ' : 'Jul – Dec ') + data.period.year;
     renderMonthlyChart('collectionsChart', 'Monthly collections - ' + data.period.year,
       collections.slice(offset, offset + 6), value => WaterStore.money(value), false,
-      monthKeys.slice(offset, offset + 6).map(monthLabel), annualTotal);
+      monthKeys.slice(offset, offset + 6).map(monthLabel), annualTotal,
+      'No collections recorded for ' + rangeText + '.');
     const controls = document.createElement('nav');
     controls.className = 'collection-half-controls';
     controls.setAttribute('aria-label', 'Collection months');
     const previous = document.createElement('button');
     previous.type = 'button';
-    previous.className = 'btn btn-secondary step-navigation-button';
-    previous.textContent = 'Previous';
+    previous.className = 'chart-nav-button';
+    previous.textContent = '‹ Jan – Jun';
+    previous.setAttribute('aria-label', 'Show January to June');
     previous.disabled = half === 0;
     const range = document.createElement('span');
-    range.textContent = half === 0 ? 'Jan - Jun' : 'Jul - Dec';
+    range.className = 'chart-nav-range';
+    range.textContent = rangeText;
     range.setAttribute('aria-live', 'polite');
     const next = document.createElement('button');
     next.type = 'button';
-    next.className = 'btn btn-secondary step-navigation-button';
-    next.textContent = 'Next';
+    next.className = 'chart-nav-button';
+    next.textContent = 'Jul – Dec ›';
+    next.setAttribute('aria-label', 'Show July to December');
     next.disabled = half === 1;
     previous.addEventListener('click', () => { half = 0; showCollectionHalf(); container.querySelector('button:last-child').focus(); });
     next.addEventListener('click', () => { half = 1; showCollectionHalf(); container.querySelector('button').focus(); });
@@ -198,6 +229,8 @@ function renderDashboardCharts(data) {
     (value) => Number(value.toFixed(3)).toLocaleString() + ' m\u00b3',
     false,
     barangayNames,
+    null,
+    'No billed consumption in the last six months.',
   );
 
   const statusLabels = ['Paid', 'Unpaid', 'Overdue'];
@@ -271,7 +304,8 @@ function renderDashboardCharts(data) {
   statusContainer.appendChild(pie);
   const billCount = document.createElement('p');
   billCount.className = 'chart-period-total';
-  billCount.textContent = data.summary.bills + ' total bills · All periods';
+  const bills = (count) => count + (Number(count) === 1 ? ' bill' : ' bills');
+  billCount.textContent = bills(data.summary.bills) + ' in total · All periods';
   statusContainer.appendChild(billCount);
   const legend = document.createElement('ul');
   legend.className = 'chart-legend';
@@ -282,8 +316,8 @@ function renderDashboardCharts(data) {
     badge.textContent = status;
     const count = document.createElement('strong');
     count.textContent =
-      counts[index] +
-      ' bills · ' +
+      bills(counts[index]) +
+      ' · ' +
       (data.summary.bills ? Math.round((counts[index] / data.summary.bills) * 100) : 0) +
       '%';
     item.append(badge, count);

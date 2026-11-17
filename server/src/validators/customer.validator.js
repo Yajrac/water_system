@@ -65,6 +65,9 @@ const fields = [
   'initialReading',
 ];
 
+// Basic installation fee by customer type (PHP), applied to manual Add/Edit.
+export const STANDARD_INSTALLATION_FEE = { Residential: '2000.00', Commercial: '2500.00' };
+
 export function validateCustomer(body, { existing = null, importing = false } = {}) {
   if (
     !body ||
@@ -211,6 +214,14 @@ export function validateCustomer(body, { existing = null, importing = false } = 
   }
   for (const key of money) result[key] = decimal(body[key] ?? '0', 2, 10, key);
   for (const key of quantity) result[key] = decimal(body[key] ?? '0', 3, 12, key);
+  // Manual Add/Edit: the basic installation fee follows the customer type. Existing
+  // records keep their saved fee unless the customer type changes.
+  if (!importing) {
+    result.installationFee =
+      existing && existing.customerType === result.customerType && existing.installationFee != null
+        ? decimal(String(existing.installationFee), 2, 10, 'installationFee')
+        : STANDARD_INSTALLATION_FEE[result.customerType];
+  }
   if (!result.meterNumber && Number(result.reading))
     throw new AppError('A reading requires an installed meter.', 400);
   if (importing) {

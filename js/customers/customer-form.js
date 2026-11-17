@@ -5,19 +5,18 @@ customerForm.elements.barangay.replaceChildren(new Option('Select barangay', '')
 customerForm.inert = true;
 const registerCustomerButton = document.getElementById('registerCustomer');
 const printApplicationButton = document.getElementById('printApplication');
-document.getElementById('generateMeterNumber').addEventListener('click', async () => {
-  if (customerForm.elements.serviceStatus.value !== 'Installed') return;
-  const field = customerForm.elements.meterNumber;
-  if (field.value.trim() && !(await confirmAction(
-    'Replace meter number?',
-    'Generate a new suggested meter number to replace the current value?',
-    'Generate number',
-  ))) return;
-  field.value = 'MTR-' + crypto.randomUUID().replaceAll('-', '').slice(0, 12).toUpperCase();
-  field.setCustomValidity('');
-  field.removeAttribute('aria-invalid');
-  updateRegistrationButtons();
-});
+// Basic installation fee by customer type; the server applies the same rule.
+const standardInstallationFee = { Residential: '2000.00', Commercial: '2500.00' };
+function syncInstallationFee() {
+  const existing = customerRecords.customers.find((item) => item.id === editingCustomerId);
+  const type = customerForm.elements.customerType.value;
+  customerForm.elements.installationFee.value =
+    existing && existing.customerType === type && existing.installationFee != null
+      ? existing.installationFee
+      : standardInstallationFee[type] || '0';
+  updateInstallationTotal();
+}
+customerForm.elements.customerType.addEventListener('change', syncInstallationFee);
 let editingCustomerId = null;
 let savingCustomer = false;
 let approvalDateEdited = false;
@@ -217,6 +216,7 @@ function openCustomer(customer) {
   if (customer) {
     customerForm.elements.contact.value = (customer.contact || '').replace(/^(\+?63|0)/, '');
   }
+  syncInstallationFee();
   lastContactValue = contactField.value;
   contactField.maxLength = contactField.value.startsWith('9') ? 10 : 11;
   if (customer && !customer.firstName && !customer.lastName) {
@@ -285,7 +285,6 @@ function updateRegistrationButtons() {
       (name === 'reading' && Boolean(existing?.hasBills || existing?.hasMeterEntries));
     if (field.disabled) field.setCustomValidity('');
   }
-  document.getElementById('generateMeterNumber').disabled = status !== 'Installed';
   const alreadyRegistered = existing && WaterStore.isRegistered(existing);
   registerCustomerButton.textContent = !requiresApproval ? 'Save application' : alreadyRegistered
     ? 'Save registered customer'
