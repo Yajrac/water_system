@@ -111,9 +111,19 @@
         button.addEventListener('click', () => selectCustomer(customer.id));
         list.appendChild(button);
       });
+    // While meters load, show placeholder rows shaped like the customer list.
+    if (loading && !customers.length) {
+      for (let index = 0; index < 3; index++) {
+        const placeholder = document.createElement('div');
+        placeholder.className = 'ledger-consumer-skeleton';
+        placeholder.setAttribute('aria-hidden', 'true');
+        list.appendChild(placeholder);
+      }
+    }
     if (!customers.length || !list.childElementCount) {
       const text = document.createElement('p');
-      text.className = 'form-help';
+      text.className = loading ? 'form-help ledger-loading-text' : 'form-help';
+      if (loading) text.setAttribute('role', 'status');
       text.textContent = loading
         ? 'Loading customer meters...'
         : selectedArea
