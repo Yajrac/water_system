@@ -16,6 +16,10 @@ import consumerRoutes from './routes/consumer.routes.js';
 import activityRoutes from './routes/activity.routes.js';
 import reportRoutes from './routes/report.routes.js';
 import feedbackRoutes from './routes/feedback.routes.js';
+import { createOwnerRouter } from './routes/owner.routes.js';
+import { createOwnerService } from './services/owner.service.js';
+import { readOwnerConfig } from './config/owner.js';
+import { pool } from './database/pool.js';
 
 import { env } from './config/env.js';
 
@@ -63,6 +67,14 @@ app.use('/api/v1/consumer', consumerRoutes);
 app.use('/api/v1/feedback', feedbackRoutes);
 app.use('/api/v1/reports', reportRoutes);
 app.use('/api/v1/activity-logs', activityRoutes);
+// Hidden owner portal; off unless OWNER_PORTAL_PATH and OWNER_PASSWORD_HASH are set.
+const ownerConfig = readOwnerConfig();
+if (ownerConfig) {
+  app.use(
+    '/api/v1/owner/' + ownerConfig.portalPath,
+    createOwnerRouter({ service: createOwnerService({ config: ownerConfig, db: pool }) }),
+  );
+}
 app.use(notFound);
 app.use(errorHandler);
 

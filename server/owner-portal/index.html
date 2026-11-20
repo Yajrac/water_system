@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Owner Portal</title>
+    <link rel="stylesheet" href="owner.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <header class="top">
+        <div>
+          <h1>Owner Portal</h1>
+          <p>Permanent deletes for PWSS records. Admins cannot do this.</p>
+        </div>
+        <button type="button" id="signOut" class="btn btn-ghost" hidden>Sign out</button>
+      </header>
+
+      <section id="loginView" class="card login">
+        <h2>Sign in</h2>
+        <form id="loginForm" novalidate>
+          <label for="password">Owner password</label>
+          <input id="password" type="password" autocomplete="current-password" required />
+          <p class="error" id="loginError" role="alert"></p>
+          <button type="submit" class="btn btn-primary" id="loginButton">Sign in</button>
+        </form>
+      </section>
+
+      <section id="workView" hidden>
+        <section class="card">
+          <h2>Find customer</h2>
+          <form id="searchForm" class="search" role="search">
+            <input id="query" type="search" placeholder="Name or account number" aria-label="Name or account number" minlength="2" />
+            <button type="submit" class="btn btn-primary">Search</button>
+          </form>
+          <p class="muted" id="searchStatus" role="status"></p>
+          <ul class="results" id="results"></ul>
+        </section>
+
+        <section class="card danger-card" id="previewCard" hidden>
+          <h2>Delete customer</h2>
+          <dl class="facts" id="customerFacts"></dl>
+          <h3>Records that will be removed</h3>
+          <ul class="counts" id="counts"></ul>
+          <p class="warning">
+            This permanently removes the customer and everything listed above. A JSON backup is
+            saved on the VPS first, in <code>server/deleted-backups/</code>.
+          </p>
+          <form id="deleteForm" novalidate>
+            <label for="confirm">Type the account number <code id="confirmHint"></code> to confirm</label>
+            <input id="confirm" autocomplete="off" spellcheck="false" />
+            <p class="error" id="deleteError" role="alert"></p>
+            <div class="actions">
+              <button type="button" class="btn btn-ghost" id="cancelDelete">Cancel</button>
+              <button type="submit" class="btn btn-danger" id="deleteButton" disabled>Delete permanently</button>
+            </div>
+          </form>
+        </section>
+
+        <p class="done" id="doneMessage" role="status" hidden></p>
+      </section>
+    </main>
+    <script src="owner.js"></script>
+  </body>
+</html>
