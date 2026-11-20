@@ -1,6 +1,7 @@
 function renderDashboardCharts(data) {
   for (const id of ['collectionsChart', 'statusChart', 'consumptionChart']) {
     const container = document.getElementById(id);
+    if (!container) continue;
     container.chartResizeObserver?.disconnect();
     container.replaceChildren();
   }
@@ -155,8 +156,14 @@ function renderDashboardCharts(data) {
       );
     });
     if (line) {
-      const path = chartNode('polyline', { points: points.join(' '), class: 'chart-line' });
-      svg.insertBefore(path, svg.querySelector('.chart-point'));
+      // Soft fill under the line, then the line itself, both beneath the points.
+      const firstPoint = svg.querySelector('.chart-point');
+      const area = chartNode('polygon', {
+        points: points[0].split(',')[0] + ',210 ' + points.join(' ') + ' ' + points.at(-1).split(',')[0] + ',210',
+        class: 'chart-area',
+      });
+      svg.insertBefore(area, firstPoint);
+      svg.insertBefore(chartNode('polyline', { points: points.join(' '), class: 'chart-line' }), firstPoint);
     }
     container.appendChild(svg);
     const total = document.createElement('p');
@@ -222,7 +229,8 @@ function renderDashboardCharts(data) {
     container.prepend(controls);
   }
   showCollectionHalf();
-  // Barangay consumption retains its recent six-month coverage.
+
+  // Barangay consumption over the recent six months, drawn as a line across areas.
   const barangayVolumes = new Map(
     data.barangayConsumption.map((row) => [row.barangay, Number(row.volume)]),
   );
@@ -233,8 +241,8 @@ function renderDashboardCharts(data) {
     'consumptionChart',
     'Barangay consumption - last six months',
     barangayNames.map((name) => barangayVolumes.get(name)),
-    (value) => Number(value.toFixed(3)).toLocaleString() + ' m\u00b3',
-    false,
+    (value) => Number(value.toFixed(3)).toLocaleString() + ' m³',
+    true,
     barangayNames,
     null,
     'No billed consumption in the last six months.',
