@@ -38,7 +38,7 @@
     $('loginView').hidden = signedIn;
     $('workView').hidden = !signedIn;
     $('signOut').hidden = !signedIn;
-    if (signedIn) $('query').focus();
+    if (signedIn) { $('query').focus(); loadCustomers(); }
     else $('password').focus();
   }
 
@@ -82,49 +82,81 @@
     closePreview();
     $('results').replaceChildren();
     $('searchStatus').textContent = '';
+    $('pager').hidden = true;
     show(false);
   });
 
-  $('searchForm').addEventListener('submit', async (event) => {
-    event.preventDefault();
-    const query = $('query').value.trim();
-    $('doneMessage').hidden = true;
-    closePreview();
-    if (query.length < 2) {
-      $('searchStatus').textContent = 'Type at least 2 characters.';
-      return;
-    }
-    $('searchStatus').textContent = 'Searching…';
+  let page = 1;
+  let query = '';
+
+  async function loadCustomers() {
+    $('searchStatus').textContent = 'Loading…';
     try {
-      const rows = await api('customers?q=' + encodeURIComponent(query));
-      $('searchStatus').textContent = rows.length ? rows.length + ' found' + (rows.length === 20 ? ' (first 20)' : '') : 'No customer found.';
-      $('results').replaceChildren(...rows.map(resultItem));
+      const data = await api('customers?q=' + encodeURIComponent(query) + '&page=' + page);
+      const pages = Math.max(1, Math.ceil(data.total / data.pageSize));
+      $('searchStatus').textContent = data.total
+        ? data.total + ' customer' + (data.total === 1 ? '' : 's') + (query ? ' found' : '')
+        : query ? 'No customer matches "' + query + '".' : 'No customers yet.';
+      $('results').replaceChildren(...data.rows.map(resultRow));
+      $('pager').hidden = pages < 2;
+      $('pageLabel').textContent = 'Page ' + data.page + ' of ' + pages;
+      $('prevPage').disabled = data.page <= 1;
+      $('nextPage').disabled = data.page >= pages;
     } catch (error) {
       $('searchStatus').textContent = error.message;
     }
-  });
+  }
 
-  function resultItem(row) {
-    const item = document.createElement('li');
+  $('searchForm').addEventListener('submit', (event) => {
+    event.preventDefault();
+    query = $('query').value.trim();
+    page = 1;
+    $('doneMessage').hidden = true;
+    closePreview();
+    loadCustomers();
+  });
+  $('prevPage').addEventListener('click', () => { page -= 1; closePreview(); loadCustomers(); });
+  $('nextPage').addEventListener('click', () => { page += 1; closePreview(); loadCustomers(); });
+
+  function cell(text, className) {
+    const td = document.createElement('td');
+    if (className) td.className = className;
+    td.textContent = text;
+    return td;
+  }
+
+  function resultRow(row) {
+    const tr = document.createElement('tr');
+    const status = document.createElement('td');
+    const pill = document.createElement('span');
+    pill.className = 'pill pill-' + String(row.status).toLowerCase();
+    pill.textContent = row.status;
+    status.appendChild(pill);
+    const action = document.createElement('td');
+    action.className = 'action';
     const button = document.createElement('button');
     button.type = 'button';
-    button.setAttribute('aria-pressed', 'false');
-    const name = document.createElement('strong');
-    name.textContent = row.name;
-    const meta = document.createElement('span');
-    meta.textContent = row.accountNumber + ' · ' + row.barangay;
-    const pill = document.createElement('span');
-    pill.className = 'pill';
-    pill.textContent = row.status;
-    button.append(name, pill, meta);
-    button.addEventListener('click', () => openPreview(row.id, button));
-    item.appendChild(button);
-    return item;
+    button.className = 'btn btn-danger-soft';
+    button.textContent = 'Delete';
+    button.setAttribute('aria-label', 'Delete ' + row.name);
+    button.addEventListener('click', () => openPreview(row.id, tr));
+    action.appendChild(button);
+    tr.append(
+      cell(row.accountNumber, 'mono'),
+      cell(row.name, 'name'),
+      cell(row.barangay),
+      status,
+      cell(row.bills, 'num'),
+      cell(row.payments, 'num'),
+      cell(row.userId ? 'Yes' : '—'),
+      action,
+    );
+    return tr;
   }
 
   async function openPreview(id, button) {
-    document.querySelectorAll('.results button').forEach((b) => b.setAttribute('aria-pressed', 'false'));
-    button.setAttribute('aria-pressed', 'true');
+    document.querySelectorAll('#results tr').forEach((r) => r.classList.remove('selected'));
+    button.classList.add('selected');
     $('deleteError').textContent = '';
     try {
       const data = await api('customers/' + encodeURIComponent(id));
@@ -167,7 +199,7 @@
   function closePreview() {
     selected = null;
     $('previewCard').hidden = true;
-    document.querySelectorAll('.results button').forEach((b) => b.setAttribute('aria-pressed', 'false'));
+    document.querySelectorAll('#results tr').forEach((r) => r.classList.remove('selected'));
   }
 
   $('cancelDelete').addEventListener('click', closePreview);
@@ -193,8 +225,7 @@
         ' records removed. Backup: ' + data.backupFile;
       $('doneMessage').hidden = false;
       closePreview();
-      $('results').replaceChildren();
-      $('searchStatus').textContent = '';
+      loadCustomers();
     } catch (error) {
       $('deleteError').textContent = error.message;
       button.disabled = false;

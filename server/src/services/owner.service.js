@@ -110,18 +110,40 @@ export function createOwnerService({ config, db, now = () => new Date() }) {
       }
     },
 
-    async searchCustomers(query) {
+    // All customers, newest first, optionally filtered by name or account number; 25 per page.
+    async searchCustomers(query, page = 1) {
       const text = typeof query === 'string' ? query.trim().slice(0, 80) : '';
-      if (text.length < 2) return [];
+      const pageNumber = Math.min(Math.max(Number.parseInt(page, 10) || 1, 1), 100000);
       const like = '%' + text.replace(/[\\%_]/g, (ch) => '\\' + ch) + '%';
-      const [rows] = await db.execute(
-        'SELECT ' + customerColumns + ` FROM customers c JOIN barangays b ON b.id = c.barangay_id
-        WHERE c.account_number LIKE ? OR CONCAT_WS(' ', c.first_name, c.last_name) LIKE ?
-          OR CONCAT_WS(', ', c.last_name, c.first_name) LIKE ?
-        ORDER BY c.last_name, c.first_name LIMIT 20`,
-        [like, like, like],
+      const where = text
+        ? `WHERE c.account_number LIKE ? OR CONCAT_WS(' ', c.first_name, c.last_name) LIKE ?
+          OR CONCAT_WS(', ', c.last_name, c.first_name) LIKE ? OR b.name LIKE ?`
+        : '';
+      const params = text ? [like, like, like, like] : [];
+      const [[{ total }]] = await db.execute(
+        'SELECT COUNT(*) AS total FROM customers c JOIN barangays b ON b.id = c.barangay_id ' + where,
+        params,
       );
-      return rows.map((row) => ({ ...row, id: String(row.id), userId: row.userId ? String(row.userId) : null }));
+      const [rows] = await db.execute(
+        'SELECT ' + customerColumns + `,
+          (SELECT COUNT(*) FROM bills x WHERE x.customer_id = c.id) AS bills,
+          (SELECT COUNT(*) FROM payments p JOIN bills x ON x.id = p.bill_id WHERE x.customer_id = c.id) AS payments
+        FROM customers c JOIN barangays b ON b.id = c.barangay_id ` + where +
+          ' ORDER BY c.id DESC LIMIT 25 OFFSET ' + (pageNumber - 1) * 25,
+        params,
+      );
+      return {
+        total: Number(total),
+        page: pageNumber,
+        pageSize: 25,
+        rows: rows.map((row) => ({
+          ...row,
+          id: String(row.id),
+          userId: row.userId ? String(row.userId) : null,
+          bills: Number(row.bills),
+          payments: Number(row.payments),
+        })),
+      };
     },
 
     async previewCustomer(id) {

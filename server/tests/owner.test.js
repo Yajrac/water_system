@@ -170,3 +170,27 @@ test('owner login issues a token only the owner portal accepts', async () => {
   });
   assert.throws(() => service.verifyToken(adminToken), { statusCode: 401 });
 });
+
+test('customer list shows everyone when empty, filters safely and pages by 25', async () => {
+  const calls = [];
+  const db = {
+    async execute(sql, params) {
+      calls.push({ sql, params });
+      if (sql.startsWith('SELECT COUNT(*)')) return [[{ total: '30' }]];
+      return [[{ ...customer, bills: '2', payments: '1' }]];
+    },
+  };
+  const service = createOwnerService({ config: {}, db });
+  const all = await service.searchCustomers(undefined, undefined);
+  assert.equal(all.total, 30);
+  assert.equal(all.rows[0].bills, 2);
+  assert.ok(!calls[0].sql.includes('WHERE'));
+  assert.match(calls[1].sql, /LIMIT 25 OFFSET 0$/);
+  calls.length = 0;
+  await service.searchCustomers('50%_off', '2');
+  assert.equal(calls[0].params[0], String.raw`%50\%\_off%`);
+  assert.match(calls[1].sql, /OFFSET 25$/);
+  calls.length = 0;
+  await service.searchCustomers('x', '-5 OR 1=1');
+  assert.match(calls[1].sql, /OFFSET 0$/);
+});

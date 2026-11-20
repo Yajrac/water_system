@@ -29,13 +29,36 @@
 
       <section id="workView" hidden>
         <section class="card">
-          <h2>Find customer</h2>
+          <div class="card-head">
+            <h2>Customers</h2>
+            <p class="muted" id="searchStatus" role="status"></p>
+          </div>
           <form id="searchForm" class="search" role="search">
-            <input id="query" type="search" placeholder="Name or account number" aria-label="Name or account number" minlength="2" />
+            <input id="query" type="search" placeholder="Filter by name, account number or barangay" aria-label="Filter customers" />
             <button type="submit" class="btn btn-primary">Search</button>
           </form>
-          <p class="muted" id="searchStatus" role="status"></p>
-          <ul class="results" id="results"></ul>
+          <div class="table-wrap">
+            <table class="customers">
+              <thead>
+                <tr>
+                  <th scope="col">Account no.</th>
+                  <th scope="col">Name</th>
+                  <th scope="col">Barangay</th>
+                  <th scope="col">Status</th>
+                  <th scope="col" class="num">Bills</th>
+                  <th scope="col" class="num">Payments</th>
+                  <th scope="col">App login</th>
+                  <th scope="col"><span class="sr-only">Action</span></th>
+                </tr>
+              </thead>
+              <tbody id="results"></tbody>
+            </table>
+          </div>
+          <div class="pager" id="pager" hidden>
+            <button type="button" class="btn btn-ghost" id="prevPage">Previous</button>
+            <span id="pageLabel"></span>
+            <button type="button" class="btn btn-ghost" id="nextPage">Next</button>
+          </div>
         </section>
 
         <section class="card danger-card" id="previewCard" hidden>
