@@ -22,18 +22,11 @@
       <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" />
   </head>
   <body class="auth-page">
-    <main class="auth-shell">
-      <aside class="auth-brand">
-        <div class="auth-brand-mark">
-          <img src="../assets/images/water_system_logo.jpg" alt="PWSS logo" />
-          <span><strong>Pio Duran Water Supply System</strong>Pio Duran, Albay</span>
-        </div>
-        <div class="auth-brand-copy">
-          <h1>Water service.<br />Better connected.</h1>
-          <p>Your workspace for customer records, meter readings, billing, and payments.</p>
-        </div>
-        <span class="auth-brand-foot">Serving Pio Duran since 2021</span>
-        <div class="auth-waves" aria-hidden="true">
+    <main class="auth-stage">
+      <div class="auth-backdrop" aria-hidden="true">
+        <span class="auth-glow auth-glow-one"></span>
+        <span class="auth-glow auth-glow-two"></span>
+        <div class="auth-waves">
           <svg class="auth-wave auth-wave-back" viewBox="0 0 2880 320" preserveAspectRatio="none">
             <path d="M0 150Q360 80 720 150T1440 150T2160 150T2880 150V320H0Z" />
           </svg>
@@ -44,12 +37,14 @@
             <path d="M0 260Q360 225 720 260T1440 260T2160 260T2880 260V320H0Z" />
           </svg>
         </div>
-      </aside>
-      <section class="auth-panel" aria-labelledby="loginTitle">
-        <div class="auth-card">
-        <span class="auth-eyebrow">Admin portal</span>
-        <h2 id="loginTitle">Sign in</h2>
-        <p>Welcome back. Enter your account details to continue.</p>
+      </div>
+      <section class="auth-glass" aria-labelledby="loginTitle">
+        <div class="auth-glass-brand">
+          <img src="../assets/images/water_system_logo.jpg" alt="PWSS logo" />
+          <span><strong>Pio Duran Water Supply System</strong>Admin portal</span>
+        </div>
+        <h1 id="loginTitle">Sign in</h1>
+        <p class="auth-glass-lead">Welcome back. Enter your account details to manage customer records, billing and payments.</p>
         <p id="loginMessage" role="alert" tabindex="-1"></p>
         <form id="loginForm">
           <label
@@ -90,8 +85,8 @@
         <p class="demo-credentials">
           Authorized personnel only. Contact your administrator for account access.
         </p>
-        </div>
       </section>
+      <p class="auth-footnote">Serving Pio Duran, Albay since 2021</p>
     </main>
     <script src="../js/auth/login.js"></script>
   </body>

@@ -198,6 +198,8 @@ test('installed accounts need the typed meter number and installation date', () 
 test('query validation limits page size, search length and supported filters', () => {
   assert.equal(validateCustomerQuery({}).limit, 10);
   assert.equal(validateCustomerQuery({ page: '2', status: 'pending' }).page, 2);
+  for (const status of ['installed', 'approved', 'registered', 'inactive'])
+    assert.equal(validateCustomerQuery({ status }).status, status);
   for (const query of [
     { limit: '1000' },
     { page: '0' },

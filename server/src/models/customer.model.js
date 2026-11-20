@@ -70,9 +70,13 @@ export async function listCustomers(filters) {
     conditions.push('c.customer_type = ?');
     values.push(filters.type);
   }
-  if (filters.status === 'inactive') conditions.push("c.connection_status <> 'Active'");
+  // Inactive / disconnected: installed connections that are not active (not pending or approved applications).
+  if (filters.status === 'inactive')
+    conditions.push("a.status = 'Installed' AND c.connection_status <> 'Active'");
   if (filters.status === 'registered')
     conditions.push("a.status IN ('Approved','Installed')");
+  if (filters.status === 'installed') conditions.push("a.status = 'Installed'");
+  if (filters.status === 'approved') conditions.push("a.status = 'Approved'");
   if (filters.status === 'pending') conditions.push("COALESCE(a.status, 'Pending') = 'Pending'");
   const where = conditions.length ? ' WHERE ' + conditions.join(' AND ') : '';
   const [[count]] = await pool.execute('SELECT COUNT(*) AS total ' + joins + where, values);

@@ -68,9 +68,11 @@ async function writeApplication(
       userId,
     );
     if (preparedHash) {
-      await connection.execute('UPDATE users SET auth_version = auth_version + 1 WHERE id = ?', [
-        userId,
-      ]);
+      // An admin-set password replaces the temporary one, like a newly added manual account.
+      await connection.execute(
+        'UPDATE users SET auth_version = auth_version + 1, must_change_password = 0 WHERE id = ?',
+        [userId],
+      );
     }
   } else if (details.username) {
     userId = await model.writeRecord(

@@ -1,92 +1,70 @@
-/* Login: full-height split screen. Brand panel on the left, sign-in form on the right. */
+/* Login: full-screen water backdrop with animated waves and a frosted-glass sign-in card. */
 .auth-page {
   min-height: 100vh;
   min-height: 100svh;
   margin: 0;
-  background: var(--color-surface);
+  background: #04263a;
+  color: #fff;
 }
 .auth-theme {
   position: absolute;
   top: 22px;
   right: 28px;
-  z-index: 2;
-}
-.auth-shell {
-  display: grid;
-  grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
-  min-height: 100vh;
-  min-height: 100svh;
+  z-index: 3;
 }
 
-/* Brand panel */
-.auth-brand {
+/* Stage: centers the glass card over the water. */
+.auth-stage {
   position: relative;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  gap: 32px;
-  padding: 44px clamp(32px, 5vw, 72px);
-  color: #fff;
-  background:
-    radial-gradient(120% 80% at 0% 0%, #0d6c99 0%, transparent 60%),
-    linear-gradient(160deg, #05314a 0%, #074a6d 55%, #0a6a95 100%);
-}
-.auth-brand-mark {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  position: relative;
-  z-index: 1;
-}
-.auth-brand-mark img {
-  width: 52px;
-  height: 52px;
-  border-radius: 50%;
-  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.15);
-}
-.auth-brand-mark span {
   display: grid;
-  gap: 2px;
-  font-size: 0.78rem;
-  color: #b9dff2;
+  place-items: center;
+  align-content: center;
+  gap: 18px;
+  min-height: 100vh;
+  min-height: 100svh;
+  padding: 40px 20px;
+  box-sizing: border-box;
+  overflow: hidden;
+  isolation: isolate;
 }
-.auth-brand-mark strong {
-  font-size: 0.95rem;
-  color: #fff;
+.auth-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(90% 70% at 50% 0%, #0b6d98 0%, transparent 60%),
+    linear-gradient(180deg, #05314a 0%, #04263a 55%, #063b57 100%);
 }
-.auth-brand-copy {
-  position: relative;
-  z-index: 1;
-  margin-block: auto;
-  max-width: 30rem;
+/* Soft light blooms behind the card so the glass has something to blur. */
+.auth-glow {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  opacity: 0.55;
 }
-.auth-brand-copy h1 {
-  margin: 0 0 18px;
-  font-size: clamp(2rem, 3.6vw, 3.2rem);
-  line-height: 1.1;
-  letter-spacing: -0.02em;
-  text-wrap: balance;
+.auth-glow-one {
+  width: 420px;
+  height: 420px;
+  top: 12%;
+  left: 18%;
+  background: #1fb3d8;
 }
-.auth-brand-copy p {
-  margin: 0;
-  max-width: 34ch;
-  font-size: 1rem;
-  line-height: 1.7;
-  color: #cfe8f5;
+.auth-glow-two {
+  width: 360px;
+  height: 360px;
+  right: 16%;
+  bottom: 22%;
+  background: #2563eb;
+  opacity: 0.4;
 }
-.auth-brand-foot {
-  position: relative;
-  z-index: 1;
-  font-size: 0.78rem;
-  color: #b9dff2;
-}
-/* Each wave is two identical periods wide; sliding it by half loops seamlessly. */
+
+/* Waves across the whole width; each is two periods wide and slides by half to loop. */
 .auth-waves {
   position: absolute;
   left: 0;
   right: 0;
   bottom: 0;
-  height: 38%;
+  height: 34%;
   overflow: hidden;
   pointer-events: none;
 }
@@ -103,13 +81,8 @@
 .auth-wave-back path { fill: rgba(255, 255, 255, 0.05); }
 .auth-wave-mid path { fill: rgba(255, 255, 255, 0.07); }
 .auth-wave-front path { fill: rgba(255, 255, 255, 0.1); }
-.auth-wave-back {
-  animation-duration: 26s;
-}
-.auth-wave-mid {
-  animation-duration: 17s;
-  animation-direction: reverse;
-}
+.auth-wave-back { animation-duration: 26s; }
+.auth-wave-mid { animation-duration: 17s; animation-direction: reverse; }
 .auth-wave-front {
   animation: auth-wave-flow 11s linear infinite, auth-wave-swell 5s ease-in-out infinite alternate;
 }
@@ -122,80 +95,91 @@
   to { bottom: -12px; }
 }
 
-/* Form panel */
-.auth-panel {
-  display: grid;
-  place-items: center;
-  min-width: 0;
-  padding: 48px clamp(24px, 5vw, 72px);
-  background: var(--color-surface);
-}
-.auth-card {
+/* Frosted glass card. */
+.auth-glass {
   width: 100%;
-  max-width: 400px;
-  min-width: 0;
+  max-width: 420px;
+  box-sizing: border-box;
+  padding: 34px 32px 28px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.1);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  backdrop-filter: blur(18px) saturate(140%);
+  box-shadow: 0 24px 60px rgba(0, 12, 24, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.18);
 }
-.auth-card form,
-.auth-card label {
-  min-width: 0;
-  max-width: 100%;
+.auth-glass-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 26px;
 }
-.auth-card p {
-  overflow-wrap: anywhere;
+.auth-glass-brand img {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.18);
 }
-.auth-eyebrow {
-  display: inline-block;
-  padding: 5px 10px;
-  border-radius: 999px;
-  background: var(--table-heading);
-  color: var(--color-primary-deep);
-  font-size: 0.7rem;
+.auth-glass-brand span {
+  display: grid;
+  gap: 2px;
+  font-size: 0.72rem;
   font-weight: 700;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
+  color: #9fdcf2;
 }
-.auth-card h2 {
-  margin: 18px 0 8px;
-  font-size: 2rem;
+.auth-glass-brand strong {
+  font-size: 0.92rem;
+  letter-spacing: 0;
+  text-transform: none;
+  color: #fff;
+}
+.auth-glass h1 {
+  margin: 0 0 8px;
+  font-size: 1.9rem;
   letter-spacing: -0.02em;
-  color: var(--color-ink);
+  color: #fff;
 }
-.auth-card > p {
+.auth-glass-lead {
   margin: 0;
-  color: var(--color-ink-muted);
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   line-height: 1.6;
+  color: #cfe6f2;
 }
 #loginForm {
   display: grid;
-  gap: 18px;
-  margin-top: 28px;
+  gap: 16px;
+  margin-top: 24px;
 }
-.auth-card label {
+.auth-glass label {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  min-width: 0;
+  font-size: 0.82rem;
   font-weight: 600;
-  font-size: 0.85rem;
-  color: var(--color-ink);
+  color: #e6f4fb;
 }
 
-/* Inputs with a leading icon; the wrapper draws the border and focus ring. */
-.auth-input {
+/* Glass inputs with a leading icon; the wrapper draws the border and focus ring. */
+html body.auth-page .auth-input {
   position: relative;
   display: flex;
   align-items: center;
   width: 100%;
   min-width: 0;
   min-height: 50px;
-  border: 1.5px solid var(--color-border-strong);
+  box-sizing: border-box;
+  border: 1px solid rgba(255, 255, 255, 0.28);
   border-radius: 12px;
-  background: var(--color-surface);
-  transition: border-color 150ms ease, box-shadow 150ms ease;
+  background: rgba(255, 255, 255, 0.1);
+  transition: border-color 150ms ease, box-shadow 150ms ease, background-color 150ms ease;
 }
-.auth-input:focus-within {
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-primary) 16%, transparent);
+html body.auth-page .auth-input:focus-within {
+  border-color: #7fd8f5;
+  background: rgba(255, 255, 255, 0.16);
+  box-shadow: 0 0 0 4px rgba(127, 216, 245, 0.25);
 }
 .auth-input > svg {
   flex: 0 0 auto;
@@ -203,45 +187,50 @@
   height: 18px;
   margin-left: 15px;
   fill: none;
-  stroke: var(--color-ink-muted);
+  stroke: #a9d6e8;
   stroke-width: 1.8;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
-.auth-input:focus-within > svg {
-  stroke: var(--color-primary);
-}
-.auth-card input {
+.auth-input:focus-within > svg { stroke: #fff; }
+html body.auth-page .auth-input input,
+html body.auth-page .auth-input input:is(:focus, :focus-visible) {
   flex: 1 1 0;
   width: 0;
   min-width: 0;
+  height: auto;
+  min-height: 46px;
   padding: 13px 14px 13px 11px;
+  border: 0;
+  border-radius: 0;
+  outline: none;
+  box-shadow: none;
+  background: transparent;
+  color: #fff;
   font: inherit;
   font-weight: 500;
-  border: 0;
-  outline: 0;
-  background: transparent;
-  color: var(--color-ink);
 }
-.auth-card input::placeholder {
-  color: var(--color-ink-muted);
-  font-weight: 400;
-}
-.password-field {
-  overflow: hidden;
+.auth-input input::placeholder { color: rgba(230, 244, 251, 0.6); font-weight: 400; }
+/* Keep browser autofill from painting a light-blue box inside the glass field. */
+.auth-input input:-webkit-autofill,
+.auth-input input:-webkit-autofill:hover,
+.auth-input input:-webkit-autofill:focus {
+  -webkit-text-fill-color: #fff;
+  caret-color: #fff;
+  transition: background-color 600000s 0s, color 600000s 0s;
 }
 .password-field button {
   display: grid;
   place-items: center;
-  flex: 0 0 46px;
-  min-width: 46px;
-  min-height: 46px;
-  margin-right: 2px;
+  flex: 0 0 42px;
+  width: 42px;
+  height: 42px;
+  margin-right: 4px;
   padding: 0;
   border: 0;
   border-radius: 10px;
   background: transparent;
-  color: var(--color-ink-muted);
+  color: #a9d6e8;
   cursor: pointer;
 }
 .password-field button svg {
@@ -253,26 +242,35 @@
   stroke-linecap: round;
   stroke-linejoin: round;
 }
-.password-field button:hover {
-  color: var(--color-primary-deep);
-  background: var(--table-heading);
+.password-field button:hover { background: rgba(255, 255, 255, 0.12); color: #fff; }
+.password-field button:focus-visible { outline: 2px solid #7fd8f5; outline-offset: -2px; }
+
+/* Bright white button reads clearly on the dark glass. */
+html body.auth-page .auth-submit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 50px;
+  margin-top: 6px;
+  padding: 12px;
+  border: 0;
+  border-radius: 12px;
+  background: #fff;
+  color: #05314a;
+  font-size: 0.95rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform 120ms ease, box-shadow 150ms ease, background-color 150ms ease;
 }
-.password-field button:focus-visible {
-  outline: 2px solid var(--color-primary);
-  outline-offset: -3px;
+html body.auth-page .auth-submit:hover:not(:disabled) {
+  background: #e6f7fd;
+  box-shadow: 0 10px 24px -10px rgba(127, 216, 245, 0.9);
 }
-.auth-links {
-  text-align: right;
-  margin: -4px 0 24px;
-  font-size: 0.8rem;
-}
-.auth-card a {
-  color: var(--color-primary-deep);
-  text-decoration: none;
-}
-.auth-card a:hover {
-  text-decoration: underline;
-}
+html body.auth-page .auth-submit:active:not(:disabled) { transform: translateY(1px); }
+html body.auth-page .auth-submit:focus-visible { outline: 3px solid #7fd8f5; outline-offset: 2px; }
+.auth-submit:disabled { opacity: 0.55; cursor: not-allowed; }
 .auth-submit-spinner {
   display: inline-block;
   width: 16px;
@@ -285,46 +283,36 @@
 }
 .auth-submit-spinner[hidden] { display: none; }
 @keyframes auth-submit-spin { to { transform: rotate(360deg); } }
-.auth-submit {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  width: 100%;
-  min-height: 50px;
-  margin-top: 6px;
-  padding: 12px;
-  border-radius: 12px;
-  font-size: 0.95rem;
-  font-weight: 700;
-  transition: transform 120ms ease, box-shadow 150ms ease;
-}
-.auth-submit:hover:not(:disabled) {
-  box-shadow: 0 8px 20px -8px color-mix(in srgb, var(--color-primary) 70%, transparent);
-}
-.auth-submit:active:not(:disabled) {
-  transform: translateY(1px);
-}
-.auth-submit:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
-}
-.auth-card .demo-credentials {
-  margin-top: 28px;
-  padding-top: 18px;
-  border-top: 1px solid var(--color-border);
-  color: var(--color-ink-muted);
-  font-size: 0.75rem;
-  line-height: 1.7;
-}
+
+#loginMessage { margin: 0; }
 #loginMessage:not(:empty) {
-  margin-top: 20px;
+  margin-top: 18px;
   padding: 12px 14px;
-  background: var(--color-danger-bg);
+  border: 1px solid rgba(255, 140, 160, 0.45);
   border-radius: 10px;
-  color: var(--color-danger);
+  background: rgba(225, 29, 72, 0.18);
+  color: #ffdbe2;
   font-size: 0.85rem;
 }
+.auth-glass .demo-credentials {
+  margin: 22px 0 0;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.16);
+  color: #b8d9e8;
+  font-size: 0.75rem;
+  line-height: 1.6;
+  text-align: center;
+}
+.auth-footnote {
+  margin: 0;
+  font-size: 0.75rem;
+  color: rgba(207, 230, 242, 0.75);
+}
+
+/* Other auth screens (reset, logout) keep their existing look. */
+.auth-links { text-align: right; margin: -4px 0 24px; font-size: 0.8rem; }
+.auth-card a, .auth-glass a { color: #9fdcf2; text-decoration: none; }
+.auth-card a:hover, .auth-glass a:hover { text-decoration: underline; }
 .reset-status {
   margin-top: 22px;
   padding: 16px;
@@ -333,17 +321,8 @@
   color: var(--color-ink);
   font-size: 0.85rem;
 }
-.reset-status p {
-  margin-top: 7px;
-  font-size: 0.8rem;
-  color: var(--color-ink-muted);
-}
-.back-to-login {
-  display: block;
-  margin-top: 24px;
-  text-align: center;
-  font-size: 0.85rem;
-}
+.reset-status p { margin-top: 7px; font-size: 0.8rem; color: var(--color-ink-muted); }
+.back-to-login { display: block; margin-top: 24px; text-align: center; font-size: 0.85rem; }
 .logout-button {
   margin-top: 8px;
   width: 100%;
@@ -351,24 +330,7 @@
   color: var(--sidebar-text);
   border-color: var(--color-border-strong);
 }
-/* Beat the shared `html body` form rules so login inputs keep the wrapper focus ring. */
-html body.auth-page .auth-input {
-  min-height: 50px;
-  border-radius: 12px;
-}
-html body.auth-page .auth-input:focus-within {
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-primary) 16%, transparent);
-}
-html body.auth-page .auth-input input,
-html body.auth-page .auth-input input:is(:focus, :focus-visible) {
-  height: auto;
-  min-height: 46px;
-  border: 0;
-  border-radius: 0;
-  outline: none;
-  box-shadow: none;
-}
+
 @media (prefers-reduced-motion: reduce) {
   .auth-submit-spinner,
   .auth-wave { animation: none; }
@@ -376,51 +338,17 @@ html body.auth-page .auth-input input:is(:focus, :focus-visible) {
   .auth-submit { transition: none; }
 }
 
-/* Tablet and phone: brand becomes a compact header band above the form. */
-@media (max-width: 860px) {
-  .auth-shell {
-    grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: auto 1fr;
-  }
-  .auth-brand {
-    gap: 18px;
-    padding: 24px 20px 56px;
-  }
-  .auth-brand-copy h1 {
-    font-size: 1.6rem;
-    margin-bottom: 0;
-  }
-  .auth-brand-copy p,
-  .auth-brand-foot {
-    display: none;
-  }
-  .auth-brand-mark img {
-    width: 42px;
-    height: 42px;
-  }
-  .auth-waves {
-    height: 45%;
-  }
-  .auth-panel {
-    place-items: start center;
-    padding: 28px 20px;
+/* Phones: the card fills the width and moves up when the keyboard opens. */
+@media (max-width: 600px) {
+  .auth-stage {
+    align-content: start;
+    padding: 32px 16px;
     padding-bottom: calc(24px + var(--auth-keyboard-space, 0px) + env(safe-area-inset-bottom, 0px));
   }
-  .auth-card h2 {
-    font-size: 1.6rem;
-  }
-  .auth-card input {
-    font-size: 16px;
-    box-sizing: border-box;
-    scroll-margin-block: 24px;
-  }
-  .auth-theme {
-    right: 16px;
-  }
-}
-@media (max-width: 360px) {
-  .auth-brand,
-  .auth-panel {
-    padding-inline: 14px;
-  }
+  .auth-glass { padding: 26px 20px 22px; border-radius: 18px; }
+  .auth-glass h1 { font-size: 1.6rem; }
+  html body.auth-page .auth-input input { font-size: 16px; scroll-margin-block: 24px; }
+  .auth-glow-one { width: 280px; height: 280px; left: -10%; }
+  .auth-glow-two { width: 240px; height: 240px; right: -10%; }
+  .auth-theme { right: 16px; }
 }

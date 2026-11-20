@@ -277,7 +277,7 @@ export function validateCustomerQuery(query) {
   const status = query.status || '';
   const type = query.type || '';
   if (
-    !['', 'registered', 'pending', 'inactive'].includes(status) ||
+    !['', 'registered', 'installed', 'approved', 'pending', 'inactive'].includes(status) ||
     !['', 'Residential', 'Commercial'].includes(type)
   ) {
     throw new AppError('Invalid customer filters.', 400);
