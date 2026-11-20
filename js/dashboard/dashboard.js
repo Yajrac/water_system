@@ -16,12 +16,19 @@ function renderDashboard(data) {
       'geo-alt-fill',
     ],
     ['Generated bills', s.bills, 'All billing periods', 'file-earmark-text-fill'],
-    ['Unpaid bills', s.unpaidBills, s.overdue + ' overdue bills', 'hourglass-split'],
+    [
+      'Unpaid bills',
+      s.unpaidBills,
+      s.overdue + (Number(s.overdue) === 1 ? ' overdue bill' : ' overdue bills'),
+      'hourglass-split',
+      Number(s.unpaidBills) > 0,
+    ],
     [
       'Outstanding balance',
       WaterStore.money(Number(s.outstanding)),
       'Remaining unpaid amount',
       'wallet2',
+      Number(s.outstanding) > 0,
     ],
     [
       'Collections today',
@@ -41,23 +48,27 @@ function renderDashboard(data) {
       'Total recorded payments',
       'cash-coin',
     ],
-  ].forEach(([label, value, description, iconName]) => {
+  ].forEach(([label, value, description, iconName, needsAttention = false]) => {
+    // Icon tile on the left, label / value / caption on the right.
     const item = document.createElement('div');
-    item.className = 'record-card';
-    const top = document.createElement('div');
-    top.className = 'record-card-top';
-    const heading = document.createElement('h3');
-    heading.textContent = label;
+    item.className = 'record-card dash-stat' + (needsAttention ? ' is-attention' : '');
+    const iconTile = document.createElement('span');
+    iconTile.className = 'dash-stat-icon';
     const icon = document.createElement('i');
     icon.className = 'bi bi-' + iconName;
     icon.setAttribute('aria-hidden', 'true');
-    top.append(heading, icon);
+    iconTile.appendChild(icon);
+    const body = document.createElement('div');
+    body.className = 'dash-stat-body';
+    const heading = document.createElement('h3');
+    heading.textContent = label;
     const number = document.createElement('strong');
     number.textContent = value;
     if (typeof value === 'string' && value.includes('\u20b1')) number.classList.add('money-value');
     const caption = document.createElement('p');
     caption.textContent = description;
-    item.append(top, number, caption);
+    body.append(heading, number, caption);
+    item.append(iconTile, body);
     summary.appendChild(item);
   });
 }

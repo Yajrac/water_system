@@ -27,19 +27,29 @@ async function showPayments() {
     body.replaceChildren();
     for (const payment of data.payments) {
       const row = body.insertRow();
-      AdminUI.cell(row, payment.receipt, 'Receipt');
+      const receiptCell = AdminUI.cell(row, '', 'Receipt');
+      const receiptTag = document.createElement('span');
+      receiptTag.className = 'payment-receipt-tag';
+      receiptTag.textContent = payment.receipt;
+      receiptCell.appendChild(receiptTag);
       AdminUI.customer(row, {
         id: payment.customerId,
         name: payment.name,
         account: payment.account,
       });
-      for (const [value, label] of [
-        [payment.cycle, 'Cycle'],
-        [WaterStore.money(Number(payment.amount)), 'Amount'],
-        [payment.method, 'Method'],
-        [payment.date, 'Date'],
-      ])
-        AdminUI.cell(row, value, label);
+      // Cycle as "Oct 2026", amount in green, method as a colored pill.
+      const cycle = /^\d{4}-\d{2}$/.test(String(payment.cycle))
+        ? new Intl.DateTimeFormat('en', { month: 'short', year: 'numeric', timeZone: 'UTC' })
+          .format(new Date(payment.cycle + '-01T00:00:00Z'))
+        : payment.cycle;
+      AdminUI.cell(row, cycle, 'Cycle');
+      AdminUI.cell(row, WaterStore.money(Number(payment.amount)), 'Amount').className = 'payment-amount';
+      const methodCell = AdminUI.cell(row, '', 'Method');
+      const method = document.createElement('span');
+      method.className = 'payment-method-pill ' + (/bank/i.test(payment.method) ? 'is-bank' : 'is-cash');
+      method.textContent = payment.method;
+      methodCell.appendChild(method);
+      AdminUI.cell(row, payment.date, 'Date');
       const actions = AdminUI.cell(row, '', 'View receipt');
       const view = document.createElement('button');
       view.type = 'button';

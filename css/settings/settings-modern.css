@@ -1,0 +1,163 @@
+/* Settings: modern panels, a focused password card and readable activity logs. */
+html.theme-teal[data-page='settings'] .section-tab-panel {
+  overflow: hidden;
+  border-radius: 14px;
+  box-shadow: var(--shadow-sm);
+}
+html.theme-teal[data-page='settings'] .section-tab-panel > .panel-header {
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+html.theme-teal[data-page='settings'] .section-tab-panel table thead th {
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-ink-muted);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+}
+html[data-page='settings'] .section-tab-panel table tbody tr { transition: background-color 160ms ease; }
+html[data-page='settings'] .section-tab-panel table tbody tr:hover { background: var(--table-heading); }
+
+/* Change password: one comfortable column instead of a wide spread. */
+html[data-page='settings'] #passwordSettingsPanel .admin-body { max-width: 560px; }
+html[data-page='settings'] #adminPasswordForm { grid-template-columns: minmax(0, 1fr); gap: 16px; }
+html[data-page='settings'] #adminPasswordForm input:not([type='checkbox']) { border-radius: 10px; }
+html[data-page='settings'] #passwordInstructions {
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: var(--table-heading);
+  color: var(--color-ink);
+  font-size: 0.85rem;
+}
+
+/* Activity log cells. */
+td.activity-when { color: var(--color-ink-muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
+td.activity-target { font-weight: 600; color: var(--color-primary-deep); }
+td.activity-target.is-empty { color: var(--color-ink-muted); font-weight: 400; }
+td.activity-actor { font-weight: 700; color: var(--color-ink); }
+.activity-action-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.activity-action-pill::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.activity-action-pill.tone-success { background: #e4f5ee; color: #14765b; }
+.activity-action-pill.tone-info { background: #e0efff; color: #0b5cad; }
+.activity-action-pill.tone-danger { background: #ffe4e7; color: #a32632; }
+.activity-action-pill.tone-security { background: #efe6ff; color: #6b3fc4; }
+[data-theme='dark'] .activity-action-pill.tone-success { background: #183f33; color: #8ee2bf; }
+[data-theme='dark'] .activity-action-pill.tone-info { background: #16365a; color: #8cc4ff; }
+[data-theme='dark'] .activity-action-pill.tone-danger { background: #512934; color: #ffb1ba; }
+[data-theme='dark'] .activity-action-pill.tone-security { background: #2d2650; color: #c4a6ff; }
+html[data-page='settings'] #passwordInstructions { margin: 0 0 14px; }
+
+/* Log filters on one row: search (wide), date, Clear filters and Refresh logs, bottoms aligned. */
+html[data-page='settings'] .settings-log-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 14px;
+}
+html[data-page='settings'] .settings-log-toolbar > label { display: grid; gap: 7px; margin: 0; }
+html[data-page='settings'] .settings-log-toolbar > label:first-child { flex: 2 1 280px; }
+html[data-page='settings'] .settings-log-toolbar > label:nth-child(2) { flex: 1 1 200px; }
+html[data-page='settings'] .settings-log-toolbar > .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex: 0 0 auto;
+  width: auto;
+  height: 46px;
+  min-height: 46px;
+  margin: 0;
+  padding-inline: 16px;
+  border-radius: 10px;
+  white-space: nowrap;
+}
+@media (max-width: 600px) {
+  html[data-page='settings'] .settings-log-toolbar > .btn { flex: 1 1 140px; }
+}
+
+/* Breathing room between the password rules and the first field. */
+html[data-page='settings'] #passwordSettingsPanel #passwordInstructions { margin: 0 0 20px; }
+html[data-page='settings'] #passwordSettingsPanel #passwordMessage:empty { display: none; }
+
+/* Change password: form on the left, live checklist on the right. */
+html[data-page='settings'] #passwordSettingsPanel .admin-body.password-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 560px) minmax(260px, 380px);
+  gap: 32px;
+  align-items: start;
+  max-width: none;
+}
+.password-checklist {
+  display: grid;
+  gap: 14px;
+  padding: 20px 22px;
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--color-primary) 4%, var(--color-surface));
+}
+.password-checklist h3 { margin: 0; font-size: 0.95rem; color: var(--color-ink); }
+.password-checklist ul { display: grid; gap: 12px; margin: 0; padding: 0; list-style: none; }
+.password-checklist li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.86rem;
+  color: var(--color-ink-muted);
+}
+.password-checklist li::before {
+  content: '';
+  display: grid;
+  place-items: center;
+  flex: 0 0 22px;
+  width: 22px;
+  height: 22px;
+  border: 2px solid var(--color-border-strong);
+  border-radius: 50%;
+  box-sizing: border-box;
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+.password-checklist li[data-state='ok'] { color: #14765b; font-weight: 600; }
+.password-checklist li[data-state='ok']::before { content: '\2713'; border-color: #14765b; background: #14765b; color: #fff; }
+.password-checklist li[data-state='fail'] { color: #a32632; font-weight: 600; }
+.password-checklist li[data-state='fail']::before { content: '\2715'; border-color: #c0354f; background: #c0354f; color: #fff; }
+[data-theme='dark'] .password-checklist li[data-state='ok'] { color: #8ee2bf; }
+[data-theme='dark'] .password-checklist li[data-state='ok']::before { border-color: #2f9e78; background: #2f9e78; color: #062018; }
+[data-theme='dark'] .password-checklist li[data-state='fail'] { color: #ffb1ba; }
+[data-theme='dark'] .password-checklist li[data-state='fail']::before { border-color: #e0566e; background: #e0566e; color: #2a0b12; }
+.password-checklist-note {
+  display: flex;
+  gap: 8px;
+  margin: 4px 0 0;
+  padding-top: 14px;
+  border-top: 1px solid var(--color-border);
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: var(--color-ink-muted);
+}
+.password-checklist-note .bi { flex-shrink: 0; margin-top: 2px; color: var(--color-primary); }
+@media (max-width: 900px) {
+  html[data-page='settings'] #passwordSettingsPanel .admin-body.password-layout { grid-template-columns: minmax(0, 1fr); }
+}
+/* Fill the card: form and checklist share the full width. */
+html[data-page='settings'] #passwordSettingsPanel .admin-body.password-layout {
+  grid-template-columns: minmax(0, 1.5fr) minmax(280px, 1fr);
+}
+@media (max-width: 900px) {
+  html[data-page='settings'] #passwordSettingsPanel .admin-body.password-layout { grid-template-columns: minmax(0, 1fr); }
+}

@@ -14,11 +14,20 @@ async function showDisconnections() {
     body.replaceChildren();
     for(const customer of result.customers) {
       const row=body.insertRow();AdminUI.customer(row,customer);
-      AdminUI.cell(row,customer.disconnectedOn || 'Not recorded','Disconnected on');
-      AdminUI.cell(row,customer.disconnectionReason || 'Not recorded','Reason');
-      AdminUI.cell(row,WaterStore.money(Number(customer.outstanding)),'Outstanding balance');
+      // Date as "Nov 17, 2026"; missing values muted; balance red while owed.
+      const when=/^\d{4}-\d{2}-\d{2}$/.test(String(customer.disconnectedOn))
+        ? new Intl.DateTimeFormat('en',{month:'short',day:'numeric',year:'numeric',timeZone:'UTC'})
+          .format(new Date(customer.disconnectedOn+'T00:00:00Z'))
+        : customer.disconnectedOn;
+      const dateCell=AdminUI.cell(row,when || 'Not recorded','Disconnected on');
+      if(!when) dateCell.className='service-not-recorded';
+      const reasonCell=AdminUI.cell(row,customer.disconnectionReason || 'Not recorded','Reason');
+      reasonCell.className=customer.disconnectionReason?'service-reason':'service-not-recorded';
+      AdminUI.cell(row,WaterStore.money(Number(customer.outstanding)),'Outstanding balance').className=
+        Number(customer.outstanding)>0?'service-balance-due':'service-balance-clear';
       const status=AdminUI.cell(row,'','Status');const text=document.createElement('span');
-      text.className=customer.active?'status-paid':'status-overdue';
+      text.className='service-status-pill '+(customer.active?'is-active'
+        :customer.connectionStatus==='Disconnected'?'is-disconnected':'is-inactive');
       text.textContent=customer.connectionStatus;status.appendChild(text);
       const actions=AdminUI.cell(row,'','Actions');
       const profile=document.createElement('a');profile.className='btn action-view';
@@ -26,7 +35,8 @@ async function showDisconnections() {
       profile.title='View customer';profile.setAttribute('aria-label','View customer');
       const icon=document.createElement('i');icon.className='bi bi-eye';icon.setAttribute('aria-hidden','true');profile.appendChild(icon);actions.appendChild(profile);
       const button=document.createElement('button');button.type='button';
-      button.className='btn '+(customer.active?'action-deactivate':'action-reconnect');
+      button.className='btn '+(customer.active?'action-deactivate'
+        :customer.connectionStatus==='Disconnected'?'action-reconnect':'action-reconnect action-activate');
       button.textContent=customer.active?'Disconnect':customer.connectionStatus==='Disconnected'?'Reconnect':'Activate';button.disabled=changingAccount;
       button.addEventListener('click',()=>changeConnection(customer));actions.appendChild(button);
     }

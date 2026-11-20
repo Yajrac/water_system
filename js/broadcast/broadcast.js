@@ -24,7 +24,9 @@ function selectedRecipients() {
     (audienceSelect.value==='barangay' ? String(customer.barangayId)===targetSelect.value : selectedCustomerIds.has(String(customer.id))));
 }
 function showRecipientCount() {
-  document.getElementById('recipientCount').textContent=selectedRecipients().length+' customers selected';
+  const count=selectedRecipients().length, node=document.getElementById('recipientCount');
+  node.textContent=count+(count===1?' customer selected':' customers selected');
+  node.setAttribute?.('data-count',String(count)); // styles the pill once someone is selected
 }
 function renderCustomerOptions() {
   const eligible=eligibleCustomers();
@@ -47,6 +49,7 @@ function renderCustomerOptions() {
       const financials=document.createElement('span'); financials.className='recipient-financials';
       const balanceLabel=document.createElement('small'); balanceLabel.textContent='Balance';
       const balance=document.createElement('strong');balance.textContent=WaterStore.money(Number(customer.balance));
+      balance.className=Number(customer.balance)>0?'has-balance':'no-balance';
       financials.append(balanceLabel,balance);label.append(financials);
     }
     customerOptions.append(label);
@@ -60,7 +63,7 @@ function changeAudience() {
   document.getElementById('noticeCustomerPicker').hidden=audienceSelect.value!=='customer';
   targetSelect.required=audienceSelect.value==='barangay';
   targetSelect.replaceChildren(new Option('Select barangay',''));
-  noticeAreas.forEach(area=>targetSelect.add(new Option(area.name,String(area.id))));
+  noticeAreas.forEach(area=>targetSelect.add(new Option(globalThis.barangayLabel?.(area.name) ?? area.name,String(area.id))));
   renderCustomerOptions();
 }
 function changeNoticeType() {
@@ -71,10 +74,26 @@ async function showNotices() {
   const body = document.getElementById('noticeRows');
   const notices = await AdminAPI.request('/notifications');
   body.replaceChildren();
+  // Notice type tones for the history pills.
+  const typeTone={'Overdue':'danger','Disconnection':'danger','Due date':'warning','Unpaid bill':'warning',
+    'Reconnection':'success','Announcement':'info'};
+  const pill=(cell,text,className)=>{
+    const tag=document.createElement('span'); tag.className=className; tag.textContent=text;
+    cell.replaceChildren(tag);
+  };
   for (const notice of notices) {
     const row = body.insertRow();
-    [notice.date,notice.type,notice.audience,notice.recipients,notice.message,notice.status]
-      .forEach((value,index)=>AdminUI.cell(row,value,['Created','Type','Audience','Recipients','Message','Status'][index]));
+    const created=/^\d{4}-\d{2}-\d{2}$/.test(String(notice.date))
+      ? new Intl.DateTimeFormat('en',{month:'short',day:'numeric',year:'numeric',timeZone:'UTC'})
+        .format(new Date(notice.date+'T00:00:00Z'))
+      : notice.date;
+    const cells=[created,notice.type,notice.audience,notice.recipients,notice.message,notice.status]
+      .map((value,index)=>AdminUI.cell(row,value,['Created','Type','Audience','Recipients','Message','Status'][index]));
+    pill(cells[1],notice.type,'notice-type-pill tone-'+(typeTone[notice.type]||'info'));
+    pill(cells[2],notice.audience,'notice-audience-pill');
+    cells[3].className='notice-recipient-count';
+    cells[4].className='notice-message-cell';
+    pill(cells[5],notice.status,'notice-status-pill '+(notice.status==='Published'?'is-published':'is-draft'));
   }
   AdminUI.empty(body,6,'No notifications yet.');
 }

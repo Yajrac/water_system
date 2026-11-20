@@ -42,13 +42,18 @@ async function renderCashierRegistry() {
     body.replaceChildren();
     for (const bill of cashierBills) {
       const row = body.insertRow();
-      for (const [value, label] of [
-        [bill.submitterNumber || bill.account, 'Submitter / account no.'],
-        [bill.name, 'Full name'],
-        [bill.barangay, 'Barangay'],
-        [bill.cycle, 'Billing month'],
-      ])
-        AdminUI.cell(row, value, label);
+      // Account as a tag, short barangay name, billing month as "Oct 2026".
+      const accountCell = AdminUI.cell(row, '', 'Submitter / account no.');
+      const accountTag = document.createElement('span');
+      accountTag.className = 'payment-receipt-tag';
+      accountTag.textContent = bill.submitterNumber || bill.account;
+      accountCell.appendChild(accountTag);
+      AdminUI.cell(row, bill.name, 'Full name').className = 'cashier-name';
+      AdminUI.cell(row, globalThis.barangayLabel?.(bill.barangay) ?? bill.barangay, 'Barangay');
+      AdminUI.cell(row, /^\d{4}-\d{2}$/.test(String(bill.cycle))
+        ? new Intl.DateTimeFormat('en', { month: 'short', year: 'numeric', timeZone: 'UTC' })
+          .format(new Date(bill.cycle + '-01T00:00:00Z'))
+        : bill.cycle, 'Billing month');
       const actions = AdminUI.cell(row, '', 'Action');
       AdminUI.button(actions, 'Process payment', () => openCashierBill(bill.id));
     }
@@ -224,7 +229,7 @@ AdminAuth.ready.then(async (user) => {
   try {
     const areas = await AdminAPI.request('/barangays');
     for (const area of areas)
-      document.getElementById('cashierBarangay').add(new Option(area.name, String(area.id)));
+      document.getElementById('cashierBarangay').add(new Option(globalThis.barangayLabel?.(area.name) ?? area.name, String(area.id)));
   } catch (error) {
     AdminUI.message(error.message);
   }

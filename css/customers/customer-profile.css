@@ -439,3 +439,81 @@
   #billingPanel .table-wrap { padding: 8px 12px 12px; }
   #billingPanel > .panel .panel-header { padding: 16px; }
 }
+
+/* Modern customer profile: matches the dashboard tiles and panels. */
+html.theme-teal .customer-page :is(.profile-hero, .profile-registry-card, .profile-meter, .profile-info-card, .profile-summary > div) {
+  border-radius: 14px;
+  box-shadow: var(--shadow-sm);
+}
+html.theme-teal .customer-page .profile-info-card {
+  overflow: hidden;
+}
+html.theme-teal .customer-page .profile-info-card .panel-header {
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+html.theme-teal .customer-page .profile-registry-card h2 {
+  padding: 18px 22px;
+  text-transform: none;
+  letter-spacing: 0;
+}
+/* Summary tiles: icon on the left, label and value stacked on the right. */
+html.theme-teal .customer-page .profile-summary > div {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  column-gap: 14px;
+  row-gap: 2px;
+  padding: 18px 20px;
+}
+html.theme-teal .customer-page .profile-summary > div > span {
+  display: contents;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+html.theme-teal .customer-page .profile-summary .profile-icon {
+  grid-row: 1 / 3;
+  width: 48px;
+  min-width: 48px;
+  height: 48px;
+  flex-basis: 48px;
+  border-radius: 12px;
+  font-size: 22px;
+}
+html.theme-teal .customer-page .profile-summary strong {
+  grid-column: 2;
+  font-size: clamp(1.25rem, 1.7vw, 1.6rem);
+  line-height: 1.2;
+  color: var(--color-ink);
+}
+[data-theme='dark'] .customer-page .profile-summary .profile-icon {
+  background: #173a4e;
+  filter: none;
+}
+[data-theme='dark'] .customer-page .profile-summary > div:nth-child(2) .profile-icon { background: #2d2650; }
+[data-theme='dark'] .customer-page .profile-summary > div:nth-child(3) .profile-icon { background: #153b50; }
+[data-theme='dark'] .customer-page .profile-summary > div:nth-child(4) .profile-icon { background: #173d2c; }
+/* Billing & Payments tab: same white panel header and light table header. */
+html.theme-teal .customer-page #billingPanel > .panel {
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  box-shadow: var(--shadow-sm);
+}
+html.theme-teal .customer-page #billingPanel > .panel .panel-header {
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+html.theme-teal .customer-page #billingPanel .table-wrap {
+  padding: 4px 8px 12px;
+}
+html.theme-teal .customer-page #billingPanel table thead th {
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-ink-muted);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+}
+html.theme-teal .customer-page #billingPanel table tbody tr:hover {
+  background: var(--table-heading);
+}

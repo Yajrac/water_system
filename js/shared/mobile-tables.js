@@ -4,7 +4,7 @@
     billRows: [0, 4, 6, 8, 9], paymentRows: [0, 1, 3, 5, 6],
     balanceRows: [0, 2, 4, 5], reportRows: [0, 3, 4, 5],
     consumptionRows: [0, 1, 2, 3], feedbackRows: [0, 1, 4, 5],
-    disconnectRows: [0, 3, 4, 5], barangayRows: [0, 3, 4],
+    disconnectRows: [0, 3, 4, 5], barangayRows: [0, 2, 3],
     cashierRows: [0, 1, 3, 4], activityRows: [0, 1, 3], consumerActivityRows: [0, 1, 3],
   };
   const titles = { 'Billing month': 'Month', 'Previous reading': 'Previous',

@@ -2,6 +2,16 @@
 (async function initializeBillingLedger() {
   if (!(await AdminAuth.ready)) return;
   const get = (id) => document.getElementById(id);
+  // Entry status text plus a tone for its pill: saved, unsaved, busy or error.
+  const setEntryStatus = (text) => {
+    const node = get('ledgerEntryStatus');
+    node.textContent = text;
+    node.setAttribute('data-tone', !text ? ''
+      : text === 'Saved' ? 'saved'
+        : /^Saving/.test(text) ? 'busy'
+          : /not saved/i.test(text) ? 'error'
+            : 'unsaved');
+  };
   const cycle = WaterStore.today().slice(0, 7);
   const form = get('ledgerEntryForm');
   const setupForm = get('ledgerSetupForm');
@@ -65,7 +75,7 @@
     for (const key of ['connection', 'late', 'other']) form.elements[key].value = '0';
     get('ledgerPrevious').value = '';
     get('ledgerSelected').textContent = 'Select a consumer';
-    get('ledgerEntryStatus').textContent = '';
+    setEntryStatus('');
     setFieldsDisabled(true);
     totals();
   }
@@ -113,6 +123,11 @@
     }
     const completed = customers.filter((customer) => entries.has(customer.id)).length;
     get('draftCount').textContent = completed + ' / ' + customers.length + ' completed';
+    // Drives the progress bar drawn under the count.
+    get('draftCount').setAttribute(
+      'style',
+      '--progress: ' + (customers.length ? Math.round((completed / customers.length) * 100) : 0) + '%',
+    );
     get('ledgerProgress').textContent = loading
       ? 'Loading entries...'
       : customers.length
@@ -146,7 +161,7 @@
     form.elements.connection.value = saved?.connectionCharge ?? '0';
     form.elements.late.value = saved?.late ?? '0';
     form.elements.other.value = saved?.other ?? '0';
-    get('ledgerEntryStatus').textContent = saved ? 'Saved' : 'Unsaved entry';
+    setEntryStatus(saved ? 'Saved' : 'Unsaved entry');
     setFieldsDisabled(false);
     render();
     totals();
@@ -193,7 +208,7 @@
   form.addEventListener('input', () => {
     dirty = true;
     totals();
-    get('ledgerEntryStatus').textContent = 'Unsaved changes';
+    setEntryStatus('Unsaved changes');
     render();
   });
   form.addEventListener('submit', async (event) => {
@@ -218,7 +233,7 @@
     saving = true;
     setFieldsDisabled(true);
     get('changeLedgerSetup').disabled = true;
-    get('ledgerEntryStatus').textContent = 'Saving entry...';
+    setEntryStatus('Saving entry...');
     render();
     try {
       const saved = await MeterEntryAPI.save(
@@ -229,7 +244,7 @@
       );
       entries.set(customer.id, saved);
       dirty = false;
-      get('ledgerEntryStatus').textContent = 'Saved';
+      setEntryStatus('Saved');
       const index = customers.findIndex((item) => item.id === customer.id);
       const ordered = [...customers.slice(index + 1), ...customers.slice(0, index)];
       const next = ordered.find((item) => !entries.has(item.id));
@@ -243,7 +258,7 @@
         AdminUI.message('All consumer entries are saved. You can now generate bills.');
       }
     } catch (error) {
-      get('ledgerEntryStatus').textContent = 'Entry not saved';
+      setEntryStatus('Entry not saved');
       await showNotice('Entry not saved', error.message);
     } finally {
       saving = false;
@@ -378,7 +393,7 @@
     areas = registered.filter((area) => Number(area.is_active) === 1);
     get('changeLedgerSetup').disabled = false;
     setups = new Map(saved.map((setup) => [setup.barangay, setup]));
-    areas.forEach((area) => setupArea.add(new Option(area.name, area.name)));
+    areas.forEach((area) => setupArea.add(new Option(globalThis.barangayLabel?.(area.name) ?? area.name, area.name)));
     const requested = new URLSearchParams(location.search).get('barangay');
     if (areas.some((area) => area.name === requested)) selectedArea = requested;
     await loadEntries();

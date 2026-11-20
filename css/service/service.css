@@ -137,3 +137,101 @@
   padding: 0;
   box-shadow: none;
 }
+
+/* Modern Disconnected Accounts: white panel header, light table header, colored values. */
+html.theme-teal .service-page > .panel {
+  overflow: hidden;
+  border-radius: 14px;
+  box-shadow: var(--shadow-sm);
+}
+html.theme-teal .service-page > .panel > .panel-header {
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+html.theme-teal .service-page .service-table thead th {
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-ink-muted);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+}
+.service-page .service-table tbody tr { transition: background-color 160ms ease; }
+.service-page .service-table tbody tr:hover { background: var(--table-heading); }
+.service-table td.service-not-recorded { color: var(--color-ink-muted); font-style: italic; }
+.service-table td.service-reason { color: var(--color-ink); max-width: 280px; }
+.service-table td.service-balance-due { color: #b42d47; font-weight: 800; }
+.service-table td.service-balance-clear { color: #14765b; font-weight: 800; }
+[data-theme='dark'] .service-table td.service-balance-due { color: #ff9cab; }
+[data-theme='dark'] .service-table td.service-balance-clear { color: #8ee2bf; }
+
+/* Status: Active green, Disconnected red, Inactive grey. */
+.service-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.service-status-pill::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.service-status-pill.is-active { background: #e4f5ee; color: #14765b; }
+.service-status-pill.is-disconnected { background: #ffe4e7; color: #a32632; }
+.service-status-pill.is-inactive { background: #eef2f5; color: #5d6b75; }
+[data-theme='dark'] .service-status-pill.is-active { background: #183f33; color: #8ee2bf; }
+[data-theme='dark'] .service-status-pill.is-disconnected { background: #512934; color: #ffb1ba; }
+[data-theme='dark'] .service-status-pill.is-inactive { background: #243440; color: #a9b8c2; }
+
+/* Action buttons colored by what they do. */
+html body .service-page .service-table .btn.action-deactivate {
+  border: 1px solid #e7a1ad;
+  border-radius: 10px;
+  background: #fff5f6;
+  color: #b3263a;
+  font-weight: 700;
+}
+html body .service-page .service-table .btn.action-deactivate:hover:not(:disabled) { background: #ffe4e7; }
+html body .service-page .service-table .btn.action-reconnect {
+  border: 1px solid #14765b;
+  border-radius: 10px;
+  background: #14765b;
+  color: #fff;
+  font-weight: 700;
+}
+html body .service-page .service-table .btn.action-reconnect:hover:not(:disabled) { background: #0f5f49; }
+html[data-theme='dark'] body .service-page .service-table .btn.action-deactivate {
+  border-color: #7a3442;
+  background: #3a1c24;
+  color: #ff9cab;
+}
+html[data-theme='dark'] body .service-page .service-table .btn.action-reconnect {
+  border-color: #2f9e78;
+  background: #1f7a5c;
+}
+/* Activate (Inactive, never disconnected) is blue, apart from green Reconnect. */
+html body .service-page .service-table .btn.action-reconnect.action-activate {
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+}
+html body .service-page .service-table .btn.action-reconnect.action-activate:hover:not(:disabled) {
+  background: var(--color-primary-deep);
+}
+html[data-theme='dark'] body .service-page .service-table .btn.action-reconnect.action-activate { color: #06263a; }
+/* Search and Status share the same label layout so both controls line up. */
+.service-toolbar > label {
+  display: grid;
+  gap: 7px;
+  margin: 0;
+  font-size: 0.8rem;
+}
+.service-toolbar .payment-search-control > .admin-filter {
+  display: block;
+  margin: 0;
+}

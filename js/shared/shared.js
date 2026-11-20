@@ -448,6 +448,8 @@ window.addEventListener('storage', (event) => {
   if (event.key === WaterStore.key) location.reload();
 });
 window.addEventListener('error', (event) => {
+  // Browser layout notices (not failures) should never reach staff.
+  if (/ResizeObserver loop/i.test(event.message || '')) return;
   AdminUI.message('The operation could not finish. ' + event.message);
 });
 
@@ -496,3 +498,10 @@ new MutationObserver((changes) => {
     change.addedNodes.forEach(scanNavigationIcons);
   });
 }).observe(document.body, { childList: true, subtree: true });
+
+// Display name for a barangay: named areas drop the "Barangay" prefix (Banawan);
+// numbered ones keep it (Barangay 2). Stored values and option values stay unchanged.
+function barangayLabel(name) {
+  const area = String(name ?? '').replace(/^Barangay\s+/i, '');
+  return /^\d+$/.test(area) ? String(name) : area;
+}

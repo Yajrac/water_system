@@ -470,18 +470,26 @@
 }
 .customer-password-control button {
   position: absolute;
-  right: 2px;
-  top: 2px;
-  bottom: 2px;
-  width: 44px;
+  right: 6px;
+  top: 50%;
+  width: 38px;
+  height: 38px;
+  transform: translateY(-50%);
   border: 0;
-  border-radius: 4px;
+  border-radius: 8px;
   color: var(--color-primary);
   background: transparent;
   cursor: pointer;
+  transition: background-color 150ms ease, color 150ms ease;
 }
+/* Soft tint on hover so the eye icon stays visible. */
 .customer-password-control button:hover {
-  background: var(--color-primary-light, #e6f5fa);
+  background: var(--table-heading);
+  color: var(--color-primary-deep);
+}
+.customer-password-control button:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 1px;
 }
 .customer-password-control svg {
   width: 21px;
@@ -1346,3 +1354,159 @@
   .profile-info-card .profile-details { padding-inline: 14px; }
   .profile-info-card .profile-details > div { grid-template-columns: minmax(95px, 1fr) minmax(0, 1.3fr); gap: 10px; }
 }
+
+/* Modern customer list: matches the dashboard tiles and chart panels. */
+.customer-list-page .customer-metric {
+  border-radius: 14px;
+  box-shadow: var(--shadow-sm);
+  gap: 16px;
+}
+.customer-list-page .metric-symbol {
+  width: 48px;
+  height: 48px;
+  font-size: 22px;
+}
+.customer-list-page .customer-metric strong {
+  line-height: 1.2;
+}
+.customer-list-page .customer-directory {
+  border-radius: 14px;
+  box-shadow: var(--shadow-sm);
+}
+.customer-list-page .customer-directory .panel-header {
+  border-bottom: 1px solid var(--color-border);
+}
+.customer-list-page .customers-table thead th {
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-ink-muted);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+}
+.customer-list-page .customers-table tbody td {
+  padding-block: 14px;
+}
+/* Status pills with a dot (Registered, Approved, Pending, Inactive/Disconnected). */
+.customer-list-page .customers-table .customer-status {
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.7rem;
+}
+.customer-list-page .customers-table .customer-status::before {
+  display: block;
+}
+.customer-list-page .customer-temporary-password {
+  width: fit-content;
+  margin-top: 6px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: #ffe9ec;
+  color: #b3263a;
+  font-size: 0.68rem;
+}
+[data-theme='dark'] .customer-list-page .customer-temporary-password {
+  background: #4a1f29;
+  color: #ff9cab;
+}
+.customer-list-page .customers-table .customer-status.is-registered { background: #e4f5ee; color: #14765b; }
+.customer-list-page .customers-table .customer-status.is-pending { background: #fff3d9; color: #92610b; }
+.customer-list-page .customers-table .customer-status.status-overdue { background: #ffe4e7; color: #a32632; }
+[data-theme='dark'] .customer-list-page .customers-table .customer-status.is-registered { background: #183f33; color: #8ee2bf; }
+[data-theme='dark'] .customer-list-page .customers-table .customer-status.is-pending { background: #3c301b; color: #f5d495; }
+[data-theme='dark'] .customer-list-page .customers-table .customer-status.status-overdue { background: #512934; color: #ffb1ba; }
+
+/* Modern Add / Edit customer form. */
+.customer-editor-page .customer-page-form {
+  border-radius: 14px;
+  box-shadow: var(--shadow-sm);
+}
+/* The stepper title already names the step: drop the duplicate fieldset frame and legend. */
+.customer-editor-page .customer-section {
+  margin-top: 18px;
+  padding: 0;
+  border: 0;
+  background: none;
+}
+.customer-editor-page .customer-section > legend {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+.customer-editor-page #customerStepTitle {
+  font-size: 1.15rem;
+  color: var(--color-ink);
+}
+.customer-editor-page .customer-step-header {
+  padding-bottom: 18px;
+  margin-bottom: 18px;
+}
+/* Read-only values (dates, approver, references): neutral fill instead of bright blue. */
+.customer-editor-page input[readonly],
+.customer-editor-page .application-date-display {
+  border: 1px dashed var(--color-border-strong);
+  background: color-mix(in srgb, var(--color-ink) 4%, var(--color-surface));
+  color: var(--color-ink);
+}
+.customer-editor-page .application-date-display svg {
+  color: var(--color-ink-muted);
+}
+/* Inputs: rounder corners and a soft focus ring. */
+.customer-editor-page #customerForm :is(input:not([type='checkbox']):not([type='radio']), select, textarea) {
+  border-radius: 10px;
+}
+.customer-editor-page #customerForm :is(input:not([type='checkbox']):not([type='radio']):not([readonly]), select, textarea):focus-visible {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-primary) 16%, transparent);
+}
+/* Step navigation: Back is secondary (outline), Next is primary. */
+.customer-editor-page .customer-step-navigation {
+  margin: 24px 0 18px;
+}
+.customer-editor-page .customer-step-navigation .btn {
+  min-height: 42px;
+  padding-inline: 18px;
+  border-radius: 10px;
+  font-weight: 600;
+}
+.customer-editor-page .customer-step-navigation .customer-step-back {
+  border: 1px solid var(--color-border-strong);
+  background: var(--color-surface);
+  color: var(--color-primary-deep);
+}
+.customer-editor-page .customer-step-navigation .customer-step-back:hover {
+  border-color: var(--color-primary);
+  background: var(--table-heading);
+}
+.customer-editor-page .customer-form-actions .btn {
+  min-height: 42px;
+  border-radius: 10px;
+}
+/* Approved (not yet installed) gets its own blue pill, apart from green Registered. */
+.customer-list-page .customers-table .customer-status.is-approved { background: #e0efff; color: #0b5cad; }
+[data-theme='dark'] .customer-list-page .customers-table .customer-status.is-approved { background: #16365a; color: #8cc4ff; }
+/* Meter reading pills: color steps up with the reading (0, <20, <50, <100, 100+ m³). */
+.customer-reading-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.customer-reading-pill.is-zero { background: #eef2f5; color: #5d6b75; }
+.customer-reading-pill.is-low { background: #e0efff; color: #0b5cad; }
+.customer-reading-pill.is-mid { background: #d9f5ef; color: #0d7568; }
+.customer-reading-pill.is-high { background: #ffefd6; color: #a35a05; }
+.customer-reading-pill.is-top { background: #efe6ff; color: #6b3fc4; }
+[data-theme='dark'] .customer-reading-pill.is-zero { background: #243440; color: #a9b8c2; }
+[data-theme='dark'] .customer-reading-pill.is-low { background: #16365a; color: #8cc4ff; }
+[data-theme='dark'] .customer-reading-pill.is-mid { background: #143c36; color: #6fdcc8; }
+[data-theme='dark'] .customer-reading-pill.is-high { background: #43321a; color: #ffbe6b; }
+[data-theme='dark'] .customer-reading-pill.is-top { background: #2d2650; color: #c4a6ff; }

@@ -1,0 +1,76 @@
+/* Reports & Analytics: matches the dashboard tiles and modern panels. */
+
+/* Summary tiles: icon tile left, label / amount / caption right. */
+#reportSummary .report-stat {
+  --stat-icon: #087de0;
+  --stat-icon-bg: #e0f2ff;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 16px;
+  padding: 18px 20px;
+  border-radius: 14px;
+}
+#reportSummary .report-stat.tone-violet { --stat-icon: #8545e6; --stat-icon-bg: #f0e7ff; }
+#reportSummary .report-stat.tone-success { --stat-icon: #079650; --stat-icon-bg: #ddf8e9; }
+#reportSummary .report-stat.tone-danger { --stat-icon: #c0354f; --stat-icon-bg: #ffe6ea; }
+[data-theme='dark'] #reportSummary .report-stat { --stat-icon: #5cb8ff; --stat-icon-bg: #153b50; }
+[data-theme='dark'] #reportSummary .report-stat.tone-violet { --stat-icon: #b78cff; --stat-icon-bg: #2d2650; }
+[data-theme='dark'] #reportSummary .report-stat.tone-success { --stat-icon: #4fd897; --stat-icon-bg: #173d2c; }
+[data-theme='dark'] #reportSummary .report-stat.tone-danger { --stat-icon: #ff8a9e; --stat-icon-bg: #4a1f29; }
+#reportSummary .report-stat-icon {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: var(--stat-icon-bg);
+  color: var(--stat-icon);
+  font-size: 22px;
+}
+#reportSummary .report-stat-body { display: grid; gap: 2px; min-width: 0; }
+#reportSummary .report-stat h3 { margin: 0; font-size: 0.78rem; font-weight: 600; color: var(--color-ink-muted); }
+#reportSummary .report-stat strong { font-size: clamp(1.3rem, 1.7vw, 1.65rem); line-height: 1.2; }
+#reportSummary .report-stat.tone-success strong,
+#reportSummary .report-stat.tone-danger strong { color: var(--stat-icon); }
+#reportSummary .report-stat p { margin: 2px 0 0; font-size: 0.74rem; color: var(--color-ink-muted); }
+
+/* Workspace panel: white headers with hairline dividers. */
+html.theme-teal[data-page='reports'] .report-workspace {
+  border-radius: 14px;
+  box-shadow: var(--shadow-sm);
+}
+html.theme-teal[data-page='reports'] .report-filter-header {
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+html.theme-teal[data-page='reports'] .report-workspace > .section-tab-panel > .panel-header {
+  border-bottom: 1px solid var(--color-border);
+}
+html.theme-teal[data-page='reports'] .report-workspace table thead th {
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-ink-muted);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+}
+html[data-page='reports'] .report-workspace table tbody tr { transition: background-color 160ms ease; }
+html[data-page='reports'] .report-workspace table tbody tr:hover { background: var(--table-heading); }
+
+/* Account report values. */
+.report-workspace td.report-balance-due { color: #b42d47; font-weight: 800; }
+.report-workspace td.report-balance-clear { color: #14765b; font-weight: 800; }
+[data-theme='dark'] .report-workspace td.report-balance-due { color: #ff9cab; }
+[data-theme='dark'] .report-workspace td.report-balance-clear { color: #8ee2bf; }
+
+/* Consumption report: barangay name and a bar scaled to the largest area. */
+.report-workspace td.report-area-name { font-weight: 700; color: var(--color-ink); }
+.report-volume { display: grid; gap: 6px; min-width: 140px; max-width: 320px; }
+.report-volume strong { font-variant-numeric: tabular-nums; color: var(--color-ink); }
+.report-volume-bar {
+  height: 8px;
+  border-radius: 999px;
+  background:
+    linear-gradient(90deg, #26b9cf, var(--color-primary)) left / var(--share, 0%) 100% no-repeat,
+    var(--color-border);
+}

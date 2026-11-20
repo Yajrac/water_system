@@ -1,0 +1,148 @@
+/* Payment History: matches the dashboard tiles and modern panels. */
+
+/* Summary tiles: icon on the left, label / amount / note stacked on the right. */
+html.theme-teal .payment-page .payment-history-summary > div {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  column-gap: 16px;
+  row-gap: 2px;
+  padding: 18px 20px;
+  border-radius: 14px;
+  box-shadow: var(--shadow-sm);
+}
+html.theme-teal .payment-page .payment-history-summary .summary-label-with-icon {
+  display: contents;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--color-ink-muted);
+}
+html.theme-teal .payment-page .payment-history-summary .summary-label-with-icon > .bi {
+  grid-row: 1 / 4;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  font-size: 22px;
+}
+html.theme-teal .payment-page .payment-history-summary > div:nth-child(2) .bi { background: #ddf8e9; color: #079650; }
+html.theme-teal .payment-page .payment-history-summary > div:nth-child(3) .bi { background: #f0e7ff; color: #8545e6; }
+[data-theme='dark'] .payment-page .payment-history-summary > div:nth-child(2) .bi { background: #173d2c; color: #4fd897; filter: none; }
+[data-theme='dark'] .payment-page .payment-history-summary > div:nth-child(3) .bi { background: #2d2650; color: #b78cff; filter: none; }
+html.theme-teal .payment-page .payment-history-summary strong {
+  grid-column: 2;
+  font-size: clamp(1.3rem, 1.7vw, 1.65rem);
+  line-height: 1.2;
+  color: var(--color-ink);
+}
+html.theme-teal .payment-page .payment-history-summary small {
+  grid-column: 2;
+  font-size: 0.74rem;
+  color: var(--color-ink-muted);
+}
+
+/* Panel and table. */
+html.theme-teal .payment-page > .panel {
+  overflow: hidden;
+  border-radius: 14px;
+  box-shadow: var(--shadow-sm);
+}
+html.theme-teal .payment-page > .panel > .panel-header {
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+html.theme-teal .payment-page > .panel table thead th {
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-ink-muted);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+}
+.payment-page > .panel table tbody tr { transition: background-color 160ms ease; }
+.payment-page > .panel table tbody tr:hover { background: var(--table-heading); }
+
+/* Receipt number, amount and method. */
+.payment-receipt-tag {
+  display: inline-block;
+  padding: 3px 8px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--table-heading);
+  color: var(--color-primary-deep);
+  font-size: 0.74rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.mobile-summary-payments td.payment-amount { color: #14765b; font-weight: 800; }
+[data-theme='dark'] .mobile-summary-payments td.payment-amount { color: #8ee2bf; }
+.payment-method-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.payment-method-pill::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.payment-method-pill.is-cash { background: #e4f5ee; color: #14765b; }
+.payment-method-pill.is-bank { background: #e0efff; color: #0b5cad; }
+[data-theme='dark'] .payment-method-pill.is-cash { background: #183f33; color: #8ee2bf; }
+[data-theme='dark'] .payment-method-pill.is-bank { background: #16365a; color: #8cc4ff; }
+
+/* Dark icon tiles (must out-rank the light html.theme-teal rules above). */
+html.theme-teal[data-theme='dark'] .payment-page .payment-history-summary .summary-label-with-icon > .bi {
+  background: #153b50;
+  color: #5cb8ff;
+  filter: none;
+}
+html.theme-teal[data-theme='dark'] .payment-page .payment-history-summary > div:nth-child(2) .bi { background: #173d2c; color: #4fd897; }
+html.theme-teal[data-theme='dark'] .payment-page .payment-history-summary > div:nth-child(3) .bi { background: #2d2650; color: #b78cff; }
+
+/* Bill Balances: paid in green; balance red while owed, green once settled. */
+.payment-page table td.balance-paid-amount { color: #14765b; font-weight: 700; }
+.payment-page table td.balance-due-amount { color: #b42d47; font-weight: 800; }
+.payment-page table td.balance-settled-amount { color: #14765b; font-weight: 800; }
+[data-theme='dark'] .payment-page table td.balance-paid-amount,
+[data-theme='dark'] .payment-page table td.balance-settled-amount { color: #8ee2bf; }
+[data-theme='dark'] .payment-page table td.balance-due-amount { color: #ff9cab; }
+
+/* Payment (cashier): name emphasis, rounder detail boxes, prominent amount due. */
+.cashier-table td.cashier-name { font-weight: 700; color: var(--color-ink); }
+.payment-page .cashier-details dd {
+  border-style: dashed;
+  border-color: var(--color-border-strong);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--color-ink) 4%, var(--color-surface));
+  color: var(--color-ink);
+  font-weight: 600;
+}
+.payment-page .cashier-cash > * {
+  border-radius: 12px;
+}
+.payment-page .cashier-amount-due strong {
+  font-size: 1.6rem;
+}
+.payment-page .cashier-section-title {
+  font-weight: 700;
+  color: var(--color-primary-deep);
+}
+/* "Process payment" is the main action on each cashier row. */
+html body .payment-page .cashier-table td .btn {
+  border-color: var(--color-primary);
+  border-radius: 10px;
+  background: var(--color-primary);
+  color: #fff;
+  font-weight: 600;
+}
+html body .payment-page .cashier-table td .btn:hover {
+  background: var(--color-primary-deep);
+  border-color: var(--color-primary-deep);
+}

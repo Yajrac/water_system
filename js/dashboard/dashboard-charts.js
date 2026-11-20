@@ -149,7 +149,8 @@ function renderDashboardCharts(data) {
         chartNode(
           'text',
           { x, y: 239, 'text-anchor': 'middle', class: 'chart-label' },
-          labels[index].replace(/^Barangay /, 'Brgy '),
+          // Named areas drop the "Barangay" prefix; numbered ones keep it.
+          /^Barangay\s+\d+$/i.test(labels[index]) ? labels[index] : labels[index].replace(/^Barangay\s+/i, ''),
         ),
       );
     });
@@ -171,8 +172,11 @@ function renderDashboardCharts(data) {
       container.chartResizeObserver = new ResizeObserver(() => {
         if (Math.abs(container.clientWidth - initialWidth) < 2) return;
         container.chartResizeObserver.disconnect();
-        container.replaceChildren();
-        renderMonthlyChart(id, title, values, format, line, labels, annualTotal, emptyMessage);
+        // Re-render on the next frame, outside the observer callback, to avoid a resize loop.
+        requestAnimationFrame(() => {
+          container.replaceChildren();
+          renderMonthlyChart(id, title, values, format, line, labels, annualTotal, emptyMessage);
+        });
       });
       container.chartResizeObserver.observe(container);
     }
@@ -190,28 +194,31 @@ function renderDashboardCharts(data) {
       collections.slice(offset, offset + 6), value => WaterStore.money(value), false,
       monthKeys.slice(offset, offset + 6).map(monthLabel), annualTotal,
       'No collections recorded for ' + rangeText + '.');
-    const controls = document.createElement('nav');
+    // Segmented toggle: Jan – Jun | Jul – Dec, with the shown half pressed.
+    const controls = document.createElement('div');
     controls.className = 'collection-half-controls';
-    controls.setAttribute('aria-label', 'Collection months');
-    const previous = document.createElement('button');
-    previous.type = 'button';
-    previous.className = 'chart-nav-button';
-    previous.textContent = '‹ Jan – Jun';
-    previous.setAttribute('aria-label', 'Show January to June');
-    previous.disabled = half === 0;
     const range = document.createElement('span');
     range.className = 'chart-nav-range';
     range.textContent = rangeText;
     range.setAttribute('aria-live', 'polite');
-    const next = document.createElement('button');
-    next.type = 'button';
-    next.className = 'chart-nav-button';
-    next.textContent = 'Jul – Dec ›';
-    next.setAttribute('aria-label', 'Show July to December');
-    next.disabled = half === 1;
-    previous.addEventListener('click', () => { half = 0; showCollectionHalf(); container.querySelector('button:last-child').focus(); });
-    next.addEventListener('click', () => { half = 1; showCollectionHalf(); container.querySelector('button').focus(); });
-    controls.append(previous, range, next);
+    const toggle = document.createElement('div');
+    toggle.className = 'chart-segmented';
+    toggle.setAttribute('role', 'group');
+    toggle.setAttribute('aria-label', 'Collection months');
+    ['Jan – Jun', 'Jul – Dec'].forEach((text, index) => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.textContent = text;
+      button.setAttribute('aria-pressed', String(half === index));
+      button.addEventListener('click', () => {
+        if (half === index) return;
+        half = index;
+        showCollectionHalf();
+        container.querySelectorAll('.chart-segmented button')[index]?.focus();
+      });
+      toggle.appendChild(button);
+    });
+    controls.append(range, toggle);
     container.prepend(controls);
   }
   showCollectionHalf();
@@ -286,14 +293,16 @@ function renderDashboardCharts(data) {
     pie.appendChild(slice);
     if (fraction >= 0.08) {
       const mid = angle + fraction * Math.PI;
+      // A single full slice puts its label in the centre of the circle.
+      const labelRadius = fraction === 1 ? 0 : 69;
       pie.appendChild(
         chartNode(
           'text',
           {
-            x: 130 + 69 * Math.cos(mid),
-            y: 135 + 69 * Math.sin(mid),
+            x: 130 + labelRadius * Math.cos(mid),
+            y: 135 + labelRadius * Math.sin(mid),
             'text-anchor': 'middle',
-            class: 'chart-pie-label',
+            class: 'chart-pie-label chart-pie-label-' + statusLabels[index].toLowerCase(),
           },
           Math.round(fraction * 100) + '%',
         ),

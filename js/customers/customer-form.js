@@ -453,7 +453,7 @@ async function loadCustomerForm() {
         (item) =>
           Number(item.is_active) === 1 || String(item.id) === requested?.customer.barangayId,
       )
-      .forEach((item) => customerForm.elements.barangay.add(new Option(item.name, item.name)));
+      .forEach((item) => customerForm.elements.barangay.add(new Option(globalThis.barangayLabel?.(item.name) ?? item.name, item.name)));
     customerRecords.customers = requested ? [requested.customer] : [];
     customerRecords.bills = requested?.bills || [];
     customerFormLoading = false;
@@ -476,7 +476,7 @@ async function refreshCustomerChoices() {
   const previous = select.selectedOptions[0]?.textContent;
   select.replaceChildren(new Option('Select barangay', ''));
   barangays.filter((item) => Number(item.is_active) === 1 || item.name === selected)
-    .forEach((item) => select.add(new Option(item.name, item.name)));
+    .forEach((item) => select.add(new Option(globalThis.barangayLabel?.(item.name) ?? item.name, item.name)));
   if (selected && !Array.from(select.options).some((option) => option.value === selected)) {
     select.add(new Option(previous || selected, selected));
   }

@@ -21,14 +21,21 @@ async function showBalances() {
     for (const bill of data.bills) {
       const row = body.insertRow();
       AdminUI.customer(row, { id: bill.customerId, name: bill.name, account: bill.account });
-      for (const [value, label] of [
-        [bill.cycle, 'Cycle'],
+      const paid = Number(bill.total) - Number(bill.balance);
+      // Cycle as "Oct 2026"; paid in green, balance red while owed and green when settled.
+      const cycle = /^\d{4}-\d{2}$/.test(String(bill.cycle))
+        ? new Intl.DateTimeFormat('en', { month: 'short', year: 'numeric', timeZone: 'UTC' })
+          .format(new Date(bill.cycle + '-01T00:00:00Z'))
+        : bill.cycle;
+      const cells = [
+        [cycle, 'Cycle'],
         [WaterStore.money(Number(bill.total)), 'Bill total'],
-        [WaterStore.money(Number(bill.total) - Number(bill.balance)), 'Paid'],
+        [WaterStore.money(paid), 'Paid'],
         [WaterStore.money(Number(bill.balance)), 'Balance'],
         [bill.status, 'Status'],
-      ])
-        AdminUI.cell(row, value, label);
+      ].map(([value, label]) => AdminUI.cell(row, value, label));
+      if (paid > 0) cells[2].className = 'balance-paid-amount';
+      cells[3].className = Number(bill.balance) > 0 ? 'balance-due-amount' : 'balance-settled-amount';
     }
     AdminUI.empty(body, 6, 'No bills match your filters.');
   } catch (error) {

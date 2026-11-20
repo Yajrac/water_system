@@ -86,3 +86,47 @@
     font-size: 0.74rem;
   }
 }
+
+/* Modern generated bills: white panel header, light table header, colored values. */
+html.theme-teal .billing-page > .panel {
+  overflow: hidden;
+  border-radius: 14px;
+  box-shadow: var(--shadow-sm);
+}
+html.theme-teal .billing-page > .panel > .panel-header {
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+html.theme-teal .billing-page .generated-bills-table thead th {
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-ink-muted);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+}
+.billing-page .generated-bills-table tbody tr { transition: background-color 160ms ease; }
+.billing-page .generated-bills-table tbody tr:hover { background: var(--table-heading); }
+/* Monthly consumption pill: 0, <10, <20, <40, 40+ m³. */
+.bill-usage-pill {
+  display: inline-flex;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.bill-usage-pill.is-zero { background: #eef2f5; color: #5d6b75; }
+.bill-usage-pill.is-low { background: #e0efff; color: #0b5cad; }
+.bill-usage-pill.is-mid { background: #d9f5ef; color: #0d7568; }
+.bill-usage-pill.is-high { background: #ffefd6; color: #a35a05; }
+.bill-usage-pill.is-top { background: #efe6ff; color: #6b3fc4; }
+[data-theme='dark'] .bill-usage-pill.is-zero { background: #243440; color: #a9b8c2; }
+[data-theme='dark'] .bill-usage-pill.is-low { background: #16365a; color: #8cc4ff; }
+[data-theme='dark'] .bill-usage-pill.is-mid { background: #143c36; color: #6fdcc8; }
+[data-theme='dark'] .bill-usage-pill.is-high { background: #43321a; color: #ffbe6b; }
+[data-theme='dark'] .bill-usage-pill.is-top { background: #2d2650; color: #c4a6ff; }
+.generated-bills-table td.bill-balance-due { color: #b42d47; font-weight: 800; }
+.generated-bills-table td.bill-balance-paid { color: #14765b; font-weight: 800; }
+[data-theme='dark'] .generated-bills-table td.bill-balance-due { color: #ff9cab; }
+[data-theme='dark'] .generated-bills-table td.bill-balance-paid { color: #8ee2bf; }

@@ -49,9 +49,21 @@ function renderCustomerRows(customers) {
     accountButton.addEventListener('click', () => showNotice('Account number', displayName + '\n' + customer.account));
     accountCell.appendChild(accountButton);
     AdminUI.cell(row, displayName, 'Customer name').className = 'customer-name';
-    AdminUI.cell(row, customer.barangay.replace(/^Barangay\s+/i, 'Brgy. '), 'Barangay');
+    // Named areas drop the "Barangay" prefix (Banawan); numbered ones keep it (Barangay 2).
+    const area = customer.barangay.replace(/^Barangay\s+/i, '');
+    AdminUI.cell(row, /^\d+$/.test(area) ? customer.barangay : area, 'Barangay');
     AdminUI.cell(row, customer.contact, 'Contact');
-    AdminUI.cell(row, customer.reading + ' m\u00b3', 'Meter reading');
+    // Reading pill colored by how high the meter reading is.
+    const readingValue = Number(customer.reading) || 0;
+    const reading = document.createElement('span');
+    reading.className = 'customer-reading-pill ' + (
+      readingValue <= 0 ? 'is-zero'
+        : readingValue < 20 ? 'is-low'
+          : readingValue < 50 ? 'is-mid'
+            : readingValue < 100 ? 'is-high'
+              : 'is-top');
+    reading.textContent = customer.reading + ' m\u00b3';
+    AdminUI.cell(row, '', 'Meter reading').appendChild(reading);
     const status = document.createElement('span');
     status.className = 'customer-status ' + (customer.active ? 'is-registered' : 'status-overdue');
     status.textContent = customer.active ? 'Registered' : customer.connectionStatus;
@@ -61,7 +73,7 @@ function renderCustomerRows(customers) {
     }
     if (customer.serviceStatus === 'Approved' && !customer.active) {
       status.textContent = 'Approved';
-      status.className = 'customer-status is-registered';
+      status.className = 'customer-status is-approved';
     }
     const statusCell = AdminUI.cell(row, '', 'Status');
     statusCell.appendChild(status);
@@ -361,7 +373,7 @@ document.getElementById('importForm').addEventListener('submit', async (event) =
       const barangays = await CustomerAPI.loadBarangays();
       const filter = document.getElementById('barangayFilter');
       filter.replaceChildren(new Option('All barangays', ''));
-      barangays.forEach((item) => filter.add(new Option(item.name, String(item.id))));
+      barangays.forEach((item) => filter.add(new Option(globalThis.barangayLabel?.(item.name) ?? item.name, String(item.id))));
     } catch (error) {
       AdminUI.message('Import saved. Reload to refresh the barangay filter. ' + error.message);
     }
@@ -394,7 +406,7 @@ AdminAuth.ready.then(async (user) => {
     const barangays = await CustomerAPI.loadBarangays();
     const filter = document.getElementById('barangayFilter');
     filter.replaceChildren(new Option('All barangays', ''));
-    barangays.forEach((item) => filter.add(new Option(item.name, String(item.id))));
+    barangays.forEach((item) => filter.add(new Option(globalThis.barangayLabel?.(item.name) ?? item.name, String(item.id))));
   } catch (error) {
     AdminUI.message(error.message);
   }

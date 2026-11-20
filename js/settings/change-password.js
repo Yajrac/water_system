@@ -14,6 +14,19 @@ AdminAuth.ready.then(user => {
   }
 });
 
+// Live checklist beside the form: each rule turns ok (green) or fail (red) while typing.
+function updatePasswordChecklist() {
+  const current = adminPasswordForm.elements.currentPassword.value;
+  const next = adminPasswordForm.elements.newPassword.value;
+  const confirmation = adminPasswordForm.elements.confirmPassword.value;
+  const mark = (id, state) => document.getElementById(id)?.setAttribute('data-state', state);
+  mark('checkPasswordLength', !next ? 'pending' : next.length >= 8 && next.length <= 128 ? 'ok' : 'fail');
+  mark('checkPasswordDifferent', !next || !current ? 'pending' : next !== current ? 'ok' : 'fail');
+  mark('checkPasswordMatch', !confirmation ? 'pending' : confirmation === next ? 'ok' : 'fail');
+}
+adminPasswordForm.addEventListener('input', updatePasswordChecklist);
+adminPasswordForm.addEventListener('reset', () => setTimeout(updatePasswordChecklist));
+
 document.getElementById('showAdminPasswords').addEventListener('change', event => {
   for (const name of ['currentPassword', 'newPassword', 'confirmPassword']) {
     adminPasswordForm.elements[name].type = event.target.checked ? 'text' : 'password';

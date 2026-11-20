@@ -53,7 +53,7 @@ async function showGeneratedBills() {
       const account = document.createElement('small');
       account.textContent = bill.account;
       identity.append(name, account);
-      [
+      const cells = [
         bill.cycle,
         bill.previous + ' m\u00b3',
         bill.current + ' m\u00b3',
@@ -62,7 +62,7 @@ async function showGeneratedBills() {
         WaterStore.money(bill.balance),
         bill.due,
         bill.status,
-      ].forEach((value, index) =>
+      ].map((value, index) =>
         AdminUI.cell(
           row,
           value,
@@ -78,6 +78,21 @@ async function showGeneratedBills() {
           ][index],
         ),
       );
+      // Billing month as "Oct 2026", consumption as a colored pill, balance red/green.
+      const [monthCell, , , usageCell, , balanceCell] = cells;
+      if (/^\d{4}-\d{2}$/.test(String(bill.cycle))) {
+        monthCell.textContent = new Intl.DateTimeFormat('en', { month: 'short', year: 'numeric', timeZone: 'UTC' })
+          .format(new Date(bill.cycle + '-01T00:00:00Z'));
+        monthCell.title = bill.cycle;
+      }
+      const used = Number(bill.consumption) || 0;
+      const usage = document.createElement('span');
+      usage.className = 'bill-usage-pill ' + (
+        used <= 0 ? 'is-zero' : used < 10 ? 'is-low' : used < 20 ? 'is-mid' : used < 40 ? 'is-high' : 'is-top');
+      usage.textContent = bill.consumption + ' m³';
+      usageCell.replaceChildren(usage);
+      balanceCell.className = [balanceCell.className, bill.balance > 0 ? 'bill-balance-due' : 'bill-balance-paid']
+        .filter(Boolean).join(' ');
       const actions = AdminUI.cell(row, '', 'View');
       AdminUI.button(actions, 'View bill', () => showBillDetails(bill));
       const button = actions.querySelector('button');

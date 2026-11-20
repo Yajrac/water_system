@@ -633,3 +633,95 @@
 [data-theme='dark'] .ledger-totals .ledger-total-label .bi {
   background: #153b50;
 }
+
+/* Modern meter entry: white panel header, progress bar, clear selection, status pills. */
+html.theme-teal .billing-page .ledger-panel {
+  overflow: hidden;
+  border-radius: 14px;
+  box-shadow: var(--shadow-sm);
+}
+html.theme-teal .billing-page .ledger-panel .panel-header {
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+html.theme-teal .billing-page .billing-setup-summary .ledger-summary-card {
+  border-radius: 14px;
+  box-shadow: var(--shadow-sm);
+}
+/* "2 / 4 completed" with a bar underneath (width from --progress set in JS). */
+#draftCount {
+  display: grid;
+  gap: 6px;
+  min-width: 160px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--color-ink);
+  text-align: right;
+}
+#draftCount::after {
+  content: '';
+  height: 6px;
+  border-radius: 999px;
+  background:
+    linear-gradient(var(--color-primary), var(--color-primary)) left / var(--progress, 0%) 100% no-repeat,
+    var(--color-border);
+}
+.ledger-consumers {
+  border-radius: 12px;
+}
+.ledger-consumer {
+  transition: background-color 150ms ease;
+}
+/* The selected customer (aria-pressed) gets a tinted row and a ring. */
+.ledger-consumer[aria-pressed='true'] {
+  background: var(--table-heading);
+  box-shadow: inset 0 0 0 2px var(--color-primary);
+}
+.ledger-consumer[aria-pressed='true'] strong {
+  color: var(--color-primary-deep);
+}
+.ledger-completion:not(.is-completed),
+[data-theme='dark'] .ledger-completion:not(.is-completed) {
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: #fff3d9;
+  color: #92610b;
+  font-weight: 700;
+}
+[data-theme='dark'] .ledger-completion:not(.is-completed) {
+  background: #3c301b;
+  color: #f5d495;
+}
+/* Read-only readings: neutral fill instead of bright blue. */
+.billing-page #ledgerEntryForm input[readonly] {
+  border: 1px dashed var(--color-border-strong);
+  background: color-mix(in srgb, var(--color-ink) 4%, var(--color-surface));
+  color: var(--color-ink);
+}
+.billing-page #ledgerEntryForm input {
+  border-radius: 10px;
+}
+/* Entry status pill: tone set by setEntryStatus(). */
+#ledgerEntryStatus:not(:empty) {
+  width: fit-content;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  background: var(--table-heading);
+  color: var(--color-primary-deep);
+}
+#ledgerEntryStatus[data-tone='saved'] { background: #e4f5ee; color: #14765b; }
+#ledgerEntryStatus[data-tone='unsaved'] { background: #fff3d9; color: #92610b; }
+#ledgerEntryStatus[data-tone='error'] { background: #ffe4e7; color: #a32632; }
+[data-theme='dark'] #ledgerEntryStatus[data-tone='saved'] { background: #183f33; color: #8ee2bf; }
+[data-theme='dark'] #ledgerEntryStatus[data-tone='unsaved'] { background: #3c301b; color: #f5d495; }
+[data-theme='dark'] #ledgerEntryStatus[data-tone='error'] { background: #512934; color: #ffb1ba; }
+/* Totals: Total amount is the number that matters most. */
+.ledger-totals {
+  border-radius: 12px;
+}
+.ledger-totals > div:last-child strong {
+  font-size: 1.35rem;
+  color: var(--color-primary-deep);
+}

@@ -162,7 +162,21 @@
             </div>
           </header>
           <p id="pageMessage" role="status" tabindex="-1"></p>
-          <section class="panel">
+          <section class="barangay-overview" aria-label="Service area summary">
+            <div class="barangay-stat">
+              <span class="barangay-stat-icon" aria-hidden="true"><i class="bi bi-geo-alt-fill"></i></span>
+              <div><p>Registered service areas</p><strong id="statServiceAreas">—</strong><span>Barangays the office serves</span></div>
+            </div>
+            <div class="barangay-stat">
+              <span class="barangay-stat-icon is-customers" aria-hidden="true"><i class="bi bi-people-fill"></i></span>
+              <div><p>Customers served</p><strong id="statCustomersServed">—</strong><span>Across all registered barangays</span></div>
+            </div>
+            <div class="barangay-stat">
+              <span class="barangay-stat-icon is-empty" aria-hidden="true"><i class="bi bi-house-dash"></i></span>
+              <div><p>Areas without customers</p><strong id="statEmptyAreas">—</strong><span>Registered, no accounts yet</span></div>
+            </div>
+          </section>
+          <section class="panel barangay-registry-panel">
             <div class="panel-header">
               <h2>Registered service areas</h2>
               <span id="barangayCount" class="barangay-count"></span>
@@ -186,8 +200,7 @@
                   <thead>
                     <tr>
                       <th>Barangay</th>
-                      <th>Municipality</th>
-                      <th>Province</th>
+                      <th>Location</th>
                       <th>Customers</th>
                       <th>Actions</th>
                     </tr>

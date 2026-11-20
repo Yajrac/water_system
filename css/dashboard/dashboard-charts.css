@@ -41,8 +41,8 @@ html body .dashboard-charts .collections-year-control #collectionsYear {
   padding: 6px 10px;
   border: 1px solid var(--color-border);
   border-radius: 8px;
-  background-color: var(--card-bg, #fff);
-  color: inherit;
+  background-color: var(--color-surface);
+  color: var(--color-ink);
   font: inherit;
 }
 .dashboard-charts .consumption-panel {
@@ -145,6 +145,79 @@ html body .dashboard-charts .collections-year-control #collectionsYear {
 .chart-empty span {
   color: var(--color-ink-muted);
   font-size: 0.8rem;
+}
+/* Modern chart panels: white header, hairline divider, same radius as the stat tiles. */
+html.theme-teal .dashboard-charts .panel {
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+}
+html.theme-teal .dashboard-charts .panel-header {
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-surface);
+  padding-inline: 22px;
+}
+html.theme-teal .dashboard-charts .panel-header h2 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-ink);
+}
+.chart-grid {
+  stroke: var(--color-border);
+  stroke-dasharray: none;
+  opacity: 0.7;
+}
+.collection-half-controls .chart-nav-range {
+  color: var(--color-ink-muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+.chart-segmented {
+  display: inline-flex;
+  padding: 3px;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  background: var(--table-heading);
+}
+.chart-segmented button {
+  min-height: 30px;
+  padding: 4px 14px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--color-ink-muted);
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.chart-segmented button[aria-pressed='true'] {
+  background: var(--color-surface);
+  color: var(--color-primary-deep);
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.12);
+  cursor: default;
+}
+[data-theme='dark'] .chart-segmented button[aria-pressed='true'] {
+  background: #1f5674;
+  color: #e6f6ff;
+  box-shadow: none;
+}
+.chart-segmented button:hover:not([aria-pressed='true']) {
+  color: var(--color-ink);
+}
+.chart-segmented button:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 1px;
+}
+#statusChart .chart-legend li {
+  border-top: 0;
+  border-radius: 10px;
+  background: var(--table-heading);
+}
+.chart-period-total {
+  color: var(--color-ink);
 }
 .chart-nav-button {
   min-height: 34px;
@@ -401,6 +474,92 @@ html body .dashboard-charts .collections-year-control #collectionsYear {
     min-width: 580px;
   }
 }
+/* Dashboard summary tiles: icon tile left, label / value / caption right. */
+#summary .dash-stat {
+  --stat-icon: #087de0;
+  --stat-icon-bg: #e0f2ff;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 16px;
+  padding: 18px 20px;
+  border-radius: 14px;
+}
+#summary .dash-stat:nth-child(4n + 2) { --stat-icon: #8545e6; --stat-icon-bg: #f0e7ff; }
+#summary .dash-stat:nth-child(4n + 3) { --stat-icon: #d96e06; --stat-icon-bg: #fff0d5; }
+#summary .dash-stat:nth-child(4n) { --stat-icon: #079650; --stat-icon-bg: #ddf8e9; }
+[data-theme='dark'] #summary .dash-stat { --stat-icon: #5cb8ff; --stat-icon-bg: #153b50; }
+[data-theme='dark'] #summary .dash-stat:nth-child(4n + 2) { --stat-icon: #b78cff; --stat-icon-bg: #2d2650; }
+[data-theme='dark'] #summary .dash-stat:nth-child(4n + 3) { --stat-icon: #ffb35c; --stat-icon-bg: #43321a; }
+[data-theme='dark'] #summary .dash-stat:nth-child(4n) { --stat-icon: #4fd897; --stat-icon-bg: #173d2c; }
+#summary .dash-stat-icon {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: var(--stat-icon-bg);
+  color: var(--stat-icon);
+  font-size: 22px;
+  line-height: 1;
+}
+#summary .dash-stat-body {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+#summary .dash-stat h3 {
+  margin: 0;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--color-ink-muted);
+}
+#summary .dash-stat strong {
+  font-size: clamp(1.35rem, 1.8vw, 1.75rem);
+  line-height: 1.2;
+}
+#summary .dash-stat p {
+  margin: 2px 0 0;
+  font-size: 0.74rem;
+  line-height: 1.4;
+  color: var(--color-ink-muted);
+}
+/* Cards that need follow-up (unpaid bills, outstanding balance). */
+#summary .dash-stat.is-attention {
+  --stat-icon: #c0354f;
+  --stat-icon-bg: #ffe6ea;
+}
+[data-theme='dark'] #summary .dash-stat.is-attention {
+  --stat-icon: #ff8a9e;
+  --stat-icon-bg: #4a1f29;
+}
+#summary .dash-stat.is-attention strong {
+  color: var(--stat-icon);
+}
+#summary .dash-stat.is-attention p::before {
+  content: '';
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-right: 6px;
+  border-radius: 50%;
+  background: var(--stat-icon);
+  vertical-align: middle;
+}
+@media (max-width: 600px) {
+  #summary .dash-stat {
+    grid-template-columns: minmax(0, 1fr);
+    align-items: start;
+    gap: 10px;
+    padding: 14px;
+  }
+  #summary .dash-stat-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    font-size: 18px;
+  }
+}
 #summary .record-card {
   transition: transform 180ms ease-out, border-color 180ms ease-out;
 }
@@ -414,3 +573,39 @@ html body .dashboard-charts .collections-year-control #collectionsYear {
   #summary .record-card { transition: none; }
   #summary .record-card:hover { transform: none; }
 }
+
+/* Bill status pie: traffic-light colors (paid green, unpaid amber, overdue rose). */
+.chart-paid { fill: #16a34a; }
+.chart-unpaid { fill: #f59e0b; }
+.chart-overdue { fill: #e11d48; }
+.chart-pie-label-unpaid { fill: #3b2604; }
+[data-theme='dark'] .chart-paid { fill: #22c55e; }
+[data-theme='dark'] .chart-unpaid { fill: #fbbf24; }
+[data-theme='dark'] .chart-overdue { fill: #fb4a6d; }
+[data-theme='dark'] .chart-pie-label { fill: #0b1a12; }
+#statusChart .chart-pie-label { font-size: 16px; }
+
+/* Legend tiles: white cards with a colored dot, matching the slices. */
+#statusChart .chart-legend li {
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  background: var(--color-surface);
+}
+#statusChart .chart-legend .payment-status {
+  border: 0;
+  background: transparent;
+  font-weight: 700;
+}
+#statusChart .chart-legend .payment-status::before {
+  width: 9px;
+  height: 9px;
+}
+#statusChart .chart-legend .status-paid { color: #15803d; }
+#statusChart .chart-legend .status-unpaid { color: #b45309; }
+#statusChart .chart-legend .status-overdue { color: #be123c; }
+#statusChart .chart-legend .status-paid::before { background: #16a34a; }
+#statusChart .chart-legend .status-unpaid::before { background: #f59e0b; }
+#statusChart .chart-legend .status-overdue::before { background: #e11d48; }
+[data-theme='dark'] #statusChart .chart-legend .status-paid { color: #4ade80; }
+[data-theme='dark'] #statusChart .chart-legend .status-unpaid { color: #fbbf24; }
+[data-theme='dark'] #statusChart .chart-legend .status-overdue { color: #fb7185; }

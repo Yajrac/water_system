@@ -24,6 +24,7 @@
     <link rel="stylesheet" href="../css/shared/form-controls.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.2/font/bootstrap-icons.min.css" />
     <link rel="stylesheet" href="../css/shared/compact-tables.css" />
+    <link rel="stylesheet" href="../css/settings/settings-modern.css" />
   </head>
   <body>
     <div class="sidebar-overlay" id="overlay"></div>
@@ -183,8 +184,9 @@
           <p id="pageMessage" role="status" tabindex="-1"></p>
           <section class="panel section-tab-panel" id="passwordSettingsPanel" role="tabpanel" aria-labelledby="passwordSettingsTab">
             <div class="panel-header"><h2>Change password</h2></div>
-            <div class="admin-body">
-              <p id="passwordInstructions">Choose your own password with 8?128 characters. Letters, numbers and symbols are allowed.</p>
+            <div class="admin-body password-layout">
+              <div class="password-main">
+              <p id="passwordInstructions">Choose your own password with 8&ndash;128 characters. Letters, numbers and symbols are allowed.</p>
               <p id="passwordMessage" role="status" tabindex="-1"></p>
               <form id="adminPasswordForm" class="admin-form">
                 <label>Current password<input name="currentPassword" type="password" autocomplete="current-password" required maxlength="1024" /></label>
@@ -193,6 +195,19 @@
                 <div class="wide"><label class="password-visibility-toggle" for="showAdminPasswords"><input id="showAdminPasswords" type="checkbox" /><span>Show passwords</span></label></div>
                 <div class="wide"><button type="submit" class="btn btn-primary" disabled>Change password</button></div>
               </form>
+              </div>
+              <aside class="password-checklist" aria-labelledby="passwordChecklistTitle">
+                <h3 id="passwordChecklistTitle">Password checklist</h3>
+                <ul>
+                  <li id="checkPasswordLength" data-state="pending">8&ndash;128 characters</li>
+                  <li id="checkPasswordDifferent" data-state="pending">Different from your current password</li>
+                  <li id="checkPasswordMatch" data-state="pending">New password and confirmation match</li>
+                </ul>
+                <p class="password-checklist-note">
+                  <i class="bi bi-info-circle" aria-hidden="true"></i>After saving, every device signed in to this
+                  account is signed out. Sign in again with your new password.
+                </p>
+              </aside>
             </div>
           </section>
           <section

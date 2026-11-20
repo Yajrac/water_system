@@ -38,13 +38,13 @@ function setupActivityTable({ searchId, dateId, rowsId, pagerId, clearId, consum
         const target = [log.entityType, log.entityId ? '#' + log.entityId : '']
           .filter(Boolean)
           .join(' ');
-        [
+        const cells = [
           stampFormat.format(new Date(log.timestamp)),
           log.action,
-          target || '?',
+          target || '—',
           log.details,
           log.actor,
-        ].forEach((value, index) =>
+        ].map((value, index) =>
           AdminUI.cell(
             row,
             value,
@@ -57,6 +57,20 @@ function setupActivityTable({ searchId, dateId, rowsId, pagerId, clearId, consum
             ][index],
           ),
         );
+        // "customer.created" → a readable "Customer created" pill, colored by what happened.
+        const action = String(log.action || '');
+        const tone = /password|login|logout|session/i.test(action) ? 'security'
+          : /delet|remov|disconnect|unregister|deactivat/i.test(action) ? 'danger'
+            : /creat|register|add|import|install|reconnect|activat|publish|paid|payment/i.test(action) ? 'success'
+              : 'info';
+        const pill = document.createElement('span');
+        pill.className = 'activity-action-pill tone-' + tone;
+        pill.title = action;
+        pill.textContent = action.replace(/[._]+/g, ' ').replace(/^\w/, (letter) => letter.toUpperCase());
+        cells[1].replaceChildren(pill);
+        cells[0].className = 'activity-when';
+        cells[2].className = target ? 'activity-target' : 'activity-target is-empty';
+        cells[4].className = 'activity-actor';
       }
       AdminUI.empty(body, 5, 'No activity logs match your filters.');
     } catch (error) {
@@ -83,8 +97,8 @@ function setupActivityTable({ searchId, dateId, rowsId, pagerId, clearId, consum
   });
   const reload = document.createElement('button');
   reload.type = 'button';
-  reload.className = 'btn';
-  reload.textContent = 'Refresh logs';
+  reload.className = 'btn settings-refresh-logs';
+  reload.innerHTML = '<i class="bi bi-arrow-clockwise" aria-hidden="true"></i>Refresh logs';
   document.getElementById(clearId).after(reload);
   reload.addEventListener('click', () => {
     clearTimeout(timer);
