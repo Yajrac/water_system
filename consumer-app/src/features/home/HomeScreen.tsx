@@ -6,8 +6,8 @@ import { useConsumerFinances } from '../bills/useConsumerFinances';
 import { ActivityIndicator, Pressable, Text, View } from 'react-native';
 import { Avatar } from '@/components/consumer/Avatar';
 import { Icon, type IconName } from '@/components/consumer/Icon';
-import { Badge, Button, Card, CardTitle, Screen, Sheet, text } from '@/components/consumer/ui';
-import { colors, money } from '@/theme/tokens';
+import { Button, Card, Screen, Sheet, text } from '@/components/consumer/ui';
+import { money } from '@/theme/tokens';
 import { styles } from './home.styles';
 
 export default function HomeScreen() {
@@ -33,9 +33,10 @@ export default function HomeScreen() {
     label: string;
     icon: IconName;
     route: '/bills' | '/payments';
+    hint: string;
   }[] = [
-    { label: 'My bills', icon: 'bills', route: '/bills' },
-    { label: 'Payments', icon: 'payments', route: '/payments' },
+    { label: 'My bills', icon: 'bills', route: '/bills', hint: 'Statements and dues' },
+    { label: 'Payments', icon: 'payments', route: '/payments', hint: 'Receipts and history' },
   ];
   if (!data)
     return (
@@ -80,47 +81,70 @@ export default function HomeScreen() {
         )}
       </Screen>
     );
+  const firstName = customer?.firstName || '';
+  const status = customer?.status || '';
   return (
     <Screen title="Home">
-      <View style={styles.refreshRow}>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Refresh account"
-          accessibilityState={{ disabled: busy, busy }}
-          disabled={busy}
-          style={styles.refreshButton}
-          onPress={() => {
-            void reload();
-            void reloadProfile();
-            void refreshNotices();
-          }}
-        >
-          {busy && <ActivityIndicator size="small" color={colors.primary} />}
-          <Text style={styles.refreshText}>{busy ? 'Refreshing...' : 'Refresh'}</Text>
-        </Pressable>
-      </View>
       {!!error && <Text accessibilityRole="alert" style={text.muted}>{error}</Text>}
       {!!profileError && <Text style={text.muted}>{profileError}</Text>}
-      <View style={styles.welcome}>
-        <View style={{ flex: 1 }}>
-          <Text style={text.muted}>
-            Welcome back{customer?.firstName ? ', ' + customer.firstName : ''}
-          </Text>
-          <Text style={styles.welcomeTitle}>Your water service</Text>
-          <Text style={text.muted}>{customer?.account || ''}</Text>
+      <View style={styles.hero}>
+        <View pointerEvents="none" accessible={false} style={[styles.heroBubble, styles.heroBubbleLarge]} />
+        <View pointerEvents="none" accessible={false} style={[styles.heroBubble, styles.heroBubbleSmall]} />
+        <View pointerEvents="none" accessible={false} style={styles.heroWave} />
+        <View style={styles.heroTop}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="View my profile"
+            onPress={() => router.push('/profile')}
+            style={styles.heroAvatar}
+          >
+            <Avatar active={status === 'Active'} gender={customer?.gender} />
+          </Pressable>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.heroGreeting}>Welcome back{firstName ? ',' : ''}</Text>
+            <Text style={styles.heroName} numberOfLines={1}>{firstName || 'Consumer'}</Text>
+          </View>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Refresh account"
+            accessibilityState={{ disabled: busy, busy }}
+            disabled={busy}
+            hitSlop={6}
+            style={styles.refreshPill}
+            onPress={() => {
+              void reload();
+              void reloadProfile();
+              void refreshNotices();
+            }}
+          >
+            {busy ? <ActivityIndicator size="small" color="#ffffff" /> : null}
+            <Text style={styles.refreshPillText}>{busy ? 'Refreshing' : 'Refresh'}</Text>
+          </Pressable>
         </View>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="View my profile"
-          onPress={() => router.push('/profile')}
-        >
-          <Avatar active={customer?.status === 'Active'} gender={customer?.gender} />
-        </Pressable>
+        <View style={styles.heroBalance}>
+          <Text style={styles.lightLabel}>REMAINING BALANCE</Text>
+          <Text style={styles.balance} adjustsFontSizeToFit numberOfLines={1}>{money(balance)}</Text>
+          <Text style={styles.due}>
+            {balance > 0 ? 'Total unpaid balance across all bills.' : 'You are all paid up. Thank you!'}
+          </Text>
+        </View>
+        <View style={styles.heroFooter}>
+          <View style={styles.heroChip}>
+            <Icon name="bills" size={14} color="#dff6fc" />
+            <Text style={styles.heroChipText}>{customer?.account || 'No account number'}</Text>
+          </View>
+          {!!status && (
+            <View style={[styles.heroChip, status === 'Active' ? styles.chipActive : styles.chipOff]}>
+              <View style={[styles.statusDot, { backgroundColor: status === 'Active' ? '#5ef0a6' : '#ffb4bd' }]} />
+              <Text style={styles.heroChipText}>{status}</Text>
+            </View>
+          )}
+        </View>
       </View>
-      {customer?.status === 'Disconnected' && (
+      {status === 'Disconnected' && (
         <View accessibilityRole="alert" style={styles.disconnectedBanner}>
           <Text style={styles.disconnectedTitle}>
-            Service disconnected{customer.disconnectedOn ? ' since ' + customer.disconnectedOn : ''}
+            Service disconnected{customer?.disconnectedOn ? ' since ' + customer.disconnectedOn : ''}
           </Text>
           <Text style={styles.disconnectedText}>
             {balance > 0 ? 'Outstanding balance: ' + money(balance) + '. ' : ''}
@@ -128,60 +152,59 @@ export default function HomeScreen() {
           </Text>
         </View>
       )}
-      <View style={styles.balanceCard}>
-        <View style={styles.row}>
-          <View>
-            <Text style={styles.lightLabel}>REMAINING BALANCE</Text>
-            <Text style={styles.balance}>{money(balance)}</Text>
-          </View>
-          <View style={styles.heroIcon}>
-            <Icon name="water" color="#ffffff" size={36} />
-          </View>
-        </View>
-        <Text style={styles.due}>Total unpaid balance across all bills.</Text>
-      </View>
       <View style={styles.quickLinks}>
         {quickLinks.map((link) => (
           <Pressable
             accessibilityRole="button"
             key={link.label}
-            style={styles.quickLink}
+            style={({ pressed }) => [styles.quickLink, pressed && styles.pressed]}
             onPress={() => router.push(link.route)}
           >
             <View style={styles.quickIcon}>
-              <Icon name={link.icon} />
+              <Icon name={link.icon} size={22} />
             </View>
-            <Text style={styles.quickLabel}>{link.label}</Text>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.quickLabel}>{link.label}</Text>
+              <Text style={styles.quickHint}>{link.hint}</Text>
+            </View>
+            <Text style={styles.quickArrow}>›</Text>
           </Pressable>
         ))}
       </View>
-      <Card>
+      <Card style={styles.modernCard}>
         <View style={styles.row}>
-          <CardTitle title="Water consumption" icon="water" />
-          <Badge label={latest?.month || 'No bills yet'} />
+          <View style={styles.cardHeading}>
+            <View style={styles.cardIcon}><Icon name="water" size={20} /></View>
+            <Text style={styles.cardTitle}>Water consumption</Text>
+          </View>
+          <View style={styles.monthPill}>
+            <Text style={styles.monthPillText}>{latest?.month || 'No bills yet'}</Text>
+          </View>
         </View>
         <View style={styles.usageRow}>
           <Text style={styles.usage}>
             {usage}
             <Text style={styles.unit}> m³</Text>
           </Text>
-          <Text style={text.muted}>Latest billed consumption</Text>
+          <Text style={styles.usageHint}>Latest billed consumption</Text>
         </View>
         <View style={styles.readings}>
-          <View>
-            <Text style={text.muted}>Previous reading</Text>
-            <Text style={styles.reading}>{latest?.previous || '?'} m³</Text>
+          <View style={styles.readingTile}>
+            <Text style={styles.readingLabel}>Previous reading</Text>
+            <Text style={styles.reading}>{latest?.previous || '—'} m³</Text>
           </View>
-          <View style={styles.readingDivider} />
-          <View>
-            <Text style={text.muted}>Current reading</Text>
-            <Text style={styles.reading}>{latest?.current || '?'} m³</Text>
+          <View style={styles.readingTile}>
+            <Text style={styles.readingLabel}>Current reading</Text>
+            <Text style={styles.reading}>{latest?.current || '—'} m³</Text>
           </View>
         </View>
-        <Text style={text.muted}>Meter no. {customer?.meter || 'Not recorded'}</Text>
+        <Text style={styles.meterText}>Meter no. {customer?.meter || 'Not recorded'}</Text>
       </Card>
-      <Card>
-        <CardTitle title="Latest notifications" icon="news" />
+      <Card style={styles.modernCard}>
+        <View style={styles.cardHeading}>
+          <View style={styles.cardIcon}><Icon name="news" size={20} /></View>
+          <Text style={styles.cardTitle}>Latest notifications</Text>
+        </View>
         {!!noticeError && <Text style={text.muted}>{noticeError}</Text>}
         {!latestNotices.length && <Text style={text.muted}>
           {noticesBusy ? 'Loading notifications...' : noticeError ? 'Notifications are unavailable right now.' : 'No notifications yet.'}
@@ -189,12 +212,16 @@ export default function HomeScreen() {
         {latestNotices.map(item => (
           <Pressable key={item.id} accessibilityRole="button"
             accessibilityLabel={(item.read ? '' : 'Unread: ') + item.title}
-            onPress={() => void viewNotice(item)} style={styles.notificationPreview}>
+            onPress={() => void viewNotice(item)}
+            style={({ pressed }) => [styles.notificationPreview, !item.read && styles.notificationUnread, pressed && styles.pressed]}>
             <View style={styles.row}>
-              <Text style={styles.advisory}>{item.title}</Text>
-              {!item.read && <Text style={styles.newNotice}>New</Text>}
+              <View style={styles.noticeTitleRow}>
+                {!item.read && <View style={styles.unreadDot} />}
+                <Text style={styles.advisory} numberOfLines={1}>{item.title}</Text>
+              </View>
+              {!item.read && <Text style={styles.newNotice}>NEW</Text>}
             </View>
-            <Text style={text.muted}>{item.date}</Text>
+            <Text style={styles.noticeDate}>{item.date}</Text>
             <Text style={text.body} numberOfLines={2}>{item.body}</Text>
           </Pressable>
         ))}

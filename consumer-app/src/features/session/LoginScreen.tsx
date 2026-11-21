@@ -11,6 +11,7 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { StatusBar } from 'expo-status-bar';
 import { Input } from '@/components/consumer/Input';
 import { Button } from '@/components/consumer/ui';
 import { useSession } from './SessionProvider';
@@ -36,6 +37,15 @@ export default function LoginScreen() {
   }, [lockedUntil]);
   const remaining = Math.max(0, Math.ceil((lockedUntil - now) / 1000));
   return (
+    <View style={styles.root}>
+      <StatusBar style="light" />
+      <View pointerEvents="none" accessible={false} style={styles.backdrop}>
+        <View style={[styles.bubble, styles.bubbleLarge]} />
+        <View style={[styles.bubble, styles.bubbleMedium]} />
+        <View style={[styles.bubble, styles.bubbleSmall]} />
+        <View style={styles.waveBack} />
+        <View style={styles.waveFront} />
+      </View>
     <SafeAreaView style={styles.safe}>
       <KeyboardAvoidingView
         style={{ flex: 1 }}
@@ -44,8 +54,6 @@ export default function LoginScreen() {
         <ScrollView keyboardShouldPersistTaps="handled" keyboardDismissMode="on-drag" showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
           <View style={styles.content}>
             <View style={styles.brand}>
-              <View pointerEvents="none" accessible={false} style={styles.waterRing} />
-              <View pointerEvents="none" accessible={false} style={styles.waterRingSmall} />
               <View style={styles.logoFrame}>
                 <Image source={require('../../../assets/images/pwss-logo.jpg')} style={styles.logo} accessibilityLabel="Pio Duran Water Supply seal" />
               </View>
@@ -56,6 +64,7 @@ export default function LoginScreen() {
                 <Text style={styles.eyebrow}>CONSUMER APP</Text>
               </View>
             </View>
+            <View style={styles.card}>
             {forgotMode ? (
               <ForgotPasswordForm
                 onCancel={() => setForgotMode(false)}
@@ -154,36 +163,76 @@ export default function LoginScreen() {
                 }
               }}
             />
-              <Text style={styles.help}>Need help signing in? Contact the PWSS office.</Text>
             </View>
             )}
+            </View>
+            <Text style={styles.help}>Need help signing in? Contact the PWSS office.</Text>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
+    </View>
   );
 }
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: '#edf5f8' },
-  scroll: { flexGrow: 1, justifyContent: 'center', paddingHorizontal: 18, paddingVertical: 20 },
-  content: { width: '100%', maxWidth: 420, alignSelf: 'center', gap: 0 },
-  brand: { alignItems: 'center', gap: 8, backgroundColor: '#12394e', paddingTop: 28, paddingBottom: 48, paddingHorizontal: 20, borderTopLeftRadius: 28, borderTopRightRadius: 28, overflow: 'hidden' },
-  waterRing: { position: 'absolute', width: 260, height: 260, borderRadius: 130, borderWidth: 38, borderColor: '#19485f', right: -135, top: -55 },
-  waterRingSmall: { position: 'absolute', width: 170, height: 170, borderRadius: 85, borderWidth: 26, borderColor: '#1b4c63', left: -100, bottom: -50 },
-  logoFrame: { padding: 6, borderRadius: 58, backgroundColor: colors.surface, borderWidth: 1, borderColor: '#d4e6ed', marginBottom: 4 },
-  logo: { width: 92, height: 92, borderRadius: 46 },
-  brandName: { fontSize: 29, lineHeight: 35, fontWeight: '800', letterSpacing: 3, color: '#ffffff' },
-  brandSubtitle: { fontSize: 13, lineHeight: 20, color: '#c3dce7', textAlign: 'center' },
-  portalBadge: { flexDirection: 'row', alignItems: 'center', gap: 7, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20, backgroundColor: '#235167', marginTop: 4 },
-  badgeDot: { width: 5, height: 5, borderRadius: 3, backgroundColor: '#64d9ef' },
-  eyebrow: { fontSize: 9, fontWeight: '700', letterSpacing: 1.4, color: '#c2f2ff' },
-  form: { gap: 18, padding: 24, borderRadius: 24, marginTop: -24, backgroundColor: colors.surface, borderWidth: 1, borderColor: '#dce8ed' },
-  formHeading: { gap: 5, marginBottom: 4 },
-  title: { fontSize: 24, lineHeight: 31, fontWeight: '700', color: colors.ink },
+  root: { flex: 1, backgroundColor: '#0b3d56' },
+  // Deep water at the top, lighter shallows at the bottom, like the admin glass login.
+  backdrop: {
+    ...StyleSheet.absoluteFill,
+    overflow: 'hidden',
+    experimental_backgroundImage: 'linear-gradient(165deg, #082f45 0%, #0b5b79 45%, #1291b3 80%, #3cc3dc 100%)',
+  },
+  bubble: { position: 'absolute', borderRadius: 999, backgroundColor: 'rgba(255,255,255,0.07)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.12)' },
+  bubbleLarge: { width: 280, height: 280, top: -90, right: -110 },
+  bubbleMedium: { width: 150, height: 150, top: 170, left: -70 },
+  bubbleSmall: { width: 54, height: 54, top: 110, right: 60 },
+  waveBack: { position: 'absolute', left: -160, right: -60, bottom: -260, height: 420, borderRadius: 420, backgroundColor: 'rgba(255,255,255,0.10)' },
+  waveFront: { position: 'absolute', left: -40, right: -200, bottom: -300, height: 420, borderRadius: 420, backgroundColor: 'rgba(255,255,255,0.12)' },
+  safe: { flex: 1 },
+  scroll: { flexGrow: 1, justifyContent: 'center', paddingHorizontal: 20, paddingVertical: 24 },
+  content: { width: '100%', maxWidth: 420, alignSelf: 'center', gap: 22 },
+  brand: { alignItems: 'center', gap: 6 },
+  logoFrame: {
+    padding: 5,
+    borderRadius: 60,
+    backgroundColor: 'rgba(255,255,255,0.18)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.45)',
+    marginBottom: 6,
+    boxShadow: '0 10px 30px rgba(2, 24, 38, 0.45)',
+  },
+  logo: { width: 88, height: 88, borderRadius: 44 },
+  brandName: { fontSize: 30, lineHeight: 36, fontWeight: '800', letterSpacing: 4, color: '#ffffff' },
+  brandSubtitle: { fontSize: 13, lineHeight: 20, color: 'rgba(225,244,250,0.85)', textAlign: 'center' },
+  portalBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 7,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255,255,255,0.14)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.25)',
+    marginTop: 6,
+  },
+  badgeDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: '#7ee8fa' },
+  eyebrow: { fontSize: 10, fontWeight: '700', letterSpacing: 1.6, color: '#e2f8ff' },
+  card: {
+    padding: 24,
+    borderRadius: 28,
+    backgroundColor: 'rgba(255,255,255,0.96)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.7)',
+    boxShadow: '0 24px 48px rgba(3, 30, 46, 0.40)',
+  },
+  form: { gap: 18 },
+  formHeading: { gap: 5, marginBottom: 2 },
+  title: { fontSize: 25, lineHeight: 32, fontWeight: '800', color: colors.ink },
   subtitle: { fontSize: 13, lineHeight: 21, color: colors.muted },
-  notice: { fontSize: 13, lineHeight: 20, color: '#187246', backgroundColor: colors.successTint, padding: 12, borderRadius: 6 },
-  error: { fontSize: 13, lineHeight: 20, color: '#b63a49', backgroundColor: '#fff0f2', padding: 12, borderRadius: 6 },
-  help: { fontSize: 11, lineHeight: 18, textAlign: 'center', color: colors.muted },
+  notice: { fontSize: 13, lineHeight: 20, color: '#187246', backgroundColor: colors.successTint, padding: 12, borderRadius: 12 },
+  error: { fontSize: 13, lineHeight: 20, color: '#b63a49', backgroundColor: '#fff0f2', padding: 12, borderRadius: 12 },
+  help: { fontSize: 12, lineHeight: 18, textAlign: 'center', color: 'rgba(230,246,251,0.85)' },
   forgotLink: { alignSelf: 'flex-end', marginTop: -6, paddingVertical: 4 },
-  forgotText: { fontSize: 13, fontWeight: '600', color: colors.primary },
+  forgotText: { fontSize: 13, fontWeight: '700', color: colors.primary },
 });

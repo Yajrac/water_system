@@ -100,10 +100,11 @@ export function ForgotPasswordForm({ onDone, onCancel }: { onDone: (message: str
 }
 
 const styles = StyleSheet.create({
-  form: { gap: 18, padding: 24, borderRadius: 24, marginTop: -24, backgroundColor: colors.surface, borderWidth: 1, borderColor: '#dce8ed' },
+  // The login screen's card supplies the background and padding.
+  form: { gap: 18 },
   heading: { gap: 5, marginBottom: 4 },
-  title: { fontSize: 24, lineHeight: 31, fontWeight: '700', color: colors.ink },
+  title: { fontSize: 25, lineHeight: 32, fontWeight: '800', color: colors.ink },
   subtitle: { fontSize: 13, lineHeight: 21, color: colors.muted },
-  error: { fontSize: 13, lineHeight: 20, color: '#b63a49', backgroundColor: '#fff0f2', padding: 12, borderRadius: 6 },
+  error: { fontSize: 13, lineHeight: 20, color: '#b63a49', backgroundColor: '#fff0f2', padding: 12, borderRadius: 12 },
   help: { fontSize: 11, lineHeight: 18, textAlign: 'center', color: colors.muted },
 });
