@@ -8,82 +8,141 @@
     <link rel="stylesheet" href="owner.css" />
   </head>
   <body>
-    <main class="shell">
-      <header class="top">
-        <div>
-          <h1>Owner Portal</h1>
-          <p>Permanent deletes for PWSS records. Admins cannot do this.</p>
+    <!-- Sign in -->
+    <main id="loginView" class="login-screen">
+      <div class="login-card">
+        <div class="login-brand">
+          <span class="logo-mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M12 2.5c3.6 4.3 6.5 8 6.5 11.3a6.5 6.5 0 0 1-13 0C5.5 10.5 8.4 6.8 12 2.5Z" /></svg>
+          </span>
+          <div>
+            <p class="eyebrow">PWSS</p>
+            <h1>Owner Portal</h1>
+          </div>
         </div>
-        <button type="button" id="signOut" class="btn btn-ghost" hidden>Sign out</button>
-      </header>
-
-      <section id="loginView" class="card login">
-        <h2>Sign in</h2>
+        <p class="login-note">Private area for permanent deletes. Admins cannot open this page.</p>
         <form id="loginForm" novalidate>
           <label for="password">Owner password</label>
           <input id="password" type="password" autocomplete="current-password" required />
           <p class="error" id="loginError" role="alert"></p>
-          <button type="submit" class="btn btn-primary" id="loginButton">Sign in</button>
+          <button type="submit" class="btn btn-primary btn-block" id="loginButton">Sign in</button>
         </form>
-      </section>
+      </div>
+    </main>
 
-      <section id="workView" hidden>
-        <section class="card">
-          <div class="card-head">
-            <h2>Customers</h2>
-            <p class="muted" id="searchStatus" role="status"></p>
+    <!-- Signed in -->
+    <div id="appView" class="app" hidden>
+      <aside class="sidebar" id="sidebar" aria-label="Owner portal navigation">
+        <div class="side-brand">
+          <span class="logo-mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M12 2.5c3.6 4.3 6.5 8 6.5 11.3a6.5 6.5 0 0 1-13 0C5.5 10.5 8.4 6.8 12 2.5Z" /></svg>
+          </span>
+          <div>
+            <strong>PWSS</strong>
+            <span>Owner Portal</span>
           </div>
-          <form id="searchForm" class="search" role="search">
-            <input id="query" type="search" placeholder="Filter by name, account number or barangay" aria-label="Filter customers" />
-            <button type="submit" class="btn btn-primary">Search</button>
-          </form>
-          <div class="table-wrap">
-            <table class="customers">
-              <thead>
-                <tr>
-                  <th scope="col">Account no.</th>
-                  <th scope="col">Name</th>
-                  <th scope="col">Barangay</th>
-                  <th scope="col">Status</th>
-                  <th scope="col" class="num">Bills</th>
-                  <th scope="col" class="num">Payments</th>
-                  <th scope="col">App login</th>
-                  <th scope="col"><span class="sr-only">Action</span></th>
-                </tr>
-              </thead>
-              <tbody id="results"></tbody>
-            </table>
-          </div>
-          <div class="pager" id="pager" hidden>
-            <button type="button" class="btn btn-ghost" id="prevPage">Previous</button>
-            <span id="pageLabel"></span>
-            <button type="button" class="btn btn-ghost" id="nextPage">Next</button>
-          </div>
-        </section>
+        </div>
+        <nav class="side-nav">
+          <button type="button" class="nav-item active" data-view="customers" aria-current="page">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 11a4 4 0 1 0-4-4 4 4 0 0 0 4 4ZM8 12a3 3 0 1 0-3-3 3 3 0 0 0 3 3Zm8 1c-2.7 0-8 1.3-8 4v3h16v-3c0-2.7-5.3-4-8-4ZM8 14c-.3 0-.7 0-1.1.1A5.2 5.2 0 0 1 9 17v3H0v-2.5C0 15.6 4.5 14 8 14Z" /></svg>
+            <span>Customers</span>
+          </button>
+          <button type="button" class="nav-item" data-view="history">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 3a9 9 0 0 0-9 9H1l4 4 4-4H6a7 7 0 1 1 2.1 5l-1.4 1.4A9 9 0 1 0 13 3Zm-1 5v5l4.3 2.5.7-1.2-3.5-2.1V8Z" /></svg>
+            <span>Delete history</span>
+          </button>
+        </nav>
+        <div class="side-foot">
+          <p>Deletes are permanent. A JSON backup is saved on the VPS first.</p>
+          <button type="button" id="signOut" class="btn btn-side">Sign out</button>
+        </div>
+      </aside>
+      <div class="scrim" id="scrim" hidden></div>
 
-        <section class="card danger-card" id="previewCard" hidden>
-          <h2>Delete customer</h2>
-          <dl class="facts" id="customerFacts"></dl>
-          <h3>Records that will be removed</h3>
-          <ul class="counts" id="counts"></ul>
-          <p class="warning">
-            This permanently removes the customer and everything listed above. A JSON backup is
-            saved on the VPS first, in <code>server/deleted-backups/</code>.
-          </p>
-          <form id="deleteForm" novalidate>
-            <label for="confirm">Type the account number <code id="confirmHint"></code> to confirm</label>
-            <input id="confirm" autocomplete="off" spellcheck="false" />
-            <p class="error" id="deleteError" role="alert"></p>
-            <div class="actions">
-              <button type="button" class="btn btn-ghost" id="cancelDelete">Cancel</button>
-              <button type="submit" class="btn btn-danger" id="deleteButton" disabled>Delete permanently</button>
-            </div>
-          </form>
-        </section>
+      <div class="main">
+        <header class="topbar">
+          <button type="button" class="menu-btn" id="menuButton" aria-label="Open menu" aria-expanded="false" aria-controls="sidebar">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z" /></svg>
+          </button>
+          <div>
+            <h1 id="pageTitle">Customers</h1>
+            <p id="pageSub">Find a customer and delete their records permanently.</p>
+          </div>
+        </header>
 
         <p class="done" id="doneMessage" role="status" hidden></p>
-      </section>
-    </main>
+
+        <!-- Customers -->
+        <section id="customersView" class="view">
+          <section class="card">
+            <div class="card-head">
+              <h2>All customers</h2>
+              <span class="count-pill" id="searchStatus" role="status"></span>
+            </div>
+            <form id="searchForm" class="search" role="search">
+              <input id="query" type="search" placeholder="Filter by name, account number or barangay" aria-label="Filter customers" />
+              <button type="submit" class="btn btn-primary">Search</button>
+            </form>
+            <div class="table-wrap">
+              <table class="customers">
+                <thead>
+                  <tr>
+                    <th scope="col">Account no.</th>
+                    <th scope="col">Name</th>
+                    <th scope="col">Barangay</th>
+                    <th scope="col">Status</th>
+                    <th scope="col" class="num">Bills</th>
+                    <th scope="col" class="num">Payments</th>
+                    <th scope="col">App login</th>
+                    <th scope="col"><span class="sr-only">Action</span></th>
+                  </tr>
+                </thead>
+                <tbody id="results"></tbody>
+              </table>
+            </div>
+            <div class="pager" id="pager" hidden>
+              <button type="button" class="btn btn-ghost" id="prevPage">Previous</button>
+              <span id="pageLabel"></span>
+              <button type="button" class="btn btn-ghost" id="nextPage">Next</button>
+            </div>
+          </section>
+
+          <section class="card danger-card" id="previewCard" hidden>
+            <div class="card-head">
+              <h2>Delete customer</h2>
+              <button type="button" class="icon-btn" id="closePreview" aria-label="Close">&times;</button>
+            </div>
+            <dl class="facts" id="customerFacts"></dl>
+            <h3>Records that will be removed</h3>
+            <ul class="counts" id="counts"></ul>
+            <p class="warning">
+              This permanently removes the customer and everything listed above. A JSON backup is
+              saved on the VPS first, in <code>server/deleted-backups/</code>.
+            </p>
+            <form id="deleteForm" novalidate>
+              <label for="confirm">Type the account number <code id="confirmHint"></code> to confirm</label>
+              <input id="confirm" autocomplete="off" spellcheck="false" />
+              <p class="error" id="deleteError" role="alert"></p>
+              <div class="actions">
+                <button type="button" class="btn btn-ghost" id="cancelDelete">Cancel</button>
+                <button type="submit" class="btn btn-danger" id="deleteButton" disabled>Delete permanently</button>
+              </div>
+            </form>
+          </section>
+        </section>
+
+        <!-- Delete history -->
+        <section id="historyView" class="view" hidden>
+          <section class="card">
+            <div class="card-head">
+              <h2>Permanent deletes</h2>
+              <span class="count-pill" id="historyStatus" role="status"></span>
+            </div>
+            <ol class="history" id="historyList"></ol>
+          </section>
+        </section>
+      </div>
+    </div>
     <script src="owner.js"></script>
   </body>
 </html>

@@ -146,6 +146,20 @@ export function createOwnerService({ config, db, now = () => new Date() }) {
       };
     },
 
+    // Latest permanent deletes made through this portal, newest first.
+    async listDeletions() {
+      const [rows] = await db.execute(
+        `SELECT id, entity_id AS customerId, description, created_at AS deletedAt
+        FROM activity_logs WHERE action = 'owner.customer.delete' ORDER BY id DESC LIMIT 100`,
+      );
+      return rows.map((row) => ({
+        id: String(row.id),
+        customerId: row.customerId ? String(row.customerId) : null,
+        description: row.description,
+        deletedAt: row.deletedAt instanceof Date ? row.deletedAt.toISOString() : String(row.deletedAt),
+      }));
+    },
+
     async previewCustomer(id) {
       const customer = await findCustomer(id);
       const records = [];

@@ -194,3 +194,18 @@ test('customer list shows everyone when empty, filters safely and pages by 25', 
   await service.searchCustomers('x', '-5 OR 1=1');
   assert.match(calls[1].sql, /OFFSET 0$/);
 });
+
+test('delete history lists only owner deletes, newest first', async () => {
+  let sql = '';
+  const db = {
+    async execute(statement) {
+      sql = statement;
+      return [[{ id: '9', customerId: '7', description: 'Owner portal permanently deleted PD-0007 Maria Santos', deletedAt: new Date('2026-11-21T08:00:00Z') }]];
+    },
+  };
+  const rows = await createOwnerService({ config: {}, db }).listDeletions();
+  assert.match(sql, /action = 'owner\.customer\.delete'/);
+  assert.match(sql, /ORDER BY id DESC/);
+  assert.equal(rows[0].deletedAt, '2026-11-21T08:00:00.000Z');
+  assert.equal(rows[0].customerId, '7');
+});

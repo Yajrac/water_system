@@ -43,6 +43,9 @@ export function createOwnerRouter({ service }) {
   router.get('/api/customers', async (req, res) => {
     res.json({ success: true, data: await service.searchCustomers(req.query.q, req.query.page) });
   });
+  router.get('/api/history', async (req, res) => {
+    res.json({ success: true, data: await service.listDeletions() });
+  });
   router.get('/api/customers/:id', async (req, res) => {
     res.json({ success: true, data: await service.previewCustomer(req.params.id) });
   });
