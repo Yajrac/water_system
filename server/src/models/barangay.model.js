@@ -76,17 +76,32 @@ export async function findConflictingBarangay(details, excludedId, connection) {
   return rows[0] || null;
 }
 
-export async function isBarangayInUse(id, connection) {
+// What still points at a barangay. Billing setups count only once they hold meter
+// readings; empty monthly setups are removed with the barangay.
+export async function barangayUsage(id, connection) {
   const [[row]] = await connection.execute(
-    `SELECT (
-       EXISTS(SELECT 1 FROM customers WHERE barangay_id = ?) OR
-       EXISTS(SELECT 1 FROM billing_setups WHERE barangay_id = ?) OR
-       EXISTS(SELECT 1 FROM bills WHERE barangay_id = ?) OR
-       EXISTS(SELECT 1 FROM announcement_barangays WHERE barangay_id = ?)
-     ) AS in_use`,
+    `SELECT
+       (SELECT COUNT(*) FROM customers WHERE barangay_id = ?) AS customers,
+       (SELECT COUNT(*) FROM billing_setups s WHERE s.barangay_id = ?
+          AND EXISTS(SELECT 1 FROM meter_entries e WHERE e.billing_setup_id = s.id)) AS usedSetups,
+       (SELECT COUNT(*) FROM bills WHERE barangay_id = ?) AS bills,
+       (SELECT COUNT(*) FROM announcement_barangays WHERE barangay_id = ?) AS announcements`,
     [id, id, id, id],
   );
-  return Number(row.in_use) === 1;
+  return {
+    customers: Number(row.customers),
+    usedSetups: Number(row.usedSetups),
+    bills: Number(row.bills),
+    announcements: Number(row.announcements),
+  };
+}
+
+export async function deleteUnusedSetups(id, connection) {
+  await connection.execute(
+    `DELETE FROM billing_setups WHERE barangay_id = ?
+     AND NOT EXISTS(SELECT 1 FROM meter_entries e WHERE e.billing_setup_id = billing_setups.id)`,
+    [id],
+  );
 }
 
 export async function deleteBarangay(id, connection) {

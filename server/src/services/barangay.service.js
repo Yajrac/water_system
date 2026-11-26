@@ -43,12 +43,23 @@ export function createBarangayService({
         await connection.beginTransaction();
         const barangay = await model.lockBarangayById(id, connection);
         if (!barangay) throw new AppError('Barangay not found.', 404);
-        if (await model.isBarangayInUse(id, connection)) {
+        const usage = await model.barangayUsage(id, connection);
+        const linked = [
+          [usage.customers, 'customer'],
+          [usage.bills, 'bill'],
+          [usage.usedSetups, 'billing setup with meter readings', 'billing setups with meter readings'],
+          [usage.announcements, 'announcement'],
+        ]
+          .filter(([count]) => count > 0)
+          .map(([count, one, many]) => count + ' ' + (count === 1 ? one : many || one + 's'));
+        if (linked.length) {
           throw new AppError(
-            'Cannot unregister barangay. This service area is linked to customer or other existing records.',
+            'Cannot unregister ' + barangay.name + '. It still has ' + linked.join(', ') + '.',
             409,
           );
         }
+        // Monthly billing setups that were never used go with the barangay.
+        await model.deleteUnusedSetups(id, connection);
         await model.deleteBarangay(id, connection);
         await recordActivity(connection, actorId, 'barangay.unregistered', barangay);
         await connection.commit();

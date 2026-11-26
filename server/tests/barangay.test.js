@@ -40,7 +40,11 @@ function fixture({
       if (deleteError) throw deleteError;
     },
     lockBarangayById: async () => existing,
-    isBarangayInUse: async () => used,
+    barangayUsage: async () => ({ customers: 0, usedSetups: 0, bills: 0, announcements: 0, ...(used === true ? { customers: 1 } : used || {}) }),
+    deleteUnusedSetups: async (id, executor) => {
+      assert.equal(executor, connection);
+      calls.push('cleanup');
+    },
     findConflictingBarangay: async () => duplicate,
     createBarangay: async (details, executor) => {
       assert.equal(executor, connection);
@@ -141,6 +145,7 @@ test('delete commits with its audit event; missing or linked rows are protected'
   assert.deepEqual(success.calls, [
     'connect',
     'begin',
+    'cleanup',
     'delete',
     'barangay.unregistered',
     'commit',
@@ -149,12 +154,21 @@ test('delete commits with its audit event; missing or linked rows are protected'
   for (const [options, statusCode] of [
     [{ existing: null }, 404],
     [{ used: true }, 409],
+    [{ used: { announcements: 1 } }, 409],
+    [{ used: { usedSetups: 2 } }, 409],
   ]) {
     const item = fixture(options);
     await assert.rejects(item.service.removeBarangay('1', '9'), { statusCode });
     assert.ok(!item.calls.includes('delete'));
     assert.ok(item.calls.includes('rollback'));
   }
+});
+
+test('delete names what still links the barangay', async () => {
+  const item = fixture({ used: { announcements: 1, usedSetups: 2 } });
+  await assert.rejects(item.service.removeBarangay('1', '9'), (error) =>
+    error.statusCode === 409 && /2 billing setups with meter readings, 1 announcement./.test(error.message));
+  assert.ok(!item.calls.includes('cleanup'));
 });
 
 test('delete handles foreign key races and rolls back when logging fails', async () => {
