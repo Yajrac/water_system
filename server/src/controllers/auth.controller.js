@@ -43,6 +43,8 @@ export async function refreshSession(req, res) {
 export async function logoutSession(req, res) {
   const result = await renewAdminSession(req.body?.refreshToken);
   await pool.execute('UPDATE users SET auth_version = auth_version + 1 WHERE id = ?', [result.user.id]);
+  // Every session is revoked, so stop phone push until the app signs in and registers again.
+  await pool.execute('UPDATE push_devices SET is_active = 0 WHERE user_id = ?', [result.user.id]);
   res.set('Cache-Control', 'no-store');
   res.json({ success: true, data: { signedOut: true } });
 }

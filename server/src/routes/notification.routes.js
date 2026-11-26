@@ -10,6 +10,11 @@ router.get('/mine', requireRole('consumer'), async (req, res) => {
 router.post('/read', requireRole('consumer'), async (req, res) =>
   res.json({ success: true, data: await service.markNotificationsRead(req.user.id, req.body) }),
 );
+// Phone push registration, called by the app after sign-in. Logout and password
+// changes switch the user's phones off again.
+router.post('/devices', requireRole('consumer'), async (req, res) =>
+  res.json({ success: true, data: await service.push.register(req.user.id, req.body?.token) }),
+);
 router.use(requireRole('admin'));
 router.get('/recipients', async (req, res) =>
   res.json({ success: true, data: await service.recipientOptions() }),

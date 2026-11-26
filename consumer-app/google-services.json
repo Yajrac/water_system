@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "203499828163",
+    "project_id": "pwss-consumer",
+    "storage_bucket": "pwss-consumer.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:203499828163:android:a6d851f18ce2d78fad4376",
+        "android_client_info": {
+          "package_name": "com.jaycaber.consumerapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCbR-5AVYuuXzENkXcBvX5FpOAFi7Gk96Y"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -2,6 +2,8 @@ import app from './app.js';
 
 import { env } from './config/env.js';
 import { startAutomaticLateFeeWorker } from './services/automatic-late-fee.service.js';
+import { startPushWorker } from './services/push.service.js';
+import { push } from './services/notification.service.js';
 import {
   pool,
   checkDatabaseConnection,
@@ -16,10 +18,15 @@ async function startServer() {
       console.log(`Water System API: http://${env.host}:${env.port}`);
     });
     const stopLateFeeWorker = startAutomaticLateFeeWorker();
-    server.on('close', stopLateFeeWorker);
+    const stopPushWorker = startPushWorker(push);
+    server.on('close', () => {
+      stopLateFeeWorker();
+      stopPushWorker();
+    });
 
     server.on('error', async (error) => {
       stopLateFeeWorker();
+      stopPushWorker();
       console.error('Could not start API:', error.message);
       process.exitCode = 1;
       await pool.end();

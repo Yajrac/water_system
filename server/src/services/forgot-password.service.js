@@ -49,6 +49,8 @@ export async function resetForgottenPassword(body, db = pool) {
       'UPDATE users SET password_hash = ?, must_change_password = 0, auth_version = auth_version + 1 WHERE id = ?',
       [passwordHash, userId],
     );
+    // Signed-out phones stop receiving push until they sign in again.
+    await connection.execute('UPDATE push_devices SET is_active = 0 WHERE user_id = ?', [userId]);
     await connection.execute(
       `INSERT INTO activity_logs (actor_id, actor_role, action, entity_type, entity_id, description)
        VALUES (?, 'consumer', ?, 'users', ?, ?)`,

@@ -1,6 +1,8 @@
 import { validateNotice } from '../validators/notification.validator.js';
 import { pool } from '../database/pool.js';
 import { AppError } from '../utils/app-error.js';
+import { createPushService } from './push.service.js';
+import { STANDARD_INSTALLATION_FEE } from '../validators/customer.validator.js';
 
 const outstandingBills = `SELECT b.customer_id,CAST(SUM(GREATEST(0,b.total_amount-COALESCE(p.paid,0))) AS CHAR) AS balance,
   MIN(CASE WHEN b.total_amount>COALESCE(p.paid,0) THEN b.due_date END) AS due
@@ -158,12 +160,44 @@ export async function consumerNotifications(userId) {
     FROM activity_logs WHERE actor_id=? AND action='consumer.password_reset' ORDER BY id DESC LIMIT 20`,
     [userId],
   );
+  // Basic installation fee: a reminder once approved, and a paid notice once installed
+  // (the office collects the fee before installing the meter).
+  const [installs] = await pool.execute(
+    // Older records without a saved fee fall back to the standard fee for the customer type.
+    `SELECT a.id,a.status,c.customer_type AS type,
+      FORMAT(COALESCE(NULLIF(e.installation_fee,0),IF(c.customer_type='Commercial',?,?)),2) AS fee,
+      DATE_FORMAT(COALESCE(a.date_approved,DATE(CONVERT_TZ(a.updated_at,'+00:00','+08:00'))),'%Y-%m-%d 08:00:00') AS approvedOn,
+      (SELECT DATE_FORMAT(MIN(m.date_installed),'%Y-%m-%d 08:00:00') FROM water_meters m WHERE m.application_id=a.id) AS installedOn
+    FROM customer_applications a JOIN customers c ON c.id=a.customer_id
+    LEFT JOIN application_estimates e ON e.application_id=a.id
+    WHERE a.customer_id=? AND a.status IN ('Approved','Installed')
+    ORDER BY a.id DESC LIMIT 5`,
+    [STANDARD_INSTALLATION_FEE.Commercial, STANDARD_INSTALLATION_FEE.Residential, id],
+  );
+  const installation = installs.flatMap((row) => [
+    {
+      id: 'install-fee-' + row.id,
+      title: 'Basic installation fee',
+      body: 'Your basic installation fee is PHP ' + row.fee + ' (' + row.type +
+        '). Please pay at the PWSS office before installation.',
+      category: 'Payment',
+      date: row.approvedOn,
+    },
+    ...(row.status === 'Installed' ? [{
+      id: 'install-paid-' + row.id,
+      title: 'Installation fee paid',
+      body: 'Your basic installation fee of PHP ' + row.fee +
+        ' is paid and your water service is now installed. Welcome to PWSS!',
+      category: 'Payment',
+      date: row.installedOn || row.approvedOn,
+    }] : []),
+  ]);
   const [reads] = await pool.execute(
     'SELECT notification_key FROM notification_reads WHERE user_id=?',
     [userId],
   );
   const keys = new Set(reads.map((row) => row.notification_key));
-  return [...notices, ...(customer.applicationStatus === 'Installed' ? [...bills, ...payments] : []), ...applications, ...service, ...security]
+  return [...notices, ...(customer.applicationStatus === 'Installed' ? [...bills, ...payments] : []), ...applications, ...installation, ...service, ...security]
     .sort((a, b) => b.date.localeCompare(a.date))
     .slice(0, 100)
     .map((item) => ({ ...item, read: keys.has(item.id) }));
@@ -197,3 +231,6 @@ export async function markNotificationsRead(userId, body) {
   }
 }
 
+
+// Phone push for the same feed; started from server.js.
+export const push = createPushService({ db: pool, feed: consumerNotifications });

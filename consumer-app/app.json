@@ -10,7 +10,8 @@
     "android": {
       "predictiveBackGestureEnabled": false,
       "package": "com.jaycaber.consumerapp",
-      "icon": "./assets/images/pwss-logo-round.png"
+      "icon": "./assets/images/pwss-logo-round.png",
+      "googleServicesFile": "./google-services.json"
     },
     "plugins": [
       "expo-router",
@@ -22,7 +23,18 @@
           "imageWidth": 76
         }
       ],
-      "expo-secure-store"
+      "expo-secure-store",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/images/android-icon-monochrome.png",
+          "color": "#087fa3",
+          "defaultChannel": "pwss-alerts",
+          "sounds": [
+            "./assets/sounds/ting.wav"
+          ]
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

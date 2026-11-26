@@ -2,6 +2,7 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { SessionProvider, useSession } from '@/features/session/SessionProvider';
 import { NotificationProvider } from '@/features/notifications/NotificationProvider';
+import { PushRegistration } from '@/features/notifications/PushRegistration';
 
 function ConsumerNavigation() {
   const { signedIn, mustChangePassword, changingPassword, restoring, restoreError } = useSession();
@@ -31,6 +32,7 @@ export default function RootLayout() {
       <StatusBar style="dark" />
       <NotificationProvider>
         <ConsumerNavigation />
+        <PushRegistration />
       </NotificationProvider>
     </SessionProvider>
   );

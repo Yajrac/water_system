@@ -73,6 +73,8 @@ async function writeApplication(
         'UPDATE users SET auth_version = auth_version + 1, must_change_password = 0 WHERE id = ?',
         [userId],
       );
+      // Signed-out phones stop receiving push until they sign in again.
+      await connection.execute('UPDATE push_devices SET is_active = 0 WHERE user_id = ?', [userId]);
     }
   } else if (details.username) {
     userId = await model.writeRecord(
