@@ -77,7 +77,7 @@ export async function findConflictingBarangay(details, excludedId, connection) {
 }
 
 // What still points at a barangay. Billing setups count only once they hold meter
-// readings; empty monthly setups are removed with the barangay.
+// readings; empty monthly setups and announcement tags are removed with the barangay.
 export async function barangayUsage(id, connection) {
   const [[row]] = await connection.execute(
     `SELECT
@@ -94,6 +94,11 @@ export async function barangayUsage(id, connection) {
     bills: Number(row.bills),
     announcements: Number(row.announcements),
   };
+}
+
+// Announcements stay (they are listed by recipient customers); only the barangay tag goes.
+export async function deleteAnnouncementLinks(id, connection) {
+  await connection.execute('DELETE FROM announcement_barangays WHERE barangay_id = ?', [id]);
 }
 
 export async function deleteUnusedSetups(id, connection) {

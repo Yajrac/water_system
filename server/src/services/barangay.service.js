@@ -48,7 +48,6 @@ export function createBarangayService({
           [usage.customers, 'customer'],
           [usage.bills, 'bill'],
           [usage.usedSetups, 'billing setup with meter readings', 'billing setups with meter readings'],
-          [usage.announcements, 'announcement'],
         ]
           .filter(([count]) => count > 0)
           .map(([count, one, many]) => count + ' ' + (count === 1 ? one : many || one + 's'));
@@ -58,8 +57,10 @@ export function createBarangayService({
             409,
           );
         }
-        // Monthly billing setups that were never used go with the barangay.
+        // Unused monthly billing setups and announcement tags go with the barangay;
+        // the announcements themselves stay for the customers who received them.
         await model.deleteUnusedSetups(id, connection);
+        await model.deleteAnnouncementLinks(id, connection);
         await model.deleteBarangay(id, connection);
         await recordActivity(connection, actorId, 'barangay.unregistered', barangay);
         await connection.commit();
